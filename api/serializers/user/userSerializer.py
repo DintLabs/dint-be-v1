@@ -1,0 +1,169 @@
+from dataclasses import field
+from api.models.pageModel import Page
+from api.models.userFollowersModel import UserFollowers
+from rest_framework import serializers
+from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet)
+
+from django.core.exceptions import ValidationError
+
+
+class UserLoginDetailSerializer(serializers.ModelSerializer):
+    """
+    Return the details of Login User.
+    """
+
+    # dob = serializers.DateField(format=DATEFORMAT, input_formats=[DATEFORMAT])
+
+    class Meta(object):
+        model = User
+        fields = (
+            'id', 'email', 'first_name', 'last_name', 'phone_no', 'is_active', 'is_deleted', 'profile_image',
+            'display_name', 'custom_username', 'is_private')
+
+
+class UserCreateUpdateSerializer(serializers.ModelSerializer):
+    """
+    create/update user .
+    """
+
+    # image = serializers.ImageField(required = False, allow_null=True)
+
+    class Meta:
+        model = User
+        fields = '__all__'
+
+
+class GetUserPostsCommentSerializer(serializers.ModelSerializer):
+    """
+    This is for update ,Create
+    """
+
+    user = UserLoginDetailSerializer()
+
+    class Meta(object):
+        model = PostComments
+        fields = '__all__'
+
+
+class GetUserPostLikeSerializer(serializers.ModelSerializer):
+    """
+    This is for update ,Create
+    """
+
+    user = UserLoginDetailSerializer()
+
+    class Meta(object):
+        model = PostLikes
+        fields = '__all__'
+
+
+class GetUserPostsSerializer(serializers.ModelSerializer):
+    """
+    This is for Retrieving full data
+    """
+    user = UserLoginDetailSerializer()
+    like_post = GetUserPostLikeSerializer(many=True)
+    post_comment = GetUserPostsCommentSerializer(many=True)
+
+    class Meta(object):
+        model = Posts
+        fields = '__all__'
+
+
+class UpdateUserProfileSerializer(serializers.ModelSerializer):
+    """
+    Update User Profile Serializer
+    """
+
+    class Meta:
+        model = User
+        fields = (
+        'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
+        'city', 'twitter', 'instagram', 'discord', 'banner_image', 'location', 'is_private')
+
+
+class GetUserPageSerializer(serializers.ModelSerializer):
+    """
+    This is for Get
+    """
+
+    class Meta(object):
+        model = Page
+        fields = '__all__'
+
+
+class GetUserProfileSerializer(serializers.ModelSerializer):
+    """
+    Update User Profile Serializer
+    """
+    user_posts = GetUserPostsSerializer(many=True)
+    is_followed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+        'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
+        'city', 'twitter', 'instagram', 'discord', 'banner_image', 'user_posts', 'location', 'is_followed',
+        'is_private')
+
+    def get_is_followed(self, obj):
+        profile_user_id = self.context.get('profile_user_id')
+        logged_in_user = self.context.get('logged_in_user')
+        try:
+            u_obj = UserFollowers.objects.get(user=profile_user_id, follower=logged_in_user)
+            if u_obj.request_status is True:
+                return True
+            else:
+                return 'Request Sent'
+        except:
+            return False
+
+
+class GetUserPageProfileSerializer(serializers.ModelSerializer):
+    """
+    Update User Profile Serializer
+    """
+    # user_posts = GetUserPostsSerializer(many=True)
+    is_followed = serializers.SerializerMethodField()
+    user_page = GetUserPageSerializer(many=True)
+
+    class Meta:
+        model = User
+        fields = (
+        'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
+        'city', 'twitter', 'instagram', 'discord', 'banner_image', 'location', 'is_followed', 'is_private', 'user_page')
+
+    def get_is_followed(self, obj):
+        profile_user_id = self.context.get('profile_user_id')
+        logged_in_user = self.context.get('logged_in_user')
+        try:
+            u_obj = UserFollowers.objects.get(user=profile_user_id, follower=logged_in_user)
+            if u_obj.request_status is True:
+                return True
+            else:
+                return 'Request Sent'
+        except:
+            return False
+
+
+class UserReferralWalletModelSerializer(serializers.ModelSerializer):
+    referred_by = serializers.SerializerMethodField()
+    user_referral = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UserReferralWallet
+        exclude = ['updated_at', ]
+
+    def get_referred_by(self, obj):
+        return {
+            'name': obj.referred_by.name,
+            'email': obj.referred_by.name,
+            'referral_id': obj.referred_by.referral_id,
+        }
+
+    def get_user_referral(self, obj):
+        return {
+            'name': obj.user_referral.name,
+            'email': obj.user_referral.name,
+            'referral_id': obj.user_referral.referral_id,
+        }
