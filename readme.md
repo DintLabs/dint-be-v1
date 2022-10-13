@@ -5,10 +5,10 @@
 
 
 ## Setting up Virtual Environment
-1. python3 -m venv dint-venv (just outside project Directory)
+1. python3.8 -m dint-venv (just outside project Directory)
 2. Activate the Virtual Environment.
 3. cd into the project directory.
-4. run this command -> pip install -r requirements.txt
+4. run this command -> pip3.8 install -r requirements.txt
 5. Start Docker for Redis Server(Django Channels) -> sudo docker run -p 6379:6379 -d redis:5
 
 
