@@ -20,4 +20,4 @@
 
 Project is setup and ready to be used. 
 Import postman collection by following link in postman
-Link: https://www.getpostman.com/collections/95311d6c9faeaf68cc5e
+Link: https://www.getpostman.com/collections/d219db6087b032cb9ec6
