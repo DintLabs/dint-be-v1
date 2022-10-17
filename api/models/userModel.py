@@ -10,6 +10,7 @@ from django.contrib.auth.models import (
 
 from django.conf import settings
 from .UploadMediaModel import UploadMedia
+from django.contrib.postgres.fields import JSONField
 
 
 # from django.contrib.auth.models import User as UserModel
@@ -65,6 +66,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     fire_base_auth_key = models.CharField(max_length=250, null=True, blank=True)
     referral_id = models.CharField(max_length=30, null=True, blank=True)
     # profile_image = models.ForeignKey(UploadMedia)
+
+    #Web3 Wallet
+    web3_wallet = JSONField(null=True, blank=True)
 
     #Profile
     custom_username = models.CharField(max_length=50, blank=True, null=True)

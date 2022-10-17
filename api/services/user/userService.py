@@ -1,7 +1,7 @@
 from curses.ascii import US
 from multiprocessing import managers
 import re
-from api.serializers.user.userSerializer import GetUserPageProfileSerializer, GetUserProfileSerializer, UpdateUserProfileSerializer
+from api.serializers.user.userSerializer import GetUserPageProfileSerializer, GetUserProfileSerializer, UpdateUserProfileSerializer, GetUserWalletSerializer, UpdateUserWalletSerializer
 from api.utils.messages.commonMessages import BAD_REQUEST, RECORD_NOT_FOUND
 from rest_framework import status
 from rest_framework.response import Response
@@ -282,6 +282,20 @@ class UserService(UserBaseService):
             return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile fetched Successfully"})
         return ({"data":serializer.errors, "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
 
+    def get_wallet_by_token(self, request, format=None):
+        user_obj = User.objects.get(id = request.user.id)
+        context = {"profile_user_id":user_obj.id , "logged_in_user":request.user.id}
+        serializer = GetUserWalletSerializer(user_obj, context = context)
+        return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Wallet fetched Successfully"})
+
+
+    def update_wallet_by_token(self, request, format=None):
+        user_obj = User.objects.get(id = request.user.id)
+        serializer = UpdateUserWalletSerializer(user_obj, data= request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Wallet saved Successfully"})
+        return ({"data":serializer.errors, "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
     
 
     def get_profile_by_username(self, request, format=None):

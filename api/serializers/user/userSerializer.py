@@ -118,6 +118,24 @@ class GetUserProfileSerializer(serializers.ModelSerializer):
         except:
             return False
 
+class UpdateUserWalletSerializer(serializers.ModelSerializer):
+    """
+    Update User Wallet Serializer
+    """
+
+    class Meta:
+        model = User
+        fields = ('web3_wallet',)
+
+
+class GetUserWalletSerializer(serializers.ModelSerializer):
+    """
+    Get User Wallet Serializer
+    """
+
+    class Meta:
+        model = User
+        fields = ('web3_wallet',)
 
 class GetUserPageProfileSerializer(serializers.ModelSerializer):
     """
