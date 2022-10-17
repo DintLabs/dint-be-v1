@@ -17,6 +17,7 @@ urlpatterns = [
     path('auth/sign-up/', SignupView.as_view(), name='auth-sign-up'),
 
     #user web3 wallet
+    path('user/decrypt-wallet-token/', UserDecryptWalletTokenView.as_view(), name="decrypt-user-wallet-token"),
     path('user/get-wallet-by-token/', UserWalletView.as_view(), name="get-user-wallet"),
     path('user/update-wallet-by-token/', UserWalletView.as_view(), name="update-user-wallet"),
     

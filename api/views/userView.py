@@ -239,6 +239,17 @@ class UserWalletView(APIView):
         result = userService.update_wallet_by_token(request, format=None)
         return Response(result, status=status.HTTP_200_OK)
 
+class UserDecryptWalletTokenView(APIView):
+    """
+    APIs for Decrypting the user wallet token
+    """
+    
+    def get(self, request, format=None):
+        """
+        Login
+        """
+        result = userService.decrypt_wallet_token_by_token(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
 
 class PageProfileView(APIView):
 

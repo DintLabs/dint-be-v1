@@ -12,7 +12,6 @@ from django.conf import settings
 from .UploadMediaModel import UploadMedia
 from django.contrib.postgres.fields import JSONField
 
-
 # from django.contrib.auth.models import User as UserModel
 
 
@@ -68,6 +67,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # profile_image = models.ForeignKey(UploadMedia)
 
     #Web3 Wallet
+    wallet_token = models.CharField(max_length=300, blank=True, null=True)
     web3_wallet = JSONField(null=True, blank=True)
 
     #Profile
