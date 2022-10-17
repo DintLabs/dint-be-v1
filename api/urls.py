@@ -15,6 +15,10 @@ urlpatterns = [
     path('auth/login', LoginView.as_view(), name='login'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),
     path('auth/sign-up/', SignupView.as_view(), name='auth-sign-up'),
+
+    #user web3 wallet
+    path('user/get-wallet-by-token/', UserWalletView.as_view(), name="get-user-wallet"),
+    path('user/update-wallet-by-token/', UserWalletView.as_view(), name="update-user-wallet"),
     
     #OTP
     path('user/verify-otp/', VarifyOtpView.as_view(), name="verify-otp"),

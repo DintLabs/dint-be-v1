@@ -220,6 +220,25 @@ class ProfileView(APIView):
         result = userService.update_profile_by_token(request, format=None)
         return Response(result, status=status.HTTP_200_OK)
 
+class UserWalletView(APIView):
+    """
+    APIs for Fetching the user wallet and Updating it by Token
+    """
+
+    def get(self, request, format=None):
+        """
+        Get User Wallet By Token.
+        """
+        result = userService.get_wallet_by_token(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+    
+    def put(self, request, format=None):
+        """
+        Login
+        """
+        result = userService.update_wallet_by_token(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
 
 class PageProfileView(APIView):
 
