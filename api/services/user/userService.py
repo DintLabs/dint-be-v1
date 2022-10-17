@@ -31,6 +31,7 @@ from api.serializers.user import (UserLoginDetailSerializer,
                                   UserCreateUpdateSerializer)
 
 from dint import settings
+from cryptography.fernet import Fernet
 
 class UserService(UserBaseService):
     """
@@ -142,6 +143,8 @@ class UserService(UserBaseService):
             serializer.save()
             user = User.objects.get (id=serializer.data.get ('id'))
             user.is_active = True
+            wallet_token = self.encrypted_wallet_token()
+            user.wallet_token = wallet_token
             user.save()
             if request.data.get('referral_by', None):
                 user_referred_by = User.objects.get(referral_id=request.data['referred_by'])
@@ -153,6 +156,7 @@ class UserService(UserBaseService):
 
             user_details = serializer.data
             user_details['token'] = token
+            user_details['wallet_token'] = wallet_token
             # self.send_otp(user)
             return ({"data":user_details, "code":status.HTTP_201_CREATED, "message":"User Created Successfully"})
         #if not valid
@@ -258,9 +262,9 @@ class UserService(UserBaseService):
         serializer = GetUserProfileSerializer(user_obj, context = context)
         # payload = jwt_payload_handler(user_obj)
         # token = jwt.encode(payload, settings.SECRET_KEY)
-        # user_details = serializer.data
-        # user_details['token'] = token
-        return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile fetched Successfully"})
+        user_details = serializer.data
+        user_details['wallet_token'] = user_obj.wallet_token
+        return ({"data":user_details, "code":status.HTTP_200_OK, "message":"User Profile fetched Successfully"})
         
     
     def get_page_profile_by_token(self, request, format=None):
@@ -296,7 +300,22 @@ class UserService(UserBaseService):
             serializer.save()
             return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Wallet saved Successfully"})
         return ({"data":serializer.errors, "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
-    
+
+    def encrypted_wallet_token(self):
+        random_token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=20))
+        cipher_suite = Fernet(settings.ENCRYPTION_KEY)
+        encrypted_text = cipher_suite.encrypt(random_token.encode('ascii'))
+        encrypted_text = base64.urlsafe_b64encode(encrypted_text).decode("ascii") 
+        return encrypted_text
+
+    def decrypt_wallet_token_by_token(self, request, format=None):
+        user_obj = User.objects.get(id = request.user.id)
+        encrypted_wallet_token = base64.urlsafe_b64decode(user_obj.wallet_token)
+        cipher_suite = Fernet(settings.ENCRYPTION_KEY)
+        decoded_text = cipher_suite.decrypt(encrypted_wallet_token).decode("ascii")
+        response_data = {}
+        response_data['token'] = decoded_text
+        return ({"data": response_data , "code":status.HTTP_200_OK, "message":"Wallet token decrypted Successfully"})
 
     def get_profile_by_username(self, request, format=None):
         try:
