@@ -43,6 +43,8 @@ class UserManager(BaseUserManager):
 
         return self._create_user(email, password=password, **extra_fields)
 
+class Language(models.Model):
+   name = models.CharField(max_length=255)
 
 class User(AbstractBaseUser, PermissionsMixin):
     """
@@ -91,14 +93,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     otp_varification = models.BooleanField(default=False)
     otp = models.CharField(max_length=6, blank=True, null=True)
     otp_send_time = models.DateTimeField(blank=True, null=True)
-
+   
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name']
 
     history = HistoricalRecords(table_name='user_history')
-
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False) 
+    is_superuser = models.BooleanField(default=False) 
+    
     def save(self, *args, **kwargs):
         super(User, self).save(*args, **kwargs)
 
@@ -108,6 +113,27 @@ class User(AbstractBaseUser, PermissionsMixin):
             models.Index(fields=['id', 'first_name', 'last_name', 'email', 'is_active'])
         ]
 
+class UserPreferences(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    enable_push_notification = models.BooleanField(default=False)
+    enable_email_notification = models.BooleanField(default=False)
+    show_full_text = models.BooleanField(default=False)
+    monthly_news_letter = models.BooleanField(default=False)
+    new_posts_summary = models.BooleanField(default=False)
+    new_posts_summary_time = models.IntegerField(blank=True, null=True)
+    new_stream = models.BooleanField(default=False)
+    upcoming_stream_reminder = models.BooleanField(default=False)
+    new_private_msg_summary = models.BooleanField(default=False)
+    new_private_msg_summary_time = models.IntegerField(blank=True, null=True)
+    receive_less_notification = models.BooleanField(default=False)
+    subscription_notification = models.BooleanField(default=False)
+    new_comment = models.BooleanField(default=False)
+    new_like = models.BooleanField(default=False)
+    language = models.ForeignKey(Language,on_delete=models.DO_NOTHING, null=True)
+    new_comment = models.BooleanField(default=True)
+    new_like = models.BooleanField(default=True)
+    discount_from_users = models.BooleanField(default=True)
+
 
 class UserReferralWallet(models.Model):
     referred_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='referred_by' )
@@ -115,3 +141,4 @@ class UserReferralWallet(models.Model):
     wallet = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+

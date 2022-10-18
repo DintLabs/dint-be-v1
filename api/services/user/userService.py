@@ -1,7 +1,7 @@
 from curses.ascii import US
 from multiprocessing import managers
 import re
-from api.serializers.user.userSerializer import GetUserPageProfileSerializer, GetUserProfileSerializer, UpdateUserProfileSerializer, GetUserWalletSerializer, UpdateUserWalletSerializer
+from api.serializers.user.userSerializer import GetUserPageProfileSerializer, GetUserProfileSerializer, UpdateUserProfileSerializer, GetUserWalletSerializer, UpdateUserWalletSerializer, GetUserPreferencesSerializer, UpdateUserPreferencesUpdateSerializer, GetUserBookmarksSerializer
 from api.utils.messages.commonMessages import BAD_REQUEST, RECORD_NOT_FOUND
 from rest_framework import status
 from rest_framework.response import Response
@@ -26,7 +26,7 @@ from django.core.files.base import ContentFile
 
 from .userBaseService import UserBaseService
 from api.utils.messages.userMessages import *
-from api.models import User, UserSession, UserReferralWallet
+from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks
 from api.serializers.user import (UserLoginDetailSerializer,
                                   UserCreateUpdateSerializer)
 
@@ -316,6 +316,55 @@ class UserService(UserBaseService):
         response_data = {}
         response_data['token'] = decoded_text
         return ({"data": response_data , "code":status.HTTP_200_OK, "message":"Wallet token decrypted Successfully"})
+
+    def get_bookmarks_by_token(self, request, format=None):
+        user_obj = User.objects.get(id = request.user.id)
+        if user_obj:
+            try:
+                if request.GET.get('type') is None:
+                    user_bookmarks = UserBookmarks.objects.filter(user = user_obj).all()
+                else:
+                    user_bookmarks = UserBookmarks.objects.filter(user = user_obj, bookmark_type= request.GET['type']).all()
+
+                if user_bookmarks:
+                    context = {"profile_user_id":user_obj.id , "logged_in_user":request.user.id}
+                    serializer = GetUserBookmarksSerializer(user_bookmarks, many=True, context = context)
+                    preference = serializer.data
+                else:
+                    preference = None
+            except UserPreferences.DoesNotExist:
+                preference = None
+            return ({"data":preference, "code":status.HTTP_200_OK, "message":"User Bookmarks fetched Successfully"})
+        return ({"data": [{error: 'User not found'}], "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
+    
+    def get_preferences_by_token(self, request, format=None):
+        user_obj = User.objects.get(id = request.user.id)
+        if user_obj:
+            try:
+                user_preferences_obj = UserPreferences.objects.get(user = user_obj)
+                context = {"profile_user_id":user_obj.id , "logged_in_user":request.user.id, "preference_id": user_preferences_obj.id}
+                serializer = GetUserPreferencesSerializer(user_preferences_obj, context = context)
+                preference = serializer.data
+            except UserPreferences.DoesNotExist:
+                preference = None
+            return ({"data":preference, "code":status.HTTP_200_OK, "message":"User Preferences fetched Successfully"})
+        return ({"data": [{error: 'User not found'}], "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
+
+
+    def update_preferences_by_token(self, request, format=None):
+        user_obj = User.objects.get(id = request.user.id)
+        if user_obj:
+            try:
+                user_preferences_obj = UserPreferences.objects.get(user = user_obj)
+            except UserPreferences.DoesNotExist:
+                user_preferences_obj = UserPreferences.objects.create(user=user_obj)
+            
+            serializer = UpdateUserPreferencesUpdateSerializer(user_preferences_obj, data= request.data)
+            if serializer.is_valid():
+                serializer.save(user=request.user)
+                return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Preferences saved Successfully"})
+            return ({"data":serializer.errors, "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
+        return ({"data": [{error: 'User not found'}], "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
 
     def get_profile_by_username(self, request, format=None):
         try:

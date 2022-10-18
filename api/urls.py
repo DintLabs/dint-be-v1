@@ -20,6 +20,14 @@ urlpatterns = [
     path('user/decrypt-wallet-token/', UserDecryptWalletTokenView.as_view(), name="decrypt-user-wallet-token"),
     path('user/get-wallet-by-token/', UserWalletView.as_view(), name="get-user-wallet"),
     path('user/update-wallet-by-token/', UserWalletView.as_view(), name="update-user-wallet"),
+
+
+    #user preferences
+    path('user/get-user-preferences/', UserPreferencesView.as_view(), name="get-user-preferences"),
+    path('user/update-user-preferences/', UserPreferencesView.as_view(), name="update-user-preferences"),
+
+    #user bookmarks
+    path('user/get-user-bookmarks/', UserBookmarksView.as_view(), name="get-user-bookmarks"),
     
     #OTP
     path('user/verify-otp/', VarifyOtpView.as_view(), name="verify-otp"),

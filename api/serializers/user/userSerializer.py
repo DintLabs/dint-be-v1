@@ -2,7 +2,8 @@ from dataclasses import field
 from api.models.pageModel import Page
 from api.models.userFollowersModel import UserFollowers
 from rest_framework import serializers
-from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet)
+from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet, UserPreferences)
+from api.models.userBookmarksModel import UserBookmarks
 
 from django.core.exceptions import ValidationError
 
@@ -137,6 +138,25 @@ class GetUserWalletSerializer(serializers.ModelSerializer):
         model = User
         fields = ('web3_wallet',)
 
+class UpdateUserPreferencesUpdateSerializer(serializers.ModelSerializer):
+    """
+    Update User Preference Serializer
+    """
+
+    class Meta:
+        model = UserPreferences
+        fields = ('enable_push_notification', 'show_full_text')
+
+
+class GetUserPreferencesSerializer(serializers.ModelSerializer):
+    """
+    Get User Preference Serializer
+    """
+
+    class Meta:
+        model = UserPreferences
+        fields = '__all__'
+
 class GetUserPageProfileSerializer(serializers.ModelSerializer):
     """
     Update User Profile Serializer
@@ -185,3 +205,10 @@ class UserReferralWalletModelSerializer(serializers.ModelSerializer):
             'email': obj.user_referral.name,
             'referral_id': obj.user_referral.referral_id,
         }
+
+class GetUserBookmarksSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        many = True
+        model = UserBookmarks
+        fields = '__all__'
