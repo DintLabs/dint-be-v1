@@ -309,6 +309,51 @@ class LogoutView(APIView):
         result = userService.logout(request, format=None)
         return Response(result, status=status.HTTP_200_OK)
 
+class UserPreferencesView(APIView):
+    """
+    APIs for Fetching the user preferences and Updating it by Token
+    """
+
+    def get(self, request, format=None):
+        """
+        Get User Preferences By Token.
+        """
+        result = userService.get_preferences_by_token(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+    
+    def put(self, request, format=None):
+        """
+        Login
+        """
+        result = userService.update_preferences_by_token(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+class UserBookmarksView(APIView):
+    """
+    APIs for Fetching the user bookmarks by Token
+    """
+
+    def get(self, request, format=None):
+        """
+        Get User Bookmarks By Token.
+        """
+        result = userService.get_bookmarks_by_token(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+    def post(self, request, format=None):
+        """
+        Create User Bookmark By Token.
+        """
+        result = userService.create_bookmark_by_token(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+    def delete(self,request,pk,format=None):
+        """
+        Delete User Bookmark By Token.
+        """
+        
+        result = userService.delete_bookmark_by_token(request,pk, format=None)
+        return Response(result, status=status.HTTP_200_OK)
 
 class UserReferralWalletModelViewSet(ModelViewSet):
     serializer_class = UserReferralWalletModelSerializer
