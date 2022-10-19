@@ -130,9 +130,7 @@ class UserPreferences(models.Model):
     new_comment = models.BooleanField(default=False)
     new_like = models.BooleanField(default=False)
     language = models.ForeignKey(Language,on_delete=models.DO_NOTHING, null=True)
-    new_comment = models.BooleanField(default=True)
-    new_like = models.BooleanField(default=True)
-    discount_from_users = models.BooleanField(default=True)
+    
 
 
 class UserReferralWallet(models.Model):

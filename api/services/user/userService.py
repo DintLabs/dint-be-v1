@@ -1,7 +1,7 @@
 from curses.ascii import US
 from multiprocessing import managers
 import re
-from api.serializers.user.userSerializer import GetUserPageProfileSerializer, GetUserProfileSerializer, UpdateUserProfileSerializer, GetUserWalletSerializer, UpdateUserWalletSerializer, GetUserPreferencesSerializer, UpdateUserPreferencesUpdateSerializer, GetUserBookmarksSerializer
+from api.serializers.user.userSerializer import GetUserPageProfileSerializer, GetUserProfileSerializer, UpdateUserProfileSerializer, GetUserWalletSerializer, UpdateUserWalletSerializer, GetUserPreferencesSerializer, UpdateUserPreferencesUpdateSerializer, GetUserBookmarksSerializer, CreateUpdatePostsSerializer
 from api.utils.messages.commonMessages import BAD_REQUEST, RECORD_NOT_FOUND
 from rest_framework import status
 from rest_framework.response import Response
@@ -26,7 +26,7 @@ from django.core.files.base import ContentFile
 
 from .userBaseService import UserBaseService
 from api.utils.messages.userMessages import *
-from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks
+from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks,Posts
 from api.serializers.user import (UserLoginDetailSerializer,
                                   UserCreateUpdateSerializer)
 
@@ -337,6 +337,25 @@ class UserService(UserBaseService):
             return ({"data":preference, "code":status.HTTP_200_OK, "message":"User Bookmarks fetched Successfully"})
         return ({"data": [{error: 'User not found'}], "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
     
+    def create_bookmark_by_token(self, request, format=None):
+        user_obj = User.objects.get(id = request.user.id)
+        serializer = CreateUpdatePostsSerializer(data=request.data)
+        if serializer.is_valid():
+            post_exist = UserBookmarks.objects.filter(post=request.data['post']).exists()
+            if not post_exist:
+                serializer.save(user=request.user)
+                res_data = GetUserBookmarksSerializer(UserBookmarks.objects.get(id = serializer.data['id'])).data
+                return ({"data": res_data, "code":status.HTTP_201_CREATED, "message":"Bookmark created successfully"})
+        return ({"data":serializer.errors, "code":status.HTTP_400_BAD_REQUEST, "message":"Oops! Something went wrong."})
+        
+    def delete_bookmark_by_token(self, request, pk, format=None):
+        post_exist = UserBookmarks.objects.filter(user=request.user,post=pk)
+        if not post_exist.exists():
+            return ({"code":status.HTTP_400_BAD_REQUEST, "message":"Bookmark not exists"})
+        else:
+            post_exist.delete()
+            return ({"code":status.HTTP_200_OK, "message":"Bookmark deleted successfully"})    
+
     def get_preferences_by_token(self, request, format=None):
         user_obj = User.objects.get(id = request.user.id)
         if user_obj:

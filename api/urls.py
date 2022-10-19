@@ -28,6 +28,8 @@ urlpatterns = [
 
     #user bookmarks
     path('user/get-user-bookmarks/', UserBookmarksView.as_view(), name="get-user-bookmarks"),
+    path('user/create-user-bookmarks/', UserBookmarksView.as_view(), name="create-user-bookmarks"),
+    path('user/delete-user-bookmarks/<int:pk>/', UserBookmarksView.as_view(), name="delete-user-bookmarks"),
     
     #OTP
     path('user/verify-otp/', VarifyOtpView.as_view(), name="verify-otp"),

@@ -145,7 +145,7 @@ class UpdateUserPreferencesUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserPreferences
-        fields = ('enable_push_notification', 'show_full_text')
+        fields = ('enable_push_notification', 'enable_email_notification','show_full_text','monthly_news_letter','new_posts_summary','new_posts_summary_time','upcoming_stream_reminder','new_private_msg_summary','new_private_msg_summary_time','receive_less_notification','subscription_notification','new_comment','new_like','language')
 
 
 class GetUserPreferencesSerializer(serializers.ModelSerializer):
@@ -210,5 +210,10 @@ class GetUserBookmarksSerializer(serializers.ModelSerializer):
     
     class Meta:
         many = True
+        model = UserBookmarks
+        fields = '__all__'
+
+class CreateUpdatePostsSerializer(serializers.ModelSerializer):
+    class Meta:
         model = UserBookmarks
         fields = '__all__'
