@@ -21,7 +21,6 @@ urlpatterns = [
     path('user/get-wallet-by-token/', UserWalletView.as_view(), name="get-user-wallet"),
     path('user/update-wallet-by-token/', UserWalletView.as_view(), name="update-user-wallet"),
 
-
     #user preferences
     path('user/get-user-preferences/', UserPreferencesView.as_view(), name="get-user-preferences"),
     path('user/update-user-preferences/', UserPreferencesView.as_view(), name="update-user-preferences"),
@@ -35,12 +34,16 @@ urlpatterns = [
     path('user/verify-otp/', VarifyOtpView.as_view(), name="verify-otp"),
     path('user/send-otp-to-old-user/', SendOtpForOldUser.as_view(), name="send-otp-to-old-user"),
     
+    
     #profile
     path('user/get-profile-by-token/', ProfileView.as_view(), name="verify-otp"),
     path('user/get-page-profile-by-token/', PageProfileView.as_view(), name="verify-otp"),
     path('user/get-profile-by-username/', ProfileUsernameView.as_view(), name="verify-otp"),
     path('user/update-profile-by-token/', ProfileView.as_view(), name="verify-otp"),
     
+    # # update email address
+    # path('user/update-email-address/' , ProfileView.as_view(), name="update-email-address"),
+
     #role
     path('role/get-all-roles/', RoleListView.as_view(), name="get-all-role"),
     path('role/create-role/', RoleCreateView.as_view(), name="create-role"),

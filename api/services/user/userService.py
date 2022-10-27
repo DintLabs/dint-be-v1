@@ -266,7 +266,6 @@ class UserService(UserBaseService):
         user_details['wallet_token'] = user_obj.wallet_token
         return ({"data":user_details, "code":status.HTTP_200_OK, "message":"User Profile fetched Successfully"})
         
-    
     def get_page_profile_by_token(self, request, format=None):
         user_obj = User.objects.get(id = request.user.id)
         context = {"profile_user_id":user_obj.id , "logged_in_user":request.user.id}
@@ -277,13 +276,12 @@ class UserService(UserBaseService):
         user_details['token'] = token
         return ({"data":user_details, "code":status.HTTP_200_OK, "message":"User Profile fetched Successfully"})
 
-
     def update_profile_by_token(self, request, format=None):
         user_obj = User.objects.get(id = request.user.id)
         serializer = UpdateUserProfileSerializer(user_obj, data= request.data)
         if serializer.is_valid():
             serializer.save()
-            return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile fetched Successfully"})
+            return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile Updated Successfully"})
         return ({"data":serializer.errors, "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
 
     def get_wallet_by_token(self, request, format=None):
@@ -291,7 +289,6 @@ class UserService(UserBaseService):
         context = {"profile_user_id":user_obj.id , "logged_in_user":request.user.id}
         serializer = GetUserWalletSerializer(user_obj, context = context)
         return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Wallet fetched Successfully"})
-
 
     def update_wallet_by_token(self, request, format=None):
         user_obj = User.objects.get(id = request.user.id)
