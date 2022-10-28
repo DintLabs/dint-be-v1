@@ -279,9 +279,14 @@ class UserService(UserBaseService):
     def update_profile_by_token(self, request, format=None):
         user_obj = User.objects.get(id = request.user.id)
         serializer = UpdateUserProfileSerializer(user_obj, data= request.data)
+        new_email = request.data['email']
+        email_exists = User.objects.filter(email = new_email)
         if serializer.is_valid():
-            serializer.save()
-            return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile Updated Successfully"})
+            if not email_exists:
+                serializer.save()
+                return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile Updated Successfully"})
+            else:
+                return ({"data":serializer.errors, "code":status.HTTP_400_BAD_REQUEST, "message":"Email already exists"})
         return ({"data":serializer.errors, "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
 
     def get_wallet_by_token(self, request, format=None):

@@ -79,7 +79,7 @@ class UpdateUserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-        'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
+        'id','email', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
         'city', 'twitter', 'instagram', 'discord', 'banner_image', 'location', 'is_private')
 
 
@@ -168,7 +168,7 @@ class GetUserPageProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-        'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
+        'id','email', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
         'city', 'twitter', 'instagram', 'discord', 'banner_image', 'location', 'is_followed', 'is_private', 'user_page')
 
     def get_is_followed(self, obj):
