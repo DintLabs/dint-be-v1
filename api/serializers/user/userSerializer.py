@@ -2,7 +2,8 @@ from dataclasses import field
 from api.models.pageModel import Page
 from api.models.userFollowersModel import UserFollowers
 from rest_framework import serializers
-from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet, UserPreferences)
+from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet, UserPreferences, ConfineUsers,
+                        UserCustomLists, UserCustomGroupMembers)
 from api.models.userBookmarksModel import UserBookmarks
 
 from django.core.exceptions import ValidationError
@@ -217,3 +218,42 @@ class CreateUpdatePostsSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserBookmarks
         fields = '__all__'
+
+
+class ConfineModelSerializer(serializers.ModelSerializer):
+    main_user_details = serializers.SerializerMethodField()
+    confine_user_details = serializers.SerializerMethodField()
+    """
+    Return the details of Login User.
+    """
+
+    # dob = serializers.DateField(format=DATEFORMAT, input_formats=[DATEFORMAT])
+
+    class Meta(object):
+        model = ConfineUsers
+        fields = "__all__"
+
+class UserCustomListsModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserCustomLists
+        fields = "__all__"
+
+
+class UserCustomGroupMembersModelSerializer(serializers.ModelSerializer):
+    member_details = serializers.SerializerMethodField()
+    list_name = serializers.SerializerMethodField()
+    """
+    Return the details of Login User.
+    """
+
+    # dob = serializers.DateField(format=DATEFORMAT, input_formats=[DATEFORMAT])
+
+    class Meta(object):
+        model = UserCustomGroupMembers
+        fields = "__all__"
+
+    def get_member_details(self, obj):
+        return UserLoginDetailSerializer(obj.member).data
+
+    def get_list_name(self, obj):
+        return obj.user_custom_lists.name

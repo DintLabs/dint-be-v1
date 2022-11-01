@@ -140,3 +140,29 @@ class UserReferralWallet(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
+class ConfineUsers(models.Model):
+    USER_BLOCK_TYPE = (
+        ('block', 'block'),
+        ('restrict', 'restrict'),
+        ('none', 'none')
+    )
+    main_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="main_user")
+    confine_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="confine_user")
+    user_block_type = models.CharField(max_length=16, choices=USER_BLOCK_TYPE, default='none')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class UserCustomLists(models.Model):
+    name = models.CharField(max_length=32)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class UserCustomGroupMembers(models.Model):
+    user_custom_lists = models.ForeignKey(UserCustomLists, on_delete=models.CASCADE)
+    member = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

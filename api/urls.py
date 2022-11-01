@@ -8,6 +8,9 @@ routers = DefaultRouter()
 routers.register('referral', UserReferralWalletModelViewSet, base_name='referral')
 routers.register('tip-reference', UserTipReferenceModelViewSet, base_name='tip-reference')
 routers.register('user-stories', UserStoriesModelViewSet, base_name='user-stories')
+routers.register('confine-user', confineUserModelViewSet, base_name='confine-user')
+routers.register('user-list', UserCustomListsModelViewSet, base_name='user-list')
+routers.register('add-member-in-list', UserCustomGroupMembersModelViewSet, base_name='add-member-in-list')
 
 
 urlpatterns = [
