@@ -284,16 +284,11 @@ class UserService(UserBaseService):
         new_email = request.data['email']
         email_exists = User.objects.filter(email = new_email)
         if serializer.is_valid():
-<<<<<<< Updated upstream
-            serializer.save()
-            return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile fetched Successfully"})
-=======
             if not email_exists:
                 serializer.save()
                 return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile Updated Successfully"})
             else:
                 return ({"data":serializer.errors, "code":status.HTTP_400_BAD_REQUEST, "message":"Email already exists"})
->>>>>>> Stashed changes
         return ({"data":serializer.errors, "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
 
     def get_wallet_by_token(self, request, format=None):
