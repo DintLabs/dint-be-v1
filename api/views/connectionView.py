@@ -6,8 +6,10 @@ from rest_framework.schemas import AutoSchema
 from rest_framework.compat import coreapi, coreschema
 from rest_framework.viewsets import ModelViewSet
 
-from api.models import User
+from api.models import User, ConfineUsers, UserCustomLists, UserCustomGroupMembers
 from api.models.userFollowersModel import UserStories, UserFollowers
+from api.serializers import ConfineModelSerializer, UserCustomListsModelSerializer, \
+    UserCustomGroupMembersModelSerializer
 from api.serializers.connections import UserStoriesModelSerializer
 from api.services.connections import ConnectionService
 
@@ -104,3 +106,29 @@ class UserStoriesModelViewSet(ModelViewSet):
         following = UserFollowers.objects.filter(follower=request.user.id, request_status=True).values_list('user')
         users = following.union(follower)
         return UserStories.objects.filter(user__in=users)
+
+
+class confineUserModelViewSet(ModelViewSet):
+    serializer_class = ConfineModelSerializer
+    permission_classes = [IsAuthenticated, ]
+    queryset = ConfineUsers.objects.all()
+
+    def get_queryset(self):
+        return ConfineUsers.objects.filter(main_user=self.request.user)
+
+class UserCustomListsModelViewSet(ModelViewSet):
+    serializer_class = UserCustomListsModelSerializer
+    permission_classes = [IsAuthenticated, ]
+    queryset = UserCustomLists.objects.all()
+
+    def get_queryset(self):
+        return UserCustomLists.objects.filter(user=self.request.user)
+
+
+class UserCustomGroupMembersModelViewSet(ModelViewSet):
+    serializer_class = UserCustomGroupMembersModelSerializer
+    permission_classes = [IsAuthenticated, ]
+    queryset = UserCustomGroupMembers.objects.all()
+
+    def get_queryset(self):
+        return UserCustomGroupMembers.objects.filter(user_custom_lists__user=self.request.user)
