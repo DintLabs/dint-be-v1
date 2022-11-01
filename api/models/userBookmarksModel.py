@@ -13,8 +13,4 @@ class UserBookmarks(models.Model):
         ]
 
 
-        # save-bookmark
-        # post_id
-
-        # delete-bookmark
-        # post_id
+       

@@ -25,6 +25,9 @@ class Posts(models.Model):
     history = HistoricalRecords(table_name='posts_history')
     can_delete = models.BooleanField(default=True)
 
+    def bookmarks_count(self):
+       return self.user_bookmarks.all().count()
+
     def __unicode__(self):
         return self.id
 

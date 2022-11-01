@@ -80,7 +80,7 @@ class UpdateUserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-        'id','email', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
+        'id', 'email', 'phone_no' ,'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
         'city', 'twitter', 'instagram', 'discord', 'banner_image', 'location', 'is_private')
 
 
@@ -169,7 +169,7 @@ class GetUserPageProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-        'id','email', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
+        'id', 'email', 'phone_no', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
         'city', 'twitter', 'instagram', 'discord', 'banner_image', 'location', 'is_followed', 'is_private', 'user_page')
 
     def get_is_followed(self, obj):
@@ -207,7 +207,19 @@ class UserReferralWalletModelSerializer(serializers.ModelSerializer):
             'referral_id': obj.user_referral.referral_id,
         }
 
+class GetPostSerializer(serializers.ModelSerializer):
+    """
+    This is for Retrieving post data
+    """
+
+    class Meta(object):
+        model = Posts
+        fields = '__all__'
+
 class GetUserBookmarksSerializer(serializers.ModelSerializer):
+
+    post = GetPostSerializer()
+    user = UserLoginDetailSerializer()
     
     class Meta:
         many = True
@@ -218,42 +230,3 @@ class CreateUpdatePostsSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserBookmarks
         fields = '__all__'
-
-
-class ConfineModelSerializer(serializers.ModelSerializer):
-    main_user_details = serializers.SerializerMethodField()
-    confine_user_details = serializers.SerializerMethodField()
-    """
-    Return the details of Login User.
-    """
-
-    # dob = serializers.DateField(format=DATEFORMAT, input_formats=[DATEFORMAT])
-
-    class Meta(object):
-        model = ConfineUsers
-        fields = "__all__"
-
-class UserCustomListsModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserCustomLists
-        fields = "__all__"
-
-
-class UserCustomGroupMembersModelSerializer(serializers.ModelSerializer):
-    member_details = serializers.SerializerMethodField()
-    list_name = serializers.SerializerMethodField()
-    """
-    Return the details of Login User.
-    """
-
-    # dob = serializers.DateField(format=DATEFORMAT, input_formats=[DATEFORMAT])
-
-    class Meta(object):
-        model = UserCustomGroupMembers
-        fields = "__all__"
-
-    def get_member_details(self, obj):
-        return UserLoginDetailSerializer(obj.member).data
-
-    def get_list_name(self, obj):
-        return obj.user_custom_lists.name

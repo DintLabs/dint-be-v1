@@ -55,7 +55,29 @@ class GetPostsSerializer(serializers.ModelSerializer):
     user = UserLoginDetailSerializer()
     like_post = GetPostLikeSerializer(many=True)
     post_comment = GetPostsCommentSerializer(many=True)
+    bookmarks_count = serializers.SerializerMethodField()
+    is_bookmarked = serializers.SerializerMethodField()
 
+    def get_is_bookmarked(self, obj):
+        logged_in_user = self.context.get('logged_in_user')
+
+        if logged_in_user:
+            try:
+                u_obj = UserBookmarks.objects.get(user=logged_in_user, post=obj)
+                if u_obj is None:
+                    return False
+                else:
+                    return True
+            except:
+                return False
+        return False
+
+    def get_bookmarks_count(self, obj):
+        try:
+            bookmarks_count = UserBookmarks.objects.filter(post=obj).all().count()
+            return bookmarks_count
+        except:
+            return 0
 
     class Meta(object):
         model = Posts
