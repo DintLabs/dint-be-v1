@@ -281,9 +281,20 @@ class UserService(UserBaseService):
     def update_profile_by_token(self, request, format=None):
         user_obj = User.objects.get(id = request.user.id)
         serializer = UpdateUserProfileSerializer(user_obj, data= request.data)
+        try:
+            new_email = request.data['email']
+            email_exists = User.objects.filter(email = new_email)
+            if serializer.is_valid():
+                if not email_exists:
+                    serializer.save()
+                    return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile Updated Successfully"})
+                else:
+                    return ({"data":serializer.errors, "code":status.HTTP_400_BAD_REQUEST, "message":"Email already exists"})
+        except KeyError:
+            pass
         if serializer.is_valid():
-            serializer.save()
-            return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile fetched Successfully"})
+                serializer.save()
+                return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile Updated Successfully"})
         return ({"data":serializer.errors, "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
 
     def get_wallet_by_token(self, request, format=None):
@@ -323,9 +334,10 @@ class UserService(UserBaseService):
             try:
                 if request.GET.get('type') is None:
                     user_bookmarks = UserBookmarks.objects.filter(user = user_obj).all()
+             
                 else:
                     user_bookmarks = UserBookmarks.objects.filter(user = user_obj, bookmark_type= request.GET['type']).all()
-
+                    
                 if user_bookmarks:
                     context = {"profile_user_id":user_obj.id , "logged_in_user":request.user.id}
                     serializer = GetUserBookmarksSerializer(user_bookmarks, many=True, context = context)
@@ -338,15 +350,15 @@ class UserService(UserBaseService):
         return ({"data": [{error: 'User not found'}], "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
     
     def create_bookmark_by_token(self, request, format=None):
-        user_obj = User.objects.get(id = request.user.id)
-        serializer = CreateUpdatePostsSerializer(data=request.data)
-        if serializer.is_valid():
-            post_exist = UserBookmarks.objects.filter(post=request.data['post']).exists()
-            if not post_exist:
+        post_exist = UserBookmarks.objects.filter(user=request.user, post=request.data['post']).exists()
+        if not post_exist:
+            serializer = CreateUpdatePostsSerializer(data=request.data)
+            if serializer.is_valid():
                 serializer.save(user=request.user)
                 res_data = GetUserBookmarksSerializer(UserBookmarks.objects.get(id = serializer.data['id'])).data
-                return ({"data": res_data, "code":status.HTTP_201_CREATED, "message":"Bookmark created successfully"})
-        return ({"data":serializer.errors, "code":status.HTTP_400_BAD_REQUEST, "message":"Oops! Something went wrong."})
+                return ({"data": res_data, "code": status.HTTP_201_CREATED, "message": "Bookmark created successfully"})
+            return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
+        return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Bookmark alrerady there."})
         
     def delete_bookmark_by_token(self, request, pk, format=None):
         post_exist = UserBookmarks.objects.filter(user=request.user,post=pk)

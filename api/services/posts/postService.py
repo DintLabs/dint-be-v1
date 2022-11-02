@@ -24,7 +24,8 @@ class PostsService (PostsBaseService):
         Retun all the Posts.
         """
         post_obj = Posts.objects.all()
-        serializer = GetPostsSerializer (post_obj, many=True)
+        context = {"logged_in_user":request.user.id}
+        serializer = GetPostsSerializer(post_obj, context = context, many=True)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
     def get_post_list_with_pagination(self, request, format=None):
@@ -175,7 +176,8 @@ class PostsService (PostsBaseService):
         except Posts.DoesNotExist:
             return ({"code": status.HTTP_400_BAD_REQUEST, "message": RECORD_NOT_FOUND})
 
-        serializer = GetPostsSerializer(post_obj, many=True)
+        context = {"logged_in_user":request.user.id}
+        serializer = GetPostsSerializer(post_obj, context = context, many=True)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
     def get_pagination_posts_by_user_id(self, request, pk, format=None):
