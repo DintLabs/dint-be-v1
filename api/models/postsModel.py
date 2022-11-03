@@ -9,8 +9,8 @@ from .pageModel import Page
 
 class Posts(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, related_name='user_posts', on_delete=models.DO_NOTHING, null=True, blank=True)
-    page = models.ForeignKey(Page, related_name='post_page', on_delete=models.DO_NOTHING, null=True, blank=True)
+    user = models.ForeignKey(User, related_name='user_posts', on_delete=models.CASCADE, null=True, blank=True)
+    page = models.ForeignKey(Page, related_name='post_page', on_delete=models.CASCADE, null=True, blank=True)
     type = models.CharField(max_length=50, null=True, blank=True)
     content = models.TextField(null=True, blank=True)
     media = models.URLField(max_length = 500, null=True, blank=True)

@@ -9,8 +9,8 @@ from .postsModel import *
 
 class UserFeeds(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, related_name='user_feeds', on_delete=models.DO_NOTHING, null=True, blank=True)
-    post = models.ForeignKey(Posts, related_name='user_posts', on_delete=models.DO_NOTHING, null=True, blank=True)
+    user = models.ForeignKey(User, related_name='user_feeds', on_delete=models.CASCADE, null=True, blank=True)
+    post = models.ForeignKey(Posts, related_name='user_posts', on_delete=models.CASCADE, null=True, blank=True)
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
