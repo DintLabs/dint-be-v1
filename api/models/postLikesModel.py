@@ -11,8 +11,8 @@ from .UploadMediaModel import *
 
 class PostLikes(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, related_name='like_user', on_delete=models.DO_NOTHING, null=True, blank=True)
-    post = models.ForeignKey(Posts, related_name='like_post', on_delete=models.DO_NOTHING, null=True, blank=True)
+    user = models.ForeignKey(User, related_name='like_user', on_delete=models.CASCADE, null=True, blank=True)
+    post = models.ForeignKey(Posts, related_name='like_post', on_delete=models.CASCADE, null=True, blank=True)
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)

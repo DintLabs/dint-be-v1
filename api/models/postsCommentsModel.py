@@ -9,8 +9,8 @@ from .userModel import User
 
 class PostComments(models.Model):
     id = models.AutoField(primary_key=True)
-    post = models.ForeignKey(Posts, related_name='post_comment', on_delete=models.DO_NOTHING, null=True, blank=True)
-    user = models.ForeignKey(User, related_name='user_comment', on_delete=models.DO_NOTHING, null=True, blank=True)
+    post = models.ForeignKey(Posts, related_name='post_comment', on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, related_name='user_comment', on_delete=models.CASCADE, null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
 
     room_type = models.CharField(max_length=50, null=True, blank=True)
