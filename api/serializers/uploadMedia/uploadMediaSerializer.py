@@ -9,7 +9,7 @@ class UploadMediaListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UploadMedia
-        fields = ("id" , "media_file", "file_type", "thumbnail")
+        fields = ("id" , "media_file_name", "file_type", "thumbnail", "media_file_url")
     
     
 class UploadMediaDetailsSerializer(serializers.ModelSerializer):
