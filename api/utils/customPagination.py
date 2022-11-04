@@ -6,7 +6,7 @@ from django.db.models import Q
 
 class CustomPagination:
 
-    def custom_pagination(self, request, model, search_keys, search_type, serializer, query):
+    def custom_pagination(self, request, model, search_keys, search_type, serializer, query, context = None ):
         """ Function to handle custom pagination"""
         length = request.data['length']
         start = request.data['start']
@@ -37,12 +37,12 @@ class CustomPagination:
         #else:
         #    query = model.objects.all()
 
-
+     
         page_no = int(start/length + 1)
         query = query.order_by(order)
         paginator = Paginator(query, length)
         paginated_data = paginator.page(page_no)
-        serializer = serializer(paginated_data, many=True)
+        serializer = serializer(paginated_data, many=True, context = context)
 
         return {"response_object": serializer.data, "total_records": paginated_data.paginator.count}
 

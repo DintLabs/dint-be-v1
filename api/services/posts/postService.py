@@ -28,7 +28,7 @@ class PostsService (PostsBaseService):
         serializer = GetPostsSerializer(post_obj, context = context, many=True)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
-    def get_post_list_with_pagination(self, request, format=None):
+    def get_post_list_with_pagination(self, request, format=None ):
         """
         Return all the Posts with Pagination.
         """
@@ -42,7 +42,8 @@ class PostsService (PostsBaseService):
         custom_pagination = CustomPagination()
         search_keys = ['content__icontains', 'id__contains']
         search_type = 'or'
-        roles_response = custom_pagination.custom_pagination(request, Posts, search_keys, search_type, GetPostsSerializer, post_obj)
+        context = {"logged_in_user":request.user.id}
+        roles_response = custom_pagination.custom_pagination(request, Posts, search_keys, search_type, GetPostsSerializer, post_obj, context )
         return {"data": roles_response['response_object'],
                 "recordsTotal": roles_response['total_records'],
                 "recordsFiltered": roles_response['total_records'],
@@ -71,7 +72,8 @@ class PostsService (PostsBaseService):
         custom_pagination = CustomPagination()
         search_keys = ['content__icontains', 'id__contains']
         search_type = 'or'
-        roles_response = custom_pagination.custom_pagination(request, Posts, search_keys, search_type, GetPostsSerializer, final_obj)
+        context = {"logged_in_user":request.user.id}
+        roles_response = custom_pagination.custom_pagination(request, Posts, search_keys, search_type, GetPostsSerializer, final_obj, context)
         return {"data": roles_response['response_object'],
                 "recordsTotal": roles_response['total_records'],
                 "recordsFiltered": roles_response['total_records'],

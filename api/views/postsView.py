@@ -125,7 +125,7 @@ class LikePostView(APIView):
         return Response(result, status=status.HTTP_200_OK)
 
 
-
+   
 
 class CommentPostView(APIView):
 

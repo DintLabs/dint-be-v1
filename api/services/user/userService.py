@@ -336,7 +336,7 @@ class UserService(UserBaseService):
                     user_bookmarks = UserBookmarks.objects.filter(user = user_obj).all()
              
                 else:
-                    user_bookmarks = UserBookmarks.objects.filter(user = user_obj, bookmark_type= request.GET['type']).all()
+                    user_bookmarks = UserBookmarks.objects.filter(user = user_obj, post__type= request.GET['type']).all()
                     
                 if user_bookmarks:
                     context = {"profile_user_id":user_obj.id , "logged_in_user":request.user.id}
