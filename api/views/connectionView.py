@@ -124,6 +124,13 @@ class UserCustomListsModelViewSet(ModelViewSet):
     def get_queryset(self):
         return UserCustomLists.objects.filter(user=self.request.user)
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        members = UserCustomGroupMembers.objects.filter(user_custom_lists=instance)
+        serializer = UserCustomGroupMembersModelSerializer(members, many=True)
+        return Response(serializer.data)
+
+
 
 class UserCustomGroupMembersModelViewSet(ModelViewSet):
     serializer_class = UserCustomGroupMembersModelSerializer
@@ -132,3 +139,4 @@ class UserCustomGroupMembersModelViewSet(ModelViewSet):
 
     def get_queryset(self):
         return UserCustomGroupMembers.objects.filter(user_custom_lists__user=self.request.user)
+

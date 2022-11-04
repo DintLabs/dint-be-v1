@@ -262,9 +262,14 @@ class ConfineModelSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class UserCustomListsModelSerializer(serializers.ModelSerializer):
+    people = serializers.SerializerMethodField()
+
     class Meta:
         model = UserCustomLists
         fields = "__all__"
+
+    def get_people(self, obj):
+        return UserCustomGroupMembers.objects.filter(user_custom_lists=obj).count()
 
 
 class UserCustomGroupMembersModelSerializer(serializers.ModelSerializer):
