@@ -11,8 +11,6 @@ routers.register('user-stories', UserStoriesModelViewSet, base_name='user-storie
 routers.register('confine-user', confineUserModelViewSet, base_name='confine-user')
 routers.register('user-list', UserCustomListsModelViewSet, base_name='user-list')
 routers.register('add-member-in-list', UserCustomGroupMembersModelViewSet, base_name='add-member-in-list')
-routers.register('upload/media', UploadMediaView, base_name='upload-media')
-routers.register('delete-media', UploadMediaView, base_name='delete-media')
 
 
 urlpatterns = [
@@ -49,6 +47,10 @@ urlpatterns = [
     #role
     path('role/get-all-roles/', RoleListView.as_view(), name="get-all-role"),
     path('role/create-role/', RoleCreateView.as_view(), name="create-role"),
+
+    #uploadMedia
+    path('upload/media/', UploadMediaView.as_view(), name="upload-media"),
+    path('delete-media/<int:pk>/', DeleteMediaView.as_view(), name="delete-media"),
 
     #Posts
     path('posts/list/', ListCreateUpdateDeletePostView.as_view(), name="get-all-posts"),
