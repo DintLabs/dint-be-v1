@@ -262,34 +262,9 @@ MEDIA_URL = '/media/'
 CORS_ORIGIN_ALLOW_ALL = True
 
 
-
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_KEY')
-AWS_STORAGE_BUCKET_NAME = config('AWS_BUCKET_NAME')
-# AWS_STORAGE_REGION = env.str("AWS_STORAGE_REGION")
+AWS_SECRET_KEY = config('AWS_SECRET_KEY')
+AWS_BUCKET_NAME = config('AWS_BUCKET_NAME')
 STRIPE_API_KEY = config('STRIPE_API_KEY')
 ENCRYPTION_KEY = config('ENCRYPTION_KEY')
 
-USE_S3 = (
-        AWS_ACCESS_KEY_ID and
-        AWS_SECRET_ACCESS_KEY and
-        AWS_STORAGE_BUCKET_NAME
-)
-
-if USE_S3:
-    AWS_S3_CUSTOM_DOMAIN = ''
-    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=86400"}
-    AWS_DEFAULT_ACL = "public-read"
-    AWS_MEDIA_LOCATION = "media"
-    AWS_AUTO_CREATE_BUCKET = True
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-    AWS_S3_SIGNATURE_VERSION = 's3v4'
-    AWS_QUERYSTRING_AUTH = False
-    AWS_S3_FILE_OVERWRITE = False
-    AWS_S3_VERIFY = True
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-else:
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
