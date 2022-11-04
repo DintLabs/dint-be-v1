@@ -5,10 +5,8 @@ from simple_history.models import HistoricalRecords
 
 class UploadMedia(models.Model):
     id = models.AutoField(primary_key=True)
-    media_file_url = models.CharField(max_length=255, blank=True, null=True)
-    media_file_name = models.CharField(max_length=250, blank=True, null=True)
+    media_file = models.ImageField(upload_to='upload-media/', blank=True, null=True)
     thumbnail = models.ImageField(upload_to='upload-media/', blank=True, null=True)
-    thumbnail_url = models.CharField(max_length=255, blank=True, null=True)
     file_type = models.CharField(max_length=120, blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
