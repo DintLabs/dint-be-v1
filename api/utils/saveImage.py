@@ -3,8 +3,8 @@ from dint.settings import *
 import random
 
 access_key_id = AWS_ACCESS_KEY_ID
-secret_access_key = AWS_SECRET_ACCESS_KEY
-bucket_name = AWS_STORAGE_BUCKET_NAME
+secret_access_key = AWS_SECRET_KEY
+bucket_name = AWS_BUCKET_NAME
 
 
 def saveImage(image, folder):
