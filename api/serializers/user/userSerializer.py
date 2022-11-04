@@ -211,11 +211,27 @@ class GetPostSerializer(serializers.ModelSerializer):
     """
     This is for Retrieving post data
     """
+    total_likes = serializers.SerializerMethodField()
+    total_comments = serializers.SerializerMethodField()
 
     class Meta(object):
         model = Posts
         fields = '__all__'
 
+    def get_total_likes(self, obj):
+        try:
+            total_likes = PostLikes.objects.filter(post = obj).all().count()
+            return total_likes
+        except:
+            return 0
+
+    def get_total_comments(self, obj):
+        try:
+            total_comments = PostComments.objects.filter(post = obj).all().count()
+            return total_comments
+        except:
+            return 0
+            
 class GetUserBookmarksSerializer(serializers.ModelSerializer):
 
     post = GetPostSerializer()

@@ -57,6 +57,8 @@ class GetPostsSerializer(serializers.ModelSerializer):
     post_comment = GetPostsCommentSerializer(many=True)
     bookmarks_count = serializers.SerializerMethodField()
     is_bookmarked = serializers.SerializerMethodField()
+    total_likes = serializers.SerializerMethodField()
+    total_comments = serializers.SerializerMethodField()
 
     def get_is_bookmarked(self, obj):
         logged_in_user = self.context.get('logged_in_user')
@@ -76,6 +78,20 @@ class GetPostsSerializer(serializers.ModelSerializer):
         try:
             bookmarks_count = UserBookmarks.objects.filter(post=obj).all().count()
             return bookmarks_count
+        except:
+            return 0
+
+    def get_total_likes(self, obj):
+        try:
+            total_likes = PostLikes.objects.filter(post = obj).all().count()
+            return total_likes
+        except:
+            return 0
+
+    def get_total_comments(self, obj):
+        try:
+            total_comments = PostComments.objects.filter(post = obj).all().count()
+            return total_comments
         except:
             return 0
 

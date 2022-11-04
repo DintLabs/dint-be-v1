@@ -14,8 +14,7 @@ class Posts(models.Model):
     type = models.CharField(max_length=50, null=True, blank=True)
     content = models.TextField(null=True, blank=True)
     media = models.URLField(max_length = 500, null=True, blank=True)
-    total_likes = models.IntegerField(null=True, blank=True)
-    total_comments = models.IntegerField(null=True, blank=True)
+    
     
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
