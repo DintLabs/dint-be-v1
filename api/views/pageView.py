@@ -107,6 +107,8 @@ class GetPageByPageNameView(APIView):
 
 
 class CheckUsernameAvailabilityView(APIView):
+    permission_classes = [AllowAny, ]
+
     def get(self, request, user_name,format=None):
         """
         Retrieve a Post by ID
