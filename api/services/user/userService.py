@@ -12,6 +12,7 @@ import string
 import json
 import base64
 import random
+from datetime import datetime
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate, login
@@ -66,6 +67,8 @@ class UserService(UserBaseService):
             # User.objects.filter(pk=user.pk).update(auth_token=token)
 
             user_session = self.create_update_user_session(user, token, request)
+            user.is_online = True
+            user.save()
 
             return ({"data": user_details,"code": status.HTTP_200_OK,"message": "LOGIN_SUCCESSFULLY"})
         return ({"data": None,"code": status.HTTP_400_BAD_REQUEST, "message": "INVALID_CREDENTIALS"})
@@ -408,7 +411,7 @@ class UserService(UserBaseService):
     
     def logout(self, request, format=None):
 
-        validated_data = self.validate_logout_data(request)
+        # validated_data = self.validate_logout_data(request)
         try:
             jwt_token_str = request.META['HTTP_AUTHORIZATION']
             jwt_token = jwt_token_str.replace('Bearer', '')
@@ -418,6 +421,9 @@ class UserService(UserBaseService):
             user_session_instance = self.get_user_session_object(user.pk, request.headers.get('device-type'), request.data.get('device_id'))
 
             if user_session_instance:
+                user.is_online = False
+                user.last_login = datetime.now()
+                user.save()
                 user_session = self.create_update_user_session(user, None, request)
                 return ({"data": None, "code": status.HTTP_200_OK, "message": "LOGOUT_SUCCESSFULLY"})
             else:
