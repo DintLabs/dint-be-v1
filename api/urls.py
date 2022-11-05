@@ -43,7 +43,10 @@ urlpatterns = [
     path('user/get-page-profile-by-token/', PageProfileView.as_view(), name="verify-otp"),
     path('user/get-profile-by-username/', ProfileUsernameView.as_view(), name="verify-otp"),
     path('user/update-profile-by-token/', ProfileView.as_view(), name="verify-otp"),
-    
+
+    # User Active Status
+    path('user/active-status/<int:pk>/', UserActiveStatus.as_view(), name="active-status"),
+
     #role
     path('role/get-all-roles/', RoleListView.as_view(), name="get-all-role"),
     path('role/create-role/', RoleCreateView.as_view(), name="create-role"),
