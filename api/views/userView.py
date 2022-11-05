@@ -362,11 +362,3 @@ class UserReferralWalletModelViewSet(ModelViewSet):
 
     def get_queryset(self):
         return UserReferralWallet.objects.filter(referred_by=self.request.user)
-
-class UserActiveStatus(APIView):
-    """
-    this class use for check user status is active or not.
-    """
-    def get(self, request, pk):
-        result = userService.user_active_status(request, pk)
-        return Response(result, status=status.HTTP_200_OK)

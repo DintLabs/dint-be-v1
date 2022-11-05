@@ -431,19 +431,3 @@ class UserService(UserBaseService):
         usr_obj = User.objects.filter(referred_by = pk)
         serializer = UserLoginDetailSerializer(usr_obj, many = True)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "Data Fetched Successfully."})
-
-    def user_active_status(self, request, pk):
-        """
-        this function is use for user online and offline status by checking token is available or not in UserSession model
-        return: json response of user online or offline with status code
-        """
-        try:
-            check_token = UserSession.objects.filter(user_id=pk).first()
-            if check_token:
-                if check_token.token:
-                    return {"data": "Online", "code": status.HTTP_200_OK, "message": "User is Online"}
-            else:
-                return {"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "RECORD_NOT_FOUND"}
-            return {"data": "Offline", "code": status.HTTP_200_OK, "message": "User is Offline"}
-        except User.DoesNotExist:
-            return {"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "RECORD_NOT_FOUND"}

@@ -36,7 +36,7 @@ static
 # Gradle
 .idea/**/gradle.xml
 .idea/**/libraries
-.env
+
 # File-based project format
 *.iws
 
