@@ -63,11 +63,9 @@ class PostsService (PostsBaseService):
             post_obj = Posts.objects.filter(type = post_type)
 
         follower_list = UserFollowers.objects.filter(follower = request.user.id).values_list('user')
-
         follower_post_obj = post_obj.filter(user__in = follower_list)
         own_post_obj = post_obj.filter(user = request.user.id)
         final_obj = follower_post_obj | own_post_obj
-
 
         custom_pagination = CustomPagination()
         search_keys = ['content__icontains', 'id__contains']
@@ -210,7 +208,8 @@ class PostsService (PostsBaseService):
         custom_pagination = CustomPagination ()
         search_keys = ['content__icontains', 'id__contains']
         search_type = 'or'
-        roles_response = custom_pagination.custom_pagination(request, Posts, search_keys, search_type, GetPostsSerializer, post_obj)
+        context = {"logged_in_user":request.user.id}
+        roles_response = custom_pagination.custom_pagination(request, Posts, search_keys, search_type, GetPostsSerializer, post_obj , context)
         return {"data": roles_response['response_object'],
                 "recordsTotal": roles_response['total_records'],
                 "recordsFiltered": roles_response['total_records'],

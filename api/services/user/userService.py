@@ -337,13 +337,14 @@ class UserService(UserBaseService):
             try:
                 if request.GET.get('type') is None:
                     user_bookmarks = UserBookmarks.objects.filter(user = user_obj).all()
-             
+                   
                 else:
                     user_bookmarks = UserBookmarks.objects.filter(user = user_obj, post__type= request.GET['type']).all()
                     
                 if user_bookmarks:
+                    latest_user_bookmarks = user_bookmarks.order_by('-created_at')
                     context = {"profile_user_id":user_obj.id , "logged_in_user":request.user.id}
-                    serializer = GetUserBookmarksSerializer(user_bookmarks, many=True, context = context)
+                    serializer = GetUserBookmarksSerializer(latest_user_bookmarks, many=True, context = context)
                     preference = serializer.data
                 else:
                     preference = None
