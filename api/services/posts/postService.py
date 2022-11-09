@@ -58,9 +58,7 @@ class PostsService (PostsBaseService):
 
         post_type = request.data.get('post_type')
         if post_type is None or post_type == 'all':
-            # post_obj = Posts.objects.all()
-            post_obj = Posts.objects.filter() 
-            print(post_obj)
+            post_obj = Posts.objects.all()
         else:
             post_obj = Posts.objects.filter(type = post_type)
 
