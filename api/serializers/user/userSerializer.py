@@ -66,6 +66,7 @@ class GetUserPostsSerializer(serializers.ModelSerializer):
     user = UserLoginDetailSerializer()
     like_post = GetUserPostLikeSerializer(many=True)
     post_comment = GetUserPostsCommentSerializer(many=True)
+  
 
     class Meta(object):
         model = Posts
@@ -211,8 +212,11 @@ class GetPostSerializer(serializers.ModelSerializer):
     """
     This is for Retrieving post data
     """
+    user = UserLoginDetailSerializer()
     total_likes = serializers.SerializerMethodField()
     total_comments = serializers.SerializerMethodField()
+    like_post = GetUserPostLikeSerializer(many=True)
+    post_comment = GetUserPostsCommentSerializer(many=True)
 
     class Meta(object):
         model = Posts
@@ -237,6 +241,21 @@ class GetUserBookmarksSerializer(serializers.ModelSerializer):
     post = GetPostSerializer()
     user = UserLoginDetailSerializer()
     
+  
+    def get_total_likes(self, obj):
+        try:
+            total_likes = PostLikes.objects.filter(post = obj).all().count()
+            return total_likes
+        except:
+            return 0
+
+    def get_total_comments(self, obj):
+        try:
+            total_comments = PostComments.objects.filter(post = obj).all().count()
+            return total_comments
+        except:
+            return 0
+
     class Meta:
         many = True
         model = UserBookmarks
