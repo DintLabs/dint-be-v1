@@ -61,7 +61,7 @@ urlpatterns = [
     path('posts/get/<int:pk>/', GetPostView.as_view(), name="create-posts"),
     path('posts/update/<int:pk>/', ListCreateUpdateDeletePostView.as_view(), name="create-posts"),
     path('posts/delete/<int:pk>/', ListCreateUpdateDeletePostView.as_view(), name="create-posts"),
-
+    path('posts/list/page/<int:pk>/', PostPaginationByPageIDView.as_view(), name="get-all-posts/list_by_page_id"),
 
     #Events
     path('events/list/', ListCreateUpdateDeleteEventView.as_view(), name="get-all-posts"),
@@ -136,7 +136,7 @@ urlpatterns = [
     path('page/delete/<int:pk>/', ListCreateUpdateDeletePageView.as_view(), name="create-page"),
     path('page/search/', SearchPageView.as_view(), name="create-page"),    
     path('page/get-by-page_name/<str:page_name>/', GetPageByPageNameView.as_view(), name="create-page"),
-
+   
     path('page/check-user-name-availability/<str:user_name>/', CheckUsernameAvailabilityView.as_view(), name="create-page"),
 
     

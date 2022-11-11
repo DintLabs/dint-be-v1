@@ -35,9 +35,9 @@ class PostsService (PostsBaseService):
 
         post_type = request.data.get('post_type')
         if post_type is None or post_type == 'all':
-            post_obj = Posts.objects.all()
+            post_obj = Posts.objects.filter(page = None)
         else:
-            post_obj = Posts.objects.filter(type = post_type)
+            post_obj = Posts.objects.filter(type = post_type, page = None)
 
         custom_pagination = CustomPagination()
         search_keys = ['content__icontains', 'id__contains']
@@ -236,3 +236,29 @@ class PostsService (PostsBaseService):
             return ({"data": serializer.data, "code": status.HTTP_201_CREATED, "message": POST_CREATED})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
        
+
+    def get_posts_by_page_id(self, request, pk, format=None):
+        """
+        Return all the Posts with Pagination.
+        """
+
+        post_type = request.data.get('post_type')
+        if post_type is None or post_type == 'all':
+            post_obj = Posts.objects.filter(page = pk).all()
+        else:
+            post_obj = Posts.objects.filter(type = post_type, page = pk)
+
+        # subscriber_list = UserSubscription.objects.filter(user_subscription = request.user.id).values_list('user')
+        # subscriber_post_obj = post_obj.filter(user__in = subscriber_list)
+        # own_post_obj = post_obj.filter(user = request.user.id)
+        # final_obj = follower_post_obj | own_post_obj
+
+        custom_pagination = CustomPagination()
+        search_keys = ['content__icontains', 'id__contains']
+        search_type = 'or'
+        context = {"logged_in_user":request.user.id}
+        roles_response = custom_pagination.custom_pagination(request, Posts, search_keys, search_type, GetPostsSerializer, post_obj, context)
+        return {"data": roles_response['response_object'],
+                "recordsTotal": roles_response['total_records'],
+                "recordsFiltered": roles_response['total_records'],
+                "code": status.HTTP_200_OK, "message": OK}

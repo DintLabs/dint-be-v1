@@ -135,3 +135,13 @@ class CommentPostView(APIView):
         """
         result = postService.comment_post(request, format=None)
         return Response(result, status=status.HTTP_200_OK)
+
+
+class PostPaginationByPageIDView(APIView):
+
+    def get(self, request, pk, format=None):
+        """
+        Retrieve a Post by ID
+        """
+        result = postService.get_posts_by_page_id(request, pk, format=None)
+        return Response(result, status=status.HTTP_200_OK)
