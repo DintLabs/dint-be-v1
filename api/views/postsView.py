@@ -124,6 +124,14 @@ class LikePostView(APIView):
         result = postService.like_post(request, format=None)
         return Response(result, status=status.HTTP_200_OK)
 
+class UnLikePostView(APIView):
+
+    def post(self, request, format=None):
+        """
+        Retrieve a Post by ID
+        """
+        result = postService.unlike_post(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
 
    
 

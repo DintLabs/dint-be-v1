@@ -30,6 +30,7 @@ class GetPostLikeSerializer(serializers.ModelSerializer):
         model = PostLikes
         fields = '__all__'
 
+
 class CreateUpdatePostsCommentSerializer(serializers.ModelSerializer):
     """
     This is for update ,Create

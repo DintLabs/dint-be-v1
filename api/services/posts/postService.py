@@ -35,9 +35,9 @@ class PostsService (PostsBaseService):
 
         post_type = request.data.get('post_type')
         if post_type is None or post_type == 'all':
-            post_obj = Posts.objects.filter(page = None)
+            post_obj = Posts.objects.all()
         else:
-            post_obj = Posts.objects.filter(type = post_type, page = None)
+            post_obj = Posts.objects.filter(type = post_type)
 
         custom_pagination = CustomPagination()
         search_keys = ['content__icontains', 'id__contains']
@@ -58,9 +58,9 @@ class PostsService (PostsBaseService):
 
         post_type = request.data.get('post_type')
         if post_type is None or post_type == 'all':
-            post_obj = Posts.objects.all()
+            post_obj = Posts.objects.filter(page__isnull = True).all()
         else:
-            post_obj = Posts.objects.filter(type = post_type)
+            post_obj = Posts.objects.filter(type = post_type, page__isnull = True)
 
         follower_list = UserFollowers.objects.filter(follower = request.user.id).values_list('user')
         follower_post_obj = post_obj.filter(user__in = follower_list)
@@ -225,6 +225,22 @@ class PostsService (PostsBaseService):
             serializer.save()
             return ({"data": serializer.data, "code": status.HTTP_201_CREATED, "message": POST_CREATED})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
+
+
+    def unlike_post(self, request, format=None):
+        """
+        unlike  Posts. 
+        """
+        post_obj = request.data['post']
+        user_obj = request.data['user']
+        try:
+            liked_post = PostLikes.objects.get(post = post_obj, user = user_obj)
+        except :
+            return ({"code": status.HTTP_400_BAD_REQUEST, "message": RECORD_NOT_FOUND})            
+
+        liked_post.delete()
+        return ({"data": [], "code": status.HTTP_201_CREATED, "message": "post unliked successfully"})
+
 
     def comment_post(self, request, format=None):
         """
