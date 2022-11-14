@@ -199,7 +199,7 @@ class PostsService (PostsBaseService):
                 except UserFollowers.DoesNotExist:
                     return ({"data":None, "code": status.HTTP_400_BAD_REQUEST, "message": "Please follow this user to view Posts."})
         
-            post_obj = Posts.objects.filter(user = pk)
+            post_obj = Posts.objects.filter(user = pk , page__isnull = True)
 
         post_type = request.data.get('post_type')
         if post_type is not None and post_type != 'all':
