@@ -1,7 +1,7 @@
 from curses.ascii import US
 from multiprocessing import managers
 import re
-from api.serializers.user.userSerializer import GetUserPageProfileSerializer, GetUserProfileSerializer, UpdateUserProfileSerializer, GetUserWalletSerializer, UpdateUserWalletSerializer, GetUserPreferencesSerializer, UpdateUserPreferencesUpdateSerializer, GetUserBookmarksSerializer, CreateUpdatePostsSerializer
+from api.serializers.user.userSerializer import GetUserPageProfileSerializer, GetUserProfileSerializer, UpdateUserProfileSerializer, GetUserWalletSerializer, UpdateUserWalletSerializer, GetUserPreferencesSerializer, UpdateUserPreferencesUpdateSerializer, GetUserBookmarksSerializer, CreateUpdatePostsSerializer , ProfileByUsernameSerializer
 from api.utils.messages.commonMessages import BAD_REQUEST, RECORD_NOT_FOUND
 from rest_framework import status
 from rest_framework.response import Response
@@ -27,7 +27,8 @@ from django.core.files.base import ContentFile
 
 from .userBaseService import UserBaseService
 from api.utils.messages.userMessages import *
-from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks,Posts
+from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks, Posts
+from api.models.userFollowersModel import UserFollowers
 from api.serializers.user import (UserLoginDetailSerializer,
                                   UserCreateUpdateSerializer)
 
@@ -404,11 +405,26 @@ class UserService(UserBaseService):
     def get_profile_by_username(self, request, format=None):
         try:
             user_obj = User.objects.get(custom_username = request.data['custom_username'])
+            print(user_obj)
+            if (user_obj.is_private == False):
+                context = {"profile_user_id":user_obj.id , "logged_in_user":request.user.id}
+                serializer = GetUserProfileSerializer(user_obj, context = context)
+                return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile fetched Successfully"})
+            else:
+                try:
+                    is_followed = UserFollowers.objects.filter(user = user_obj, follower = request.user.id)
+                    if is_followed.exists():
+                        context = {"profile_user_id":user_obj.id , "logged_in_user":request.user.id}
+                        serializer = GetUserProfileSerializer(user_obj, context = context)
+                        return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile fetched Successfully"})
+                except:
+                    pass
+
         except User.DoesNotExist:
             return ({"data":None, "code":status.HTTP_400_BAD_REQUEST, "message":RECORD_NOT_FOUND})
         context = {"profile_user_id":user_obj.id , "logged_in_user":request.user.id}
-        serializer = GetUserProfileSerializer(user_obj, context = context)
-        return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile fetched Successfully"})
+        serializer = ProfileByUsernameSerializer(user_obj, context = context)
+        return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"Follow user to see all the posts"})
     
     def logout(self, request, format=None):
 

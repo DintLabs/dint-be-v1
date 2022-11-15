@@ -309,3 +309,32 @@ class UserCustomGroupMembersModelSerializer(serializers.ModelSerializer):
 
     def get_list_name(self, obj):
         return obj.user_custom_lists.name
+
+
+class ProfileByUsernameSerializer(serializers.ModelSerializer):
+    #  user = UserLoginDetailSerializer()
+     is_followed = serializers.SerializerMethodField()
+     user_posts = serializers.SerializerMethodField()
+        
+     class Meta:
+        model = User
+        fields = fields = (
+        'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
+        'city', 'twitter', 'instagram', 'discord', 'banner_image', 'user_posts', 'location', 'is_followed',
+        'is_private')
+
+     def get_is_followed(self, obj):
+        profile_user_id = self.context.get('profile_user_id')
+        logged_in_user = self.context.get('logged_in_user')
+        try:
+            u_obj = UserFollowers.objects.get(user=profile_user_id, follower=logged_in_user)
+            if u_obj.request_status is True:
+                return True
+            else:
+                return 'Request Sent'
+        except:
+            return False
+    
+     def get_user_posts(self, obj):
+        user_posts = ""
+        return user_posts

@@ -86,6 +86,7 @@ urlpatterns = [
 
     path('posts/like/', LikePostView.as_view(), name="create-posts"),
     path('posts/comment/', CommentPostView.as_view(), name="create-posts"),
+    path('posts/unlike/', UnLikePostView.as_view(), name="unlike-posts"),
 
 
     #Subscription
