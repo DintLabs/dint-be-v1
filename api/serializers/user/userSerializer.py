@@ -107,7 +107,7 @@ class GetUserProfileSerializer(serializers.ModelSerializer):
         fields = (
         'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
         'city', 'twitter', 'instagram', 'discord', 'banner_image', 'user_posts', 'location', 'is_followed',
-        'is_private')
+        'is_private',)
 
     def get_is_followed(self, obj):
         profile_user_id = self.context.get('profile_user_id')
@@ -279,6 +279,15 @@ class ConfineModelSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = ConfineUsers
         fields = "__all__"
+    
+    def get_main_user_details(self, obj):
+        main_user_details = UserLoginDetailSerializer(obj.main_user).data
+        return main_user_details
+
+    def get_confine_user_details(self, obj):
+        main_user_details = UserLoginDetailSerializer(obj.confine_user).data
+        return main_user_details
+
 
 class UserCustomListsModelSerializer(serializers.ModelSerializer):
     people = serializers.SerializerMethodField()
@@ -305,6 +314,8 @@ class UserCustomGroupMembersModelSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_member_details(self, obj):
+        
+        member_details = UserLoginDetailSerializer(obj.member).data
         return UserLoginDetailSerializer(obj.member).data
 
     def get_list_name(self, obj):

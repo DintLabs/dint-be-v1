@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.schemas import AutoSchema
 from rest_framework.compat import coreapi, coreschema
 from rest_framework.viewsets import ModelViewSet
-
+from rest_framework import viewsets
 from api.models import User, ConfineUsers, UserCustomLists, UserCustomGroupMembers
 from api.models.userFollowersModel import UserStories, UserFollowers
 from api.serializers import ConfineModelSerializer, UserCustomListsModelSerializer, \
@@ -111,15 +111,44 @@ class UserStoriesModelViewSet(ModelViewSet):
 class confineUserModelViewSet(ModelViewSet):
     serializer_class = ConfineModelSerializer
     permission_classes = [IsAuthenticated, ]
-    queryset = ConfineUsers.objects.all()
+    # queryset = ConfineUsers.objects.all()
 
     def get_queryset(self):
         return ConfineUsers.objects.filter(main_user=self.request.user)
 
-class UserCustomListsModelViewSet(ModelViewSet):
+    def create(self,request):
+        main_user = request.data['main_user']
+        user_block_type = request.data['user_block_type']
+        confine_user = request.data['confine_user']
+        
+        user = ConfineUsers.objects.filter(main_user = main_user, user_block_type = user_block_type, confine_user = confine_user)
+        
+        main_usr_obj = User.objects.get(id = main_user)
+        confine_usr_obj = User.objects.get(id = confine_user)
+
+        if user.exists():
+            res = {
+            "data" : [],
+            "message": "User already blocked or restricted",
+            }
+            return Response(res)
+        else:
+            data = request.data
+            confine_user = ConfineUsers.objects.create(main_user = main_usr_obj, user_block_type = user_block_type, confine_user = confine_usr_obj)
+            
+            serializer = ConfineModelSerializer(confine_user, data = request.data)
+            if serializer.is_valid():
+                serializer.save(user=request.user)
+                res = {
+                    "data" : serializer.data,
+                    "message": "User added to restrict or block successfully",
+                    }
+                return Response(res)
+  
+
+class UserCustomListsModelViewSet(viewsets.ModelViewSet):
     serializer_class = UserCustomListsModelSerializer
     permission_classes = [IsAuthenticated, ]
-    queryset = UserCustomLists.objects.all()
 
     def get_queryset(self):
         return UserCustomLists.objects.filter(user=self.request.user)
@@ -128,9 +157,14 @@ class UserCustomListsModelViewSet(ModelViewSet):
         instance = self.get_object()
         members = UserCustomGroupMembers.objects.filter(user_custom_lists=instance)
         serializer = UserCustomGroupMembersModelSerializer(members, many=True)
-        return Response(serializer.data)
-
-
+        
+        res = {
+            "data" : serializer.data,
+            "message": "List Fethced Successfully",
+        }
+    
+        return Response(res)
+       
 
 class UserCustomGroupMembersModelViewSet(ModelViewSet):
     serializer_class = UserCustomGroupMembersModelSerializer
