@@ -405,14 +405,13 @@ class UserService(UserBaseService):
     def get_profile_by_username(self, request, format=None):
         try:
             user_obj = User.objects.get(custom_username = request.data['custom_username'])
-            print(user_obj)
             if (user_obj.is_private == False):
                 context = {"profile_user_id":user_obj.id , "logged_in_user":request.user.id}
                 serializer = GetUserProfileSerializer(user_obj, context = context)
                 return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User Profile fetched Successfully"})
             else:
                 try:
-                    is_followed = UserFollowers.objects.filter(user = user_obj, follower = request.user.id)
+                    is_followed = UserFollowers.objects.filter(user = user_obj, follower = request.user.id , request_status=True)
                     if is_followed.exists():
                         context = {"profile_user_id":user_obj.id , "logged_in_user":request.user.id}
                         serializer = GetUserProfileSerializer(user_obj, context = context)

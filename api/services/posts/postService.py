@@ -62,11 +62,11 @@ class PostsService (PostsBaseService):
         else:
             post_obj = Posts.objects.filter(type = post_type, page__isnull = True)
 
-        follower_list = UserFollowers.objects.filter(follower = request.user.id).values_list('user')
+        follower_list = UserFollowers.objects.filter(follower = request.user.id , request_status = True).values_list('user')
         follower_post_obj = post_obj.filter(user__in = follower_list)
         own_post_obj = post_obj.filter(user = request.user.id)
         final_obj = follower_post_obj | own_post_obj
-
+        
         custom_pagination = CustomPagination()
         search_keys = ['content__icontains', 'id__contains']
         search_type = 'or'
