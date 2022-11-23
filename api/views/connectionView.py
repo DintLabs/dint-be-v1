@@ -144,7 +144,18 @@ class confineUserModelViewSet(ModelViewSet):
                     "message": "User added to restrict or block successfully",
                     }
                 return Response(res)
-  
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+       
+        remove_user = ConfineUsers.objects.get(id=instance.id)
+        remove_user.delete()
+       
+        res = {
+            "message": "User removed successfully",
+        }
+    
+        return Response(res)
 
 class UserCustomListsModelViewSet(viewsets.ModelViewSet):
     serializer_class = UserCustomListsModelSerializer
@@ -174,3 +185,25 @@ class UserCustomGroupMembersModelViewSet(ModelViewSet):
     def get_queryset(self):
         return UserCustomGroupMembers.objects.filter(user_custom_lists__user=self.request.user)
 
+    def create(self,request):
+        data = request.data
+        list_data = list(data)
+
+        for i in list_data:
+            
+            custom_list = i['user_custom_lists']
+            print(custom_list)
+            member = i['member']
+            print(member)
+            
+            custom_user_obj = UserCustomLists.objects.get(id = custom_list)
+            print(custom_user_obj)
+            member_obj = User.objects.get(id = member)
+            print(member_obj)
+
+            list_create = UserCustomGroupMembers.objects.create(user_custom_lists = custom_user_obj , member = member_obj)
+
+        res = {
+                "message" : "Member added successfully"
+              }
+        return Response(res)
