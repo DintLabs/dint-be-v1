@@ -12,6 +12,8 @@ from api.serializers import ConfineModelSerializer, UserCustomListsModelSerializ
     UserCustomGroupMembersModelSerializer
 from api.serializers.connections import UserStoriesModelSerializer
 from api.services.connections import ConnectionService
+import datetime
+from django.utils import timezone
 
 connectionService = ConnectionService()
 
@@ -105,7 +107,9 @@ class UserStoriesModelViewSet(ModelViewSet):
         follower = UserFollowers.objects.filter(user=request.user.id, request_status=True).values_list('follower')
         following = UserFollowers.objects.filter(follower=request.user.id, request_status=True).values_list('user')
         users = following.union(follower)
-        return UserStories.objects.filter(user__in=users)
+
+        expire_time = timezone.now() - datetime.timedelta(hours=24)
+        return UserStories.objects.filter(user__in=users, created_at__gt = expire_time)
 
 
 class confineUserModelViewSet(ModelViewSet):
@@ -192,14 +196,9 @@ class UserCustomGroupMembersModelViewSet(ModelViewSet):
         for i in list_data:
             
             custom_list = i['user_custom_lists']
-            print(custom_list)
             member = i['member']
-            print(member)
-            
             custom_user_obj = UserCustomLists.objects.get(id = custom_list)
-            print(custom_user_obj)
             member_obj = User.objects.get(id = member)
-            print(member_obj)
 
             list_create = UserCustomGroupMembers.objects.create(user_custom_lists = custom_user_obj , member = member_obj)
 
