@@ -116,12 +116,12 @@ class PostsService (PostsBaseService):
     
 
     def get_total_post_count(self, request, format=None):
-        follower_list = UserFollowers.objects.filter(follower = request.user.id).values_list('user')
-        follower_post_obj = Posts.objects.filter(user__in = follower_list)
+        follower_list = UserFollowers.objects.filter(follower = request.user.id,request_status = True).values_list('user')
+        follower_post_obj = Posts.objects.filter(user__in = follower_list, page__isnull = True)
         
         
         try:
-            own_post_obj = Posts.objects.filter(user = request.user.id)
+            own_post_obj = Posts.objects.filter(user = request.user.id , page__isnull = True)
             final_obj = follower_post_obj | own_post_obj
         except:
             print('---------------------------------_<><><><>')
