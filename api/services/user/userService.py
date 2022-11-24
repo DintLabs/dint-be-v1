@@ -27,10 +27,10 @@ from django.core.files.base import ContentFile
 
 from .userBaseService import UserBaseService
 from api.utils.messages.userMessages import *
-from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks, Posts
+from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks, Posts, UserCloseFriends
 from api.models.userFollowersModel import UserFollowers
 from api.serializers.user import (UserLoginDetailSerializer,
-                                  UserCreateUpdateSerializer)
+                                  UserCreateUpdateSerializer, UserCloseFriendsSerializer)
 
 from dint import settings
 from cryptography.fernet import Fernet
@@ -463,3 +463,43 @@ class UserService(UserBaseService):
         user_obj = User.objects.filter(Q(custom_username__icontains = search_text) | Q(display_name__icontains = search_text))
         serializer = UserLoginDetailSerializer(user_obj,many=True)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
+
+    def get_closefriends(self, request, format=None):
+        user_obj = User.objects.get(id = request.user.id)
+        if user_obj:
+            close_friends = UserCloseFriends.objects.filter(main_user = user_obj).all()
+            if close_friends:
+                context = {"profile_user_id":user_obj.id , "logged_in_user":request.user.id}
+                serializer = UserCloseFriendsSerializer(close_friends, many = True, context = context)
+                close_friends = serializer.data
+
+            else:
+                close_friends = None
+            return ({"data":close_friends, "code":status.HTTP_200_OK, "message":"User Closefriends fetched Successfully"})
+        return ({"data": [{error: 'User not found'}], "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
+    
+    def create_closefriends(self, request, format=None):
+        main_user = request.data['main_user']
+        close_friend = request.data['close_friend']
+        print(request.data)
+        friend_exist = UserCloseFriends.objects.filter(main_user = main_user, close_friend = close_friend).exists()
+        if not friend_exist:
+            main_user_obj = User.objects.get(id = main_user )
+            close_friend_obj = User.objects.get(id = close_friend)
+            create_close_friend = UserCloseFriends.objects.create(main_user = main_user_obj , close_friend = close_friend_obj)
+            serializer = UserCloseFriendsSerializer(create_close_friend, data=request.data)
+            if serializer.is_valid():
+                serializer.save(user=request.user)
+                res_data = UserCloseFriendsSerializer(UserCloseFriends.objects.get(id = serializer.data['id'])).data
+                return ({"data": res_data, "code": status.HTTP_201_CREATED, "message": "Close friend created successfully"})
+            return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
+        return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Close friend alrerady there."})
+        
+
+    def delete_closefriends(self, request, pk, format=None):
+        post_exist = UserCloseFriends.objects.filter(main_user=request.user, close_friend=pk)
+        if not post_exist.exists():
+            return ({"code":status.HTTP_400_BAD_REQUEST, "message":"Close friend not exists"})
+        else:
+            post_exist.delete()
+            return ({"code":status.HTTP_200_OK, "message":"User remover from close friend  successfully"})  

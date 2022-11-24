@@ -372,3 +372,31 @@ class SearchAnyUserView(APIView):
         """
         result = userService.search_any_user(request, format=None)
         return Response(result, status=status.HTTP_200_OK)
+
+
+class CloseFriendsView(APIView):
+    """
+    APIs for Fetching the user bookmarks by Token
+    """
+
+    def get(self, request, format=None):
+        """
+        Get User Bookmarks By Token.
+        """
+        result = userService.get_closefriends(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+    def post(self, request, format=None):
+        """
+        Create User Bookmark By Token.
+        """
+        result = userService.create_closefriends(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+    def delete(self,request,pk,format=None):
+        """
+        Delete User Bookmark By Token.
+        """
+        
+        result = userService.delete_closefriends(request,pk, format=None)
+        return Response(result, status=status.HTTP_200_OK)
