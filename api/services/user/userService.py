@@ -16,7 +16,7 @@ from datetime import datetime
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate, login
-
+from django.db.models import Q
 import pytz
 from datetime import datetime, timedelta
 import jwt
@@ -453,3 +453,13 @@ class UserService(UserBaseService):
         usr_obj = User.objects.filter(referred_by = pk)
         serializer = UserLoginDetailSerializer(usr_obj, many = True)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "Data Fetched Successfully."})
+
+
+    def search_any_user(self, request, format=None):
+        search_text = request.GET.get('search')
+        print(search_text)
+        if search_text is None:
+            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Please provide Search Text"})
+        user_obj = User.objects.filter(Q(custom_username__icontains = search_text) | Q(display_name__icontains = search_text))
+        serializer = UserLoginDetailSerializer(user_obj,many=True)
+        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})

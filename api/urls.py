@@ -153,6 +153,7 @@ urlpatterns = [
     path('connection/delete-follow-request/<int:pk>/', DeleteFollowRequestView.as_view(), name="create-page"),
     path('connection/update-privacy-status/', UpdatePrivacyStatusView.as_view(), name="create-page"),
 
-    path('stripe/', include('api.payments.urls'))
+    path('stripe/', include('api.payments.urls')),
+    path('search-user/', SearchAnyUserView.as_view(), name="search-user")
 
 ]

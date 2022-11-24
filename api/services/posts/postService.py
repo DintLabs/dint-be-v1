@@ -116,8 +116,8 @@ class PostsService (PostsBaseService):
     
 
     def get_total_post_count(self, request, format=None):
-        follower_list = UserFollowers.objects.filter(follower = request.user.id).values_list('user')
-        follower_post_obj = Posts.objects.filter(user__in = follower_list)
+        follower_list = UserFollowers.objects.filter(follower = request.user.id,request_status = True).values_list('user')
+        follower_post_obj = Posts.objects.filter(user__in = follower_list, page__isnull = True)
         
         
         try:

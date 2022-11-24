@@ -362,3 +362,13 @@ class UserReferralWalletModelViewSet(ModelViewSet):
 
     def get_queryset(self):
         return UserReferralWallet.objects.filter(referred_by=self.request.user)
+
+
+class SearchAnyUserView(APIView):
+
+    def get(self, request, format=None):
+        """
+        Retrieve a User 
+        """
+        result = userService.search_any_user(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
