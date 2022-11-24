@@ -121,7 +121,7 @@ class PostsService (PostsBaseService):
         
         
         try:
-            own_post_obj = Posts.objects.filter(user = request.user.id)
+            own_post_obj = Posts.objects.filter(user = request.user.id , page__isnull = True)
             final_obj = follower_post_obj | own_post_obj
         except:
             print('---------------------------------_<><><><>')
