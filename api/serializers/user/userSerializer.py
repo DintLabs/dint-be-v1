@@ -107,7 +107,7 @@ class GetUserProfileSerializer(serializers.ModelSerializer):
         fields = (
         'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
         'city', 'twitter', 'instagram', 'discord', 'banner_image', 'user_posts', 'location', 'is_followed',
-        'is_private','is_online')
+        'is_private','is_online','is_active')
 
     def get_is_followed(self, obj):
         profile_user_id = self.context.get('profile_user_id')
