@@ -3,7 +3,7 @@ from api.models.pageModel import Page
 from api.models.userFollowersModel import UserFollowers
 from rest_framework import serializers
 from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet, UserPreferences, ConfineUsers,
-                        UserCustomLists, UserCustomGroupMembers)
+                        UserCustomLists, UserCustomGroupMembers, UserCloseFriends)
 from api.models.userBookmarksModel import UserBookmarks
 
 from django.core.exceptions import ValidationError
@@ -171,7 +171,7 @@ class GetUserPageProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = (
         'id', 'email', 'phone_no', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
-        'city', 'twitter', 'instagram', 'discord', 'banner_image', 'location', 'is_followed', 'is_private', 'user_page', 'is_online', 'last_login')
+        'city', 'twitter', 'instagram', 'discord', 'banner_image', 'location', 'is_followed', 'is_private', 'user_page', 'is_online', 'last_login','is_active')
 
     def get_is_followed(self, obj):
         profile_user_id = self.context.get('profile_user_id')
@@ -349,3 +349,9 @@ class ProfileByUsernameSerializer(serializers.ModelSerializer):
      def get_user_posts(self, obj):
         user_posts = ""
         return user_posts
+
+class UserCloseFriendsSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = UserCloseFriends
+        fields = "__all__"

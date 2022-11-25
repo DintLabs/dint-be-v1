@@ -154,6 +154,10 @@ urlpatterns = [
     path('connection/update-privacy-status/', UpdatePrivacyStatusView.as_view(), name="create-page"),
 
     path('stripe/', include('api.payments.urls')),
-    path('search-user/', SearchAnyUserView.as_view(), name="search-user")
-
+    path('search-user/', SearchAnyUserView.as_view(), name="search-user"),
+    
+    path('user/get-close-friends/', CloseFriendsView.as_view(), name="close-friend"),
+    path('user/create-close-friends/', CloseFriendsView.as_view(), name="create-close-friend"),
+    path('user/delete-close-friends/<int:pk>/', CloseFriendsView.as_view(), name="delete-close-friend")
 ]
+
