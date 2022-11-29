@@ -7,7 +7,6 @@ routers = DefaultRouter()
 
 routers.register('referral', UserReferralWalletModelViewSet, base_name='referral')
 routers.register('tip-reference', UserTipReferenceModelViewSet, base_name='tip-reference')
-routers.register('user-stories', UserStoriesModelViewSet, base_name='user-stories')
 routers.register('confine-user', confineUserModelViewSet, base_name='confine-user')
 routers.register('user-list', UserCustomListsModelViewSet, base_name='user-list')
 routers.register('add-member-in-list', UserCustomGroupMembersModelViewSet, base_name='add-member-in-list')
@@ -44,6 +43,12 @@ urlpatterns = [
     path('user/get-profile-by-username/', ProfileUsernameView.as_view(), name="verify-otp"),
     path('user/update-profile-by-token/', ProfileView.as_view(), name="verify-otp"),
     
+    # user stories
+    path('user/get-stories/',UserStoriesView.as_view(), name="get-stories"),
+    path('user/get-stories-by-user/',UserStoriesByUserView.as_view(), name="get-stories-by-user"),
+    path('user/create-stories/',UserStoriesView.as_view(), name="create-stories"),
+    path('user/delete-stories/<int:pk>/', UserStoriesView.as_view(), name="delete-stories"),
+
     #role
     path('role/get-all-roles/', RoleListView.as_view(), name="get-all-role"),
     path('role/create-role/', RoleCreateView.as_view(), name="create-role"),

@@ -18,3 +18,4 @@ from .campaignModel import *
 from .freeSubscriptionTrialModel import *
 from .userSubscriptionHistory import *
 from .userBookmarksModel import *
+from .userFollowersModel import *
