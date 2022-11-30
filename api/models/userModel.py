@@ -170,7 +170,7 @@ class UserCustomGroupMembers(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 class UserCloseFriends(models.Model):
-    main_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user") 
+    main_user = models.ForeignKey(User, on_delete=models.CASCADE) 
     close_friend = models.ForeignKey(User, on_delete=models.CASCADE, related_name="close_friend")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

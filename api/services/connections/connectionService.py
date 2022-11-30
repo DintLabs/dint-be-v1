@@ -11,7 +11,8 @@ from api.utils.messages.commonMessages import *
 from api.utils.messages.eventMessages import *
 
 from .connectionBaseService import ConnectionBaseService
-
+import datetime
+from django.utils import timezone
 
 class ConnectionService(ConnectionBaseService):
     """
@@ -140,6 +141,9 @@ class ConnectionService(ConnectionBaseService):
         user_obj = User.objects.get(id = request.user.id)
         if user_obj.is_private is True:
             user_obj.is_private = False
+
+            follow_requests = UserFollowers.objects.filter(user = request.user.id, request_status = None).update(request_status = True) 
+            print(follow_requests)
             message = 'Account switched to Public'
         else:
             user_obj.is_private = True
@@ -147,8 +151,40 @@ class ConnectionService(ConnectionBaseService):
         user_obj.save()
         return ({"data": None, "code": status.HTTP_200_OK, "message": message})
 
+    def get_stories(self, request, format=None):
+
+        sub_obj = UserFollowers.objects.filter(follower = request.user.id, request_status = True).values_list('user')
+        follower_obj = User.objects.filter(id__in = sub_obj)
+        context = {"logged_in_user":request.user.id}
+        serializer = GetUserStoriesModelSerializer(follower_obj, many=True, context=context)
+        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "Stories List Fecthed."})
 
     
+    def create_stories(self, request, format=None):
+        user_obj = User.objects.get(id = request.user.id)
+      
+        user_story = UserStories.objects.create(user = user_obj, story = request.data.get('story'))
+        serializer = UserStoriesModelSerializer(data = request.data)
 
+        if serializer.is_valid():
+            serializer.save()
+            return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "Story posted successfully."})
+        else:
+            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Something went wrong."}) 
 
-    
+    def delete_stories(self, request, pk, format=None):
+        try:
+            user_story = UserStories.objects.get(user = request.user, id=pk)
+            user_story.delete()
+            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Story deleted successfully"})
+        except:
+             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": RECORD_NOT_FOUND})
+
+    def get_stories_by_user(self, request, format=None):
+        try:
+            expire_time = timezone.now() - datetime.timedelta(hours=24)
+            user_all_stories = UserStories.objects.filter(user = request.user, created_at__gt = expire_time)
+            serializer = UserStoriesModelSerializer(user_all_stories, many=True)
+            return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "User Stories List Fecthed."})
+        except:
+            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": RECORD_NOT_FOUND})

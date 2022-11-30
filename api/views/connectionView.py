@@ -97,20 +97,51 @@ class UpdatePrivacyStatusView(APIView):
         return Response(result, status=status.HTTP_200_OK)
 
 
-class UserStoriesModelViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated, ]
-    queryset = UserStories.objects.all()
-    serializer_class = UserStoriesModelSerializer
+# class UserStoriesModelViewSet(ModelViewSet):
+#     permission_classes = [IsAuthenticated, ]
+#     # queryset = UserStories.objects.all()
+#     serializer_class = UserStoriesModelSerializer
 
-    def get_queryset(self):
-        request = self.request
-        follower = UserFollowers.objects.filter(user=request.user.id, request_status=True).values_list('follower')
-        following = UserFollowers.objects.filter(follower=request.user.id, request_status=True).values_list('user')
-        users = following.union(follower)
+#     def get_queryset(self):
+#         request = self.request
 
-        expire_time = timezone.now() - datetime.timedelta(hours=24)
-        return UserStories.objects.filter(user__in=users, created_at__gt = expire_time)
+#         follower = UserFollowers.objects.filter(user=request.user.id, request_status=True).values_list('follower')
+#         following = UserFollowers.objects.filter(follower=request.user.id, request_status=True).values_list('user')
+#         users = following.union(follower)
 
+#         expire_time = timezone.now() - datetime.timedelta(hours=24)
+#         return UserStories.objects.filter(user__in=users, created_at__gt = expire_time)
+
+
+class UserStoriesView(APIView):
+    def get(self, request,format=None):
+        """
+        Retun all the Posts.
+        """
+        result = connectionService.get_stories(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+    def post(self, request,format=None):
+        """
+        Retun all the Posts.
+        """
+        result = connectionService.create_stories(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+    def delete(self, request, pk , format=None):
+        """
+        Retun all the Posts.
+        """
+        result = connectionService.delete_stories(request, pk, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+class UserStoriesByUserView(APIView):
+    def get(self, request, format=None):
+        """
+        fetch stories of logged in user
+        """
+        result = connectionService.get_stories_by_user(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
 
 class confineUserModelViewSet(ModelViewSet):
     serializer_class = ConfineModelSerializer
