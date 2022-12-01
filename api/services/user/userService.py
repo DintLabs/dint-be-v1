@@ -30,7 +30,7 @@ from api.utils.messages.userMessages import *
 from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks, Posts, UserCloseFriends
 from api.models.userFollowersModel import UserFollowers
 from api.serializers.user import (UserLoginDetailSerializer,
-                                  UserCreateUpdateSerializer, UserCloseFriendsSerializer)
+                                  UserCreateUpdateSerializer, UserCloseFriendsSerializer, UserStatusUpdateSerializer)
 
 from dint import settings
 from cryptography.fernet import Fernet
@@ -503,3 +503,13 @@ class UserService(UserBaseService):
         else:
             post_exist.delete()
             return ({"code":status.HTTP_200_OK, "message":"User remover from close friend  successfully"})  
+
+    def update_user_status_by_token(self, request, format=None):
+        user_obj = User.objects.get(id = request.user.id)
+       
+        serializer = UserStatusUpdateSerializer(user_obj, data= request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return ({"data":serializer.data, "code":status.HTTP_200_OK, "message":"User status saved Successfully"})
+        return ({"data":serializer.errors, "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
+        # return ({"data": [{error: 'User not found'}], "code":status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})

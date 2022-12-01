@@ -33,6 +33,9 @@ urlpatterns = [
     path('user/create-user-bookmarks/', UserBookmarksView.as_view(), name="create-user-bookmarks"),
     path('user/delete-user-bookmarks/<int:pk>/', UserBookmarksView.as_view(), name="delete-user-bookmarks"),
     
+    # update user status
+    path('user/update-status/', UserUpdateStatusView.as_view(),  name="update-user-status"),
+    
     #OTP
     path('user/verify-otp/', VarifyOtpView.as_view(), name="verify-otp"),
     path('user/send-otp-to-old-user/', SendOtpForOldUser.as_view(), name="send-otp-to-old-user"),
