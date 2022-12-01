@@ -400,3 +400,12 @@ class CloseFriendsView(APIView):
         
         result = userService.delete_closefriends(request,pk, format=None)
         return Response(result, status=status.HTTP_200_OK)
+
+class UserUpdateStatusView(APIView):
+
+    def put(self, request, format=None):
+        """
+        update user status
+        """
+        result = userService.update_user_status_by_token(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
