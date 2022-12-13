@@ -33,6 +33,13 @@ urlpatterns = [
     path('user/create-user-bookmarks/', UserBookmarksView.as_view(), name="create-user-bookmarks"),
     path('user/delete-user-bookmarks/<int:pk>/', UserBookmarksView.as_view(), name="delete-user-bookmarks"),
     
+    #Wise payment payouts
+    path('user/get-recipient-account/', ReceiptTransferWiseView.as_view(), name="get-recipient-details"),
+    path('user/create-transferwise-quotes/', QuotesTransferWiseView.as_view(), name="create-transferwise-quotes"),
+    path('user/create-recipient-account/', ReceiptTransferWiseView.as_view(), name="create-recipient-account"),
+    path('user/delete-recipient-account/<int:pk>/', ReceiptTransferWiseView.as_view(), name="delete-recipient-account"),
+    # path('user/update-recipient-account/<int:pk>/', ReceiptTransferWiseView.as_view(), name="update-transferwise-details"),
+
     # update user status
     path('user/update-status/', UserUpdateStatusView.as_view(),  name="update-user-status"),
     
@@ -166,6 +173,7 @@ urlpatterns = [
     
     path('user/get-close-friends/', CloseFriendsView.as_view(), name="close-friend"),
     path('user/create-close-friends/', CloseFriendsView.as_view(), name="create-close-friend"),
-    path('user/delete-close-friends/<int:pk>/', CloseFriendsView.as_view(), name="delete-close-friend")
+    path('user/delete-close-friends/<int:pk>/', CloseFriendsView.as_view(), name="delete-close-friend"),
+
 ]
 

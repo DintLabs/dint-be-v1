@@ -381,21 +381,21 @@ class CloseFriendsView(APIView):
 
     def get(self, request, format=None):
         """
-        Get User Bookmarks By Token.
+        Get User close friends By Token.
         """
         result = userService.get_closefriends(request, format=None)
         return Response(result, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
         """
-        Create User Bookmark By Token.
+        Create User close friends By Token.
         """
         result = userService.create_closefriends(request, format=None)
         return Response(result, status=status.HTTP_200_OK)
 
     def delete(self,request,pk,format=None):
         """
-        Delete User Bookmark By Token.
+        Delete User close friends By Token.
         """
         
         result = userService.delete_closefriends(request,pk, format=None)
@@ -409,3 +409,47 @@ class UserUpdateStatusView(APIView):
         """
         result = userService.update_user_status_by_token(request, format=None)
         return Response(result, status=status.HTTP_200_OK)
+
+
+class ReceiptTransferWiseView(APIView):
+    """
+    APIs for Fetching the user bankaccounts by Token
+    """
+
+    def get(self, request, format=None):
+        """
+        Get User bankaccounts By Token.
+        """
+        result = userService.get_recipient_account_by_token(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+    def put(self, request, pk, format=None):
+        """
+        update user status
+        """
+        result = userService.update_recipient_account_by_token(request, pk, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+    def post(self, request, format=None):
+        """
+        Create User bankaccounts By Token.
+        """
+        result = userService.create_recipient_account_by_token(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+    def delete(self,request,pk,format=None):
+        """
+        Delete User bankaccounts By Token.
+        """
+        
+        result = userService.delete_recipient_account_by_token(request,pk, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+class QuotesTransferWiseView(APIView):
+     def post(self, request, format=None):
+        """
+        Create User Wise Quotes By Token.
+        """
+        result = userService.create_transferwise_quotes_by_token(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
