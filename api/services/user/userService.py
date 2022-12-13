@@ -565,13 +565,13 @@ class UserService(UserBaseService):
 
     def create_recipient_account_by_token(self, request, format=None):
         data = request.data
-        print(data)
+       
         details = data['details']
         address = details['address']
 
         url = settings.WISE_URL +'/v1/accounts'
         token = settings.WISE_TOKEN
-        print(token)
+       
         payload = json.dumps({
         "profile" : settings.WISE_PROFILE_ID,
         "accountHolderName": request.data['accountHolderName'],
@@ -597,17 +597,19 @@ class UserService(UserBaseService):
         }
         response = requests.post(url, headers = headers, data = payload)
         final = response.json()
-        details =final['details']
+        details = final['details']
         address =details['address']
 
-        RecepientAccount = UserRecepientAccount.objects.create(profile = final['profile'], accountHolderName = final['accountHolderName'], accountNumber = final['accountHolderName'], receipt_id = final['id'], abartn = details['abartn'], country = address['countryCode'], city = address['city'], state = address['city'], postCode = address['postCode'], firstLine = address['firstLine'])
+        last_digit = details['accountNumber'][-4:]
+      
+        RecepientAccount = UserRecepientAccount.objects.create(profile = final['profile'], accountHolderName = final['accountHolderName'], accountNumber = last_digit, receipt_id = final['id'], abartn = details['abartn'], country = address['countryCode'], city = address['city'], state = address['city'], postCode = address['postCode'], firstLine = address['firstLine'])
 
         acnt_data = model_to_dict(RecepientAccount)
      
         serializer = UserRecepientAccountSerializer(RecepientAccount, data = acnt_data)
         if serializer.is_valid():
             serializer.save()
-            print('seriali...',serializer.data)
+           
             return final
 
     def get_recipient_account_by_token(self, request, format=None):
@@ -615,7 +617,6 @@ class UserService(UserBaseService):
        
         if receipt_accounts:
             serializer = UserRecepientAccountSerializer(receipt_accounts, many=True)
-            print(serializer)
             preference = serializer.data
             return ({"data": preference, "code": status.HTTP_200_OK, "message": "Details fetched Successfully"})
         else:
