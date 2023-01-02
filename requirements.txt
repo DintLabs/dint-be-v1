@@ -7,6 +7,7 @@ attrs==19.3.0
 autobahn==20.4.1
 Automat==20.2.0
 Babel==2.8.0
+backports.zoneinfo==0.2.1
 billiard==3.6.3.0
 boto3==1.18.16
 botocore==1.21.16
@@ -40,6 +41,8 @@ fcm-django==0.3.4
 ffmpeg-python==0.2.0
 flower==0.9.3
 future==0.18.2
+gunicorn==20.1.0
+h11==0.14.0
 h2==2.6.2
 hiredis==1.0.1
 hpack==3.0.0
@@ -108,6 +111,8 @@ txaio==20.4.1
 typing-extensions==3.10.0.0
 tzlocal==2.0.0
 uritemplate==3.0.0
+urllib3==1.25.11
+uvicorn==0.20.0
 vine==1.3.0
 webencodings==0.5.1
 websocket-client==0.57.0
