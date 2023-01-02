@@ -1,6 +1,5 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
-import json
 from asgiref.sync import async_to_sync
 from api.serializers.chat import CreateUpdateMessageSerializer, GetSocketMessageSerializer
 from api.models.messagesModel import Messages
@@ -32,7 +31,7 @@ class ChatConsumer(WebsocketConsumer):
             message = text_data_json['message']
         except:
             message = text_data_json
-        message=self._create_message(message)
+        #message=self._create_message(message)
         
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
