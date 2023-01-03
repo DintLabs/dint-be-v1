@@ -20,7 +20,7 @@ urlpatterns = [
 
     #user web3 wallet
     path('user/decrypt-wallet-token/', UserDecryptWalletTokenView.as_view(), name="decrypt-user-wallet-token"),
-    path('user/get-wallet-by-token/', UserWalletView.as_view(), name="get-user-wallet"),
+    path('user/wallet', UserWalletView.as_view(), name="get-user-wallet"),
     path('user/update-wallet-by-token/', UserWalletView.as_view(), name="update-user-wallet"),
 
 
@@ -60,9 +60,9 @@ urlpatterns = [
     path('user/delete-stories/<int:pk>/', UserStoriesView.as_view(), name="delete-stories"),
     
     # USER SEND DINT
-    path('user/send-dint-by-token/', UserSendDint.as_view(), name="send-dint-by-token"),
-    path('user/send-reward-by-token/', UserDintReward.as_view(), name="send-reward-by-token"),
-    # path('user/send-dint-by-id/', UserSendDintById.as_view(), name="send-dint-by-id"),
+    # path('user/send-dint/', UserSendDint.as_view(), name="send-dint-by-token"),
+    path('user/send-dint-by-id/', UserSendDintById.as_view(), name="send-dint-by-id"),
+    path('user/send-reward/', UserDintReward.as_view(), name="send-reward-by-token"),
    
     #role
     path('role/get-all-roles/', RoleListView.as_view(), name="get-all-role"),
