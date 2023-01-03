@@ -62,7 +62,7 @@ urlpatterns = [
     # USER SEND DINT
     path('user/send-dint-by-token/', UserSendDint.as_view(), name="send-dint-by-token"),
     path('user/send-reward-by-token/', UserDintReward.as_view(), name="send-reward-by-token"),
-    
+    # path('user/send-dint-by-id/', UserSendDintById.as_view(), name="send-dint-by-id"),
    
     #role
     path('role/get-all-roles/', RoleListView.as_view(), name="get-all-role"),
