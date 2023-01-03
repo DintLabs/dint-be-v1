@@ -58,7 +58,12 @@ urlpatterns = [
     path('user/get-stories-by-user/',UserStoriesByUserView.as_view(), name="get-stories-by-user"),
     path('user/create-stories/',UserStoriesView.as_view(), name="create-stories"),
     path('user/delete-stories/<int:pk>/', UserStoriesView.as_view(), name="delete-stories"),
-
+    
+    # USER SEND DINT
+    path('user/send-dint-by-token/', UserSendDint.as_view(), name="send-dint-by-token"),
+    path('user/send-reward-by-token/', UserDintReward.as_view(), name="send-reward-by-token"),
+    
+   
     #role
     path('role/get-all-roles/', RoleListView.as_view(), name="get-all-role"),
     path('role/create-role/', RoleCreateView.as_view(), name="create-role"),

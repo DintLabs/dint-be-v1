@@ -224,7 +224,7 @@ class UserWalletView(APIView):
     """
     APIs for Fetching the user wallet and Updating it by Token
     """
-
+   
     def get(self, request, format=None):
         """
         Get User Wallet By Token.
@@ -453,3 +453,17 @@ class QuotesTransferWiseView(APIView):
         result = userService.create_transferwise_quotes_by_token(request, format=None)
         return Response(result, status=status.HTTP_200_OK)
 
+class UserSendDint(APIView):
+    def post(self, request, format=None):
+        result = userService.send_dint_by_token(request, format=None)
+        return Response(result, status = status.HTTP_200_OK)
+
+class UserDintReward(APIView):
+    def post(self, request, format=None):
+        result = userService.send_reward_by_token(request, format=None)
+        return Response(result, status = status.HTTP_200_OK)
+
+
+
+
+    
