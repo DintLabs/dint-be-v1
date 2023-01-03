@@ -81,7 +81,7 @@ class PageByUserIDView(APIView):
 
 
 class PagePaginationByUserIDView(APIView):
-
+    
     def post(self, request,pk, format=None):
         """
         Retrieve a Post by ID
@@ -98,6 +98,8 @@ class SearchPageView(APIView):
         return Response(result, status=status.HTTP_200_OK)
 
 class GetPageByPageNameView(APIView):
+    permission_classes = (AllowAny,)
+
     def get(self, request, page_name,format=None):
         """
         Retrieve a Post by ID
@@ -107,7 +109,7 @@ class GetPageByPageNameView(APIView):
 
 
 class CheckUsernameAvailabilityView(APIView):
-    permission_classes = [AllowAny, ]
+    permission_classes = (AllowAny,)
 
     def get(self, request, user_name,format=None):
         """
