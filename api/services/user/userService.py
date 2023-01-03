@@ -36,6 +36,16 @@ jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 from django.forms.models import model_to_dict
 
+from web3 import Web3
+from web3.middleware import geth_poa_middleware
+from dotenv import load_dotenv
+from eth_account import Account
+import secrets
+from binascii import hexlify
+load_dotenv()
+
+
+
 class UserService(UserBaseService):
     """
     Allow any user (authenticated or not) to access this url 
@@ -135,8 +145,8 @@ class UserService(UserBaseService):
             return None
 
     def sign_up(self, request, format=None):
-        request.data['referral_id'] = ''.join(random.choices(
-            string.ascii_uppercase + string.digits, k=10))
+        request.data['referral_id'] = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+        print(request.data['referral_id'])
         if 'referred_by' in request.data:
             try:
                 User.objects.get(referral_id=request.data['referred_by'])
@@ -151,10 +161,8 @@ class UserService(UserBaseService):
             user.wallet_token = wallet_token
             user.save()
             if request.data.get('referral_by', None):
-                user_referred_by = User.objects.get(
-                    referral_id=request.data['referred_by'])
-                user_referral_wallet = UserReferralWallet(
-                    referred_by=user_referred_by)
+                user_referred_by = User.objects.get(referral_id=request.data['referred_by'])
+                user_referral_wallet = UserReferralWallet(referred_by=user_referred_by)
                 user_referral_wallet.user_referral = user
                 user_referral_wallet.save()
             payload = jwt_payload_handler(user)
@@ -163,10 +171,251 @@ class UserService(UserBaseService):
             user_details = serializer.data
             user_details['token'] = token
             user_details['wallet_token'] = wallet_token
-            # self.send_otp(user)
+
+            # **************************************************************WALLET CREATION START
+            priv = secrets.token_hex(32)
+            wallet_private_key = "0x" + priv
+            print("WALLET PRIVATE KEY",wallet_private_key)
+            print ("SAVE BUT DO NOT SHARE THIS:", wallet_private_key)
+            acct = Account.from_key(wallet_private_key)
+            print(acct)
+            wallet_address = acct.address
+            print("WALLET ADDRESS", acct.address)
+
+            
+            address = wallet_address
+            # encrypted_wallet_address = self.wallet_address(address)
+            # encrypted_wallet_privatekey = self.wallet_privatekey(wallet_private_key)
+
+            key = Fernet(settings.ENCRYPTION_KEY)
+            
+            encrypted_wallet_address = key.encrypt(address.encode())
+            print("ENCRYPTED WALLET ADDRESS *******************************", type(encrypted_wallet_address))
+
+           
+        
+            decwallet = key.decrypt(encrypted_wallet_address).decode()
+            print("*********************** DECRYPTED WALLET ADDRESS", decwallet)
+
+
+            
+            encrypted_wallet_privatekey = key.encrypt(wallet_private_key.encode())
+            print("**************************** ENCRYPTED WALLET PRIVATE KEY",encrypted_wallet_privatekey)
+           
+
+            decrypted_wallet_key = key.decrypt(encrypted_wallet_privatekey).decode()
+            print("DECRYPTED WALLET KEY",decrypted_wallet_key)
+
+            user.wallet_address = encrypted_wallet_address
+            user.wallet_private_key = encrypted_wallet_privatekey
+            user.save()
+
+            user = User.objects.get(id = serializer.data.get('id'))
+            print(user.wallet_address)
+            print(type(user.wallet_address))
+            print("private key",user.wallet_private_key)
+            print("-------------",type(user.wallet_private_key))
+            
+
+            print("THIS IS SAVED WALLET ADDRESS",user.wallet_address)
+            print("THIS IS SAVED WALLET PRIVATE KEY", user.wallet_private_key)
+
+    
+            user_details['wallet_address'] = encrypted_wallet_address
+            user_details['wallet_private_key'] = encrypted_wallet_privatekey
+
+
+            # WALLET CREATION END
+
+            # ***********************************************************WALLET REGISTER START
+            node_url = settings.NODE_URL
+            web3 = Web3(Web3.HTTPProvider(node_url))
+            web3.middleware_onion.inject(geth_poa_middleware, layer=0)
+            address = Web3.toChecksumAddress(settings.ADDRESS)
+            private_key= settings.PRIVATE_KEY
+            
+            user_ref = '0x0000000000000000000000000000000000000000'
+            new_user = acct.address
+            # new_user = '0x862c122b550a44D37a3F9402D7ea2649471C84F8'
+
+            abi = json.loads('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_sender","type":"address"},{"indexed":false,"internalType":"address","name":"_recipient","type":"address"}],"name":"tipSent","type":"event"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_blocked","type":"bool"}],"name":"blockUnblockReferrer","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"blockedReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"changeManagedState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"_isReferrer","type":"bool"}],"name":"changeReferrerState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"dintToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isManaged","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isRegistered","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"reward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_recipient","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"sendDint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeCollector","type":"address"}],"name":"setFeeCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"startedReferringAt","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"tipRecieverToReferrer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"unRegister","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"address","name":"_to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]') 
+
+            contract = web3.eth.contract(address = address , abi = abi)
+    
+            user_address = contract.functions.owner().call()
+            nonce = web3.eth.getTransactionCount(user_address) 
+            register = contract.functions.register(new_user, user_ref, True).buildTransaction({  
+                'from': user_address,
+                'chainId': 80001,   
+                'gasPrice': web3.toWei('30', 'gwei'),  
+                'nonce': nonce,  
+            })  
+            print(register)
+            print("Registering user...")
+
+            signed_txn = web3.eth.account.signTransaction(register, private_key)  
+
+            result = web3.eth.sendRawTransaction(signed_txn.rawTransaction)   
+
+            tx_receipt = web3.eth.wait_for_transaction_receipt(result)  
+
+            print("Transaction Hash:", tx_receipt.transactionHash.hex())
+
+            print("User Successfully Registered")
+            # WALLET REGISTER END
+
             return ({"data": user_details, "code": status.HTTP_201_CREATED, "message": "User Created Successfully"})
         # if not valid
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
+    
+
+    # SEND DINT START
+    
+
+    def send_dint_by_token(self, request, format=None):
+       
+        user_obj = User.objects.get(id = request.user.id)
+        encrypted_wallet_address = user_obj.wallet_address
+       
+        
+        wallet_bytes = bytes(encrypted_wallet_address)
+        key = Fernet(settings.ENCRYPTION_KEY)
+        decwallet = key.decrypt(wallet_bytes).decode()
+          
+        print("*********************** DECRYPTED WALLET ADDRESS", decwallet)
+
+        
+        node_url = settings.NODE_URL
+        web3 = Web3(Web3.HTTPProvider(node_url))
+        web3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        address = settings.ADDRESS
+        checksum_address = Web3.toChecksumAddress(address)
+        print("checksum", checksum_address)
+        private_key= settings.PRIVATE_KEY
+
+        abi = json.loads('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_sender","type":"address"},{"indexed":false,"internalType":"address","name":"_recipient","type":"address"}],"name":"tipSent","type":"event"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_blocked","type":"bool"}],"name":"blockUnblockReferrer","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"blockedReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"changeManagedState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"_isReferrer","type":"bool"}],"name":"changeReferrerState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"dintToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isManaged","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isRegistered","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"reward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_recipient","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"sendDint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeCollector","type":"address"}],"name":"setFeeCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"startedReferringAt","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"tipRecieverToReferrer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"unRegister","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"address","name":"_to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]') 
+        contract = web3.eth.contract(address = checksum_address , abi = abi)
+        print("cgggbhfgfjg", contract)
+        dintAddress = settings.DINTDISTRIBUTERADD
+        checksum_dintAddress = Web3.toChecksumAddress(dintAddress)
+        dintABI = json.loads('[{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_amount","type":"uint256"}],"name":"approve","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"creationBlock","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_newController","type":"address"}],"name":"changeController","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_blockNumber","type":"uint256"}],"name":"balanceOfAt","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"version","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_cloneTokenName","type":"string"},{"name":"_cloneDecimalUnits","type":"uint8"},{"name":"_cloneTokenSymbol","type":"string"},{"name":"_snapshotBlock","type":"uint256"},{"name":"_transfersEnabled","type":"bool"}],"name":"createCloneToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"parentToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_owner","type":"address"},{"name":"_amount","type":"uint256"}],"name":"generateTokens","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_blockNumber","type":"uint256"}],"name":"totalSupplyAt","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"transfersEnabled","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"parentSnapShotBlock","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_amount","type":"uint256"},{"name":"_extraData","type":"bytes"}],"name":"approveAndCall","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_owner","type":"address"},{"name":"_amount","type":"uint256"}],"name":"destroyTokens","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_token","type":"address"}],"name":"claimTokens","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"tokenFactory","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_transfersEnabled","type":"bool"}],"name":"enableTransfers","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"controller","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_tokenFactory","type":"address"},{"name":"_parentToken","type":"address"},{"name":"_parentSnapShotBlock","type":"uint256"},{"name":"_tokenName","type":"string"},{"name":"_decimalUnits","type":"uint8"},{"name":"_tokenSymbol","type":"string"},{"name":"_transfersEnabled","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_token","type":"address"},{"indexed":true,"name":"_controller","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"ClaimedTokens","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_from","type":"address"},{"indexed":true,"name":"_to","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_cloneToken","type":"address"},{"indexed":false,"name":"_snapshotBlock","type":"uint256"}],"name":"NewCloneToken","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_owner","type":"address"},{"indexed":true,"name":"_spender","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"Approval","type":"event"}]')
+
+        dintCont = web3.eth.contract(address = checksum_dintAddress , abi = dintABI)
+        user_address = contract.functions.owner().call()
+        print(user_address)
+        user_ref = '0x0000000000000000000000000000000000000000'
+        receiver_add = decwallet
+        owner = contract.functions.owner().call()
+        nonce = web3.eth.getTransactionCount(owner)  
+
+        # Enter amount that you want to send
+        amount = 10
+
+        balance = dintCont.functions.balanceOf(owner).call()
+        print(balance, "Available Dint")
+        dint_approve = dintAllow = dintCont.functions.allowance(user_address, address).call() 
+        print("Approved Allowance Dint:", dintAllow, )
+
+        dint_approve = dintCont.functions.approve(address, amount).buildTransaction({  
+                    'from': user_address,
+                    'chainId': 80001,  
+                    'gasPrice': web3.toWei('30', 'gwei'),  
+                    'nonce': nonce,  
+                })  
+        print("Approval in Process...")
+
+        dint_txn = web3.eth.account.signTransaction(dint_approve, private_key)
+        resulDint = web3.eth.sendRawTransaction(dint_txn.rawTransaction)
+        dintReciept = web3.eth.wait_for_transaction_receipt(resulDint)
+        print(dintReciept.transactionHash.hex())
+
+        dintAllow = dintCont.functions.allowance(user_address, address).call() 
+        print("Approved Allowance Dint:", dintAllow, )
+
+        new_nonce = web3.eth.getTransactionCount(user_address)  
+
+        print("Sending Dint...")
+        sendDint = contract.functions.sendDint(receiver_add, amount).buildTransaction({  
+            'from': user_address,
+            'chainId': 80001,   
+            'gasPrice': web3.toWei('30', 'gwei'),  
+            'nonce': new_nonce,  
+        })  
+        
+        signed_txn = web3.eth.account.signTransaction(sendDint, private_key)  
+
+        result = web3.eth.sendRawTransaction(signed_txn.rawTransaction)  
+
+        tx_receipt = web3.eth.wait_for_transaction_receipt(result)  
+
+        print("Transaction Hash:", tx_receipt.transactionHash.hex())
+
+        balance = dintCont.functions.balanceOf(receiver_add).call()
+        print(balance, "Available Dint")
+        # SEND DINT END 
+
+
+
+    def send_reward_by_token(self, request, format=None):
+        receiver = User.objects.get(id = request.user.id)
+        receiver_wallet = receiver.wallet_address
+
+        receiver_wallet_bytes = bytes(receiver_wallet)
+        key = Fernet(settings.ENCRYPTION_KEY)
+        receiver_decwallet = key.decrypt(receiver_wallet_bytes).decode()
+        print(receiver_decwallet)
+
+        sender_obj = User.objects.get(id = request.user.id)
+        sender_wallet = sender_obj.wallet_address
+        # sender_wallet_key = sender_obj.wallet_private_key
+        print(sender_wallet)
+        node_url = settings.NODE_URL
+        web3 = Web3(Web3.HTTPProvider(node_url))
+        web3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        address = Web3.toChecksumAddress(settings.ADDRESS)
+        private_key = settings.PRIVATE_KEY
+
+        abi = json.loads('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_sender","type":"address"},{"indexed":false,"internalType":"address","name":"_recipient","type":"address"}],"name":"tipSent","type":"event"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_blocked","type":"bool"}],"name":"blockUnblockReferrer","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"blockedReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"changeManagedState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"_isReferrer","type":"bool"}],"name":"changeReferrerState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"dintToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isManaged","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isRegistered","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"reward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_recipient","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"sendDint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeCollector","type":"address"}],"name":"setFeeCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"startedReferringAt","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"tipRecieverToReferrer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"unRegister","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"address","name":"_to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]') 
+        contract = web3.eth.contract(address = address , abi = abi)
+
+        dintAdd =  Web3.toChecksumAddress(settings.DINTDISTRIBUTERADD)
+        dintABI = json.loads('[{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_amount","type":"uint256"}],"name":"approve","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"creationBlock","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_newController","type":"address"}],"name":"changeController","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_blockNumber","type":"uint256"}],"name":"balanceOfAt","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"version","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_cloneTokenName","type":"string"},{"name":"_cloneDecimalUnits","type":"uint8"},{"name":"_cloneTokenSymbol","type":"string"},{"name":"_snapshotBlock","type":"uint256"},{"name":"_transfersEnabled","type":"bool"}],"name":"createCloneToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"parentToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_owner","type":"address"},{"name":"_amount","type":"uint256"}],"name":"generateTokens","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_blockNumber","type":"uint256"}],"name":"totalSupplyAt","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"transfersEnabled","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"parentSnapShotBlock","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_amount","type":"uint256"},{"name":"_extraData","type":"bytes"}],"name":"approveAndCall","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_owner","type":"address"},{"name":"_amount","type":"uint256"}],"name":"destroyTokens","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_token","type":"address"}],"name":"claimTokens","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"tokenFactory","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_transfersEnabled","type":"bool"}],"name":"enableTransfers","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"controller","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_tokenFactory","type":"address"},{"name":"_parentToken","type":"address"},{"name":"_parentSnapShotBlock","type":"uint256"},{"name":"_tokenName","type":"string"},{"name":"_decimalUnits","type":"uint8"},{"name":"_tokenSymbol","type":"string"},{"name":"_transfersEnabled","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_token","type":"address"},{"indexed":true,"name":"_controller","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"ClaimedTokens","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_from","type":"address"},{"indexed":true,"name":"_to","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_cloneToken","type":"address"},{"indexed":false,"name":"_snapshotBlock","type":"uint256"}],"name":"NewCloneToken","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_owner","type":"address"},{"indexed":true,"name":"_spender","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"Approval","type":"event"}]')
+
+        dintCont = web3.eth.contract(address = dintAdd , abi = dintABI)
+
+        user_address = contract.functions.owner().call()
+        user_ref = '0x0000000000000000000000000000000000000000'
+        receiver_add = receiver_decwallet
+        owner = contract.functions.owner().call()
+        nonce = web3.eth.getTransactionCount(owner)  
+        tip_dint = 10
+
+        balance = dintCont.functions.balanceOf(address).call()
+        print(balance, "Available Dint")
+
+        new_nonce = web3.eth.getTransactionCount(owner)  
+
+        print("Rewarding...")
+
+        sendReward = contract.functions.reward(receiver_add, tip_dint).buildTransaction({
+            'from': user_address,
+            'chainId': 80001,  
+            'gasPrice': web3.toWei('30', 'gwei'),  
+            'nonce': new_nonce,     
+        })
+
+        singed_reward_txn = web3.eth.account.signTransaction(sendReward, private_key)
+
+        reward_result = web3.eth.sendRawTransaction(singed_reward_txn.rawTransaction)
+
+        reward_reciept = web3.eth.wait_for_transaction_receipt(reward_result)
+
+        print("Transaction Hash:", reward_reciept.transactionHash.hex())
+
+        balance = dintCont.functions.balanceOf(receiver_add).call()
+        print(balance, "Available Dint")
+
+    # SEND DINT REWARD END
 
     def send_otp(self, user):
         try:
@@ -302,12 +551,25 @@ class UserService(UserBaseService):
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
 
     def get_wallet_by_token(self, request, format=None):
-        user_obj = User.objects.get(id=request.user.id)
-        context = {"profile_user_id": user_obj.id,
-                   "logged_in_user": request.user.id}
-        serializer = GetUserWalletSerializer(user_obj, context=context)
-        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "User Wallet fetched Successfully"})
+        user_obj = User.objects.filter(id = request.user.id)
+        user = User.objects.get(id = request.user.id)
+        wallet = user.wallet_address
+        print(wallet)
+        wallet_address = wallet.tobytes()
+        key = Fernet(settings.ENCRYPTION_KEY)
+        sender_decwallet = key.decrypt(wallet_address).decode()
+        print(sender_decwallet)
+        
+        node_url = settings.NODE_URL
+        web3 = Web3(Web3.HTTPProvider(node_url))
+        web3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        wallet_balance = web3.eth.get_balance(sender_decwallet)
+        context = {'wallet_balance': wallet_balance , 'sender_decwallet': sender_decwallet}
+        serializer = GetUserWalletSerializer(user_obj, context=context, many=True).data
+        
+        return ({"data": serializer, "code": status.HTTP_200_OK, "message": "User Wallet fetched Successfully"})
 
+      
     def update_wallet_by_token(self, request, format=None):
         user_obj = User.objects.get(id=request.user.id)
         serializer = UpdateUserWalletSerializer(user_obj, data=request.data)
@@ -481,6 +743,7 @@ class UserService(UserBaseService):
     def search_any_user(self, request, format=None):
         search_text = request.GET.get('search')
         print(search_text)
+    
         if search_text is None:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Please provide Search Text"})
         user_obj = User.objects.filter(Q(custom_username__icontains=search_text) | Q(

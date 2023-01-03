@@ -162,7 +162,7 @@ REST_FRAMEWORK = {
     
     # Permission settings
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
 
     #'EXCEPTION_HANDLER': 'api.utils.exceptions.custom_exception_handler',
@@ -271,3 +271,10 @@ ENCRYPTION_KEY = config('ENCRYPTION_KEY')
 WISE_URL = config('WISE_URL')
 WISE_TOKEN = config('WISE_TOKEN')
 WISE_PROFILE_ID = config('WISE_PROFILE_ID')
+
+
+
+PRIVATE_KEY = config('PRIVATE_KEY')
+NODE_URL = config('NODE_URL')
+ADDRESS = config('ADDRESS')
+DINTDISTRIBUTERADD = config('DINTDISTRIBUTERADD')
