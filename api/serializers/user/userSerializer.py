@@ -141,27 +141,6 @@ class UpdateUserWalletSerializer(serializers.ModelSerializer):
         model = User
         fields = ('web3_wallet',)
 
-
-class GetUserWalletSerializer(serializers.ModelSerializer):
-    """
-    Get User Wallet Serializer
-    """
-    wallet_address = serializers.SerializerMethodField()
-    wallet_balance = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = ('wallet_address','wallet_balance')
-
-    def get_wallet_balance(self, obj):
-        wallet_balance = self.context.get('wallet_balance')
-        
-        return wallet_balance
-    
-    def get_wallet_address(self, obj):
-        wallet_address = self.context.get('sender_decwallet')
-        return wallet_address
-
 class UpdateUserPreferencesUpdateSerializer(serializers.ModelSerializer):
     """
     Update User Preference Serializer

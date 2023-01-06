@@ -6,18 +6,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0072_auto_20221230_0655'),
+        ('api', '0071_auto_20221229_1306'),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='historicaluser',
-            name='wallet_privatekey',
-        ),
-        migrations.RemoveField(
-            model_name='user',
-            name='wallet_privatekey',
-        ),
         migrations.AddField(
             model_name='historicaluser',
             name='wallet_private_key',
