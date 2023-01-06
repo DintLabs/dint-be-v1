@@ -67,14 +67,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     fire_base_auth_key = models.CharField(max_length=250, null=True, blank=True)
     referral_id = models.CharField(max_length=30, null=True, blank=True)
     # profile_image = models.ForeignKey(UploadMedia)
-
-    #Web3 Wallet
-    wallet_token = models.CharField(max_length=300, blank=True, null=True)
-    # web3_wallet = JSONField(null=True, blank=True)
   
     wallet_address = models.BinaryField(null = True, blank=True)
     wallet_private_key = models.BinaryField(null=True, blank=True)
-    # wallet_privatekey = models.BinaryField(blank=True, null=True)
+
     #Profile
     custom_username = models.CharField(max_length=50, blank=True, null=True)
     display_name = models.CharField(max_length=40, blank=True, null=True)

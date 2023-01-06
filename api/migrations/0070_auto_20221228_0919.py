@@ -16,18 +16,8 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, max_length=300, null=True),
         ),
         migrations.AddField(
-            model_name='historicaluser',
-            name='wallet_privatekey',
-            field=models.CharField(blank=True, max_length=300, null=True),
-        ),
-        migrations.AddField(
             model_name='user',
             name='wallet_address',
-            field=models.CharField(blank=True, max_length=300, null=True),
-        ),
-        migrations.AddField(
-            model_name='user',
-            name='wallet_privatekey',
             field=models.CharField(blank=True, max_length=300, null=True),
         ),
     ]

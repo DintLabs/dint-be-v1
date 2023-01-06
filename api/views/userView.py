@@ -455,7 +455,7 @@ class QuotesTransferWiseView(APIView):
 
 class UserSendDint(APIView):
     def post(self, request, format=None):
-        result = userService.send_dint_by_token(request, format=None)
+        result = userService.send_dint(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
 
 class UserDintReward(APIView):
@@ -463,10 +463,7 @@ class UserDintReward(APIView):
         result = userService.send_reward_by_token(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
 
-class UserSendDintById(APIView):
-    def post(self, request, format=None):
-        result = userService.send_dint_by_id(request, format=None)
-        return Response(result, status = status.HTTP_200_OK)
+
 
 
     
