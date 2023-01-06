@@ -231,7 +231,7 @@ class UserService(UserBaseService):
             node_url = settings.NODE_URL
             web3 = Web3(Web3.HTTPProvider(node_url))
             web3.middleware_onion.inject(geth_poa_middleware, layer=0)
-            address = Web3.toChecksumAddress(settings.ADDRESS)
+            address = Web3.toChecksumAddress(settings.DINT_TOKEN_DISTRIBUTOR_ADDRESS)
             private_key= settings.PRIVATE_KEY
             
             user_ref = '0x0000000000000000000000000000000000000000'
@@ -299,22 +299,22 @@ class UserService(UserBaseService):
           
         print("*********************** DECRYPTED WALLET key", sender_decwalletkey)
             
-        node_url = 'https://matic-mumbai.chainstacklabs.com' #settings.NODE_URL
+        node_url =  settings.NODE_URL
         # this is RPC url saved in ENV as node_url
 
         web3 = Web3(Web3.HTTPProvider(node_url))
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
-        address = '0xFD7952322260c617D47f747dC2a0b8c7Ddd177E6'
+        address = DINT_TOKEN_DISTRIBUTOR_ADDRESS
         #this is DINT contract address that we saved on ENV
 
         checksum_address = Web3.toChecksumAddress(address)
         #this is the checksum DINT contract address. It prevent users from sending transactions to the wrong address.
 
-        private_key = '0x70a18bce2fd906b495ba758058e686a47c4800b8da8fe39684f84bd9a4fca48c'
+        private_key = sender_decwalletkey
         #this is Private Key of the wallet of the user(sender)
 
-        user_address = '0x5748eBAd1383bf9B1e29B8d2523FC93bf39E08f6'
+        user_address = sender_decwallet
         #This is wallet address of the user(sender)
 
         abi = json.loads('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_sender","type":"address"},{"indexed":false,"internalType":"address","name":"_recipient","type":"address"}],"name":"tipSent","type":"event"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_blocked","type":"bool"}],"name":"blockUnblockReferrer","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"blockedReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"changeManagedState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"_isReferrer","type":"bool"}],"name":"changeReferrerState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"dintToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isManaged","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isRegistered","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"reward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_recipient","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"sendDint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeCollector","type":"address"}],"name":"setFeeCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"startedReferringAt","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"tipRecieverToReferrer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"unRegister","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"address","name":"_to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]') 
@@ -323,7 +323,7 @@ class UserService(UserBaseService):
         contract = web3.eth.contract(address = checksum_address , abi = abi)
         #Setting up DINT contract address for interaction 
 
-        dintAddress = '0x97df2760193Df86af0A5248D7DFc0AA0b52AC2F5' #settings.DINT_TOKEN_ADDRESS
+        dintAddress = settings.DINT_TOKEN_ADDRESS
         #this is DINT Token address which we need to get approval for sending Dint
         checksum_dintAddress = Web3.toChecksumAddress(dintAddress)
         #This is checksum DINT Token address
@@ -339,7 +339,7 @@ class UserService(UserBaseService):
         #this is nonce of sender. It is  used by authentication protocols to ensure that old communications cannot be reprocessed 
 
         # Enter amount that you want to send
-        amount = 10000000000000000000
+        amount = request.data['amount']
 
         balance = dintCont.functions.balanceOf(user_address).call()
         # this is read function of DINT Token that will give us the balance of sender
