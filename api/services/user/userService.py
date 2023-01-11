@@ -157,8 +157,7 @@ class UserService(UserBaseService):
             serializer.save()
             user = User.objects.get(id=serializer.data.get('id'))
             user.is_active = True
-            # wallet_token = self.encrypted_wallet_token()
-            # user.wallet_token = wallet_token
+            user.is_online = True
             user.save()
             if request.data.get('referral_by', None):
                 user_referred_by = User.objects.get(referral_id=request.data['referred_by'])
@@ -170,6 +169,7 @@ class UserService(UserBaseService):
 
             user_details = serializer.data
             user_details['token'] = token
+            user_details['is_online'] = True
             # user_details['wallet_token'] = wallet_token
 
             # **************************************************************WALLET CREATION START
