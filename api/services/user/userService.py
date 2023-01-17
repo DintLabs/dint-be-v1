@@ -272,139 +272,20 @@ class UserService(UserBaseService):
     # SEND DINT START
 
     def send_dint(self, request, format=None):
-        receiver_id = request.data['id']
-        receiver_user_obj = User.objects.get(id = receiver_id)
-        receiver_user_wallet = receiver_user_obj.wallet_address
+        url = settings.DINT_TOKEN_URL
 
-        wallet_bytes = bytes(receiver_user_wallet)
-        key = Fernet(settings.ENCRYPTION_KEY)
-        receiver_decwallet = key.decrypt(wallet_bytes).decode()
-          
-        print("*********************** DECRYPTED WALLET ADDRESS", receiver_decwallet)
-
-
-        sender_user_obj = User.objects.get(id = request.user.id)
-        sender_user_wallet = sender_user_obj.wallet_address
-        sender_wallet_key = sender_user_obj.wallet_private_key
-
-        wallet_bytes = bytes(sender_user_wallet)
-        key = Fernet(settings.ENCRYPTION_KEY)
-        sender_decwallet = key.decrypt(wallet_bytes).decode()
-          
-        print("*********************** DECRYPTED WALLET ADDRESS", sender_decwallet)
-
-        wallet_keybytes = bytes(sender_wallet_key)
-        key = Fernet(settings.ENCRYPTION_KEY)
-        sender_decwalletkey = key.decrypt(wallet_keybytes).decode()
-          
-        print("*********************** DECRYPTED WALLET key", sender_decwalletkey)
-            
-        node_url =  settings.NODE_URL
-        # this is RPC url saved in ENV as node_url
-
-        web3 = Web3(Web3.HTTPProvider(node_url))
-        web3.middleware_onion.inject(geth_poa_middleware, layer=0)
-
-        address = DINT_TOKEN_DISTRIBUTOR_ADDRESS
-        #this is DINT contract address that we saved on ENV
-
-        checksum_address = Web3.toChecksumAddress(address)
-        #this is the checksum DINT contract address. It prevent users from sending transactions to the wrong address.
-
-        private_key = sender_decwalletkey
-        #this is Private Key of the wallet of the user(sender)
-
-        user_address = sender_decwallet
-        #This is wallet address of the user(sender)
-
-        abi = json.loads('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_sender","type":"address"},{"indexed":false,"internalType":"address","name":"_recipient","type":"address"}],"name":"tipSent","type":"event"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_blocked","type":"bool"}],"name":"blockUnblockReferrer","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"blockedReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"changeManagedState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"_isReferrer","type":"bool"}],"name":"changeReferrerState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"dintToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isManaged","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isRegistered","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"reward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_recipient","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"sendDint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeCollector","type":"address"}],"name":"setFeeCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"startedReferringAt","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"tipRecieverToReferrer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"unRegister","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"address","name":"_to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]') 
-        #This is ABI of DINT Contract all the fuctions that we can read and write
-
-        contract = web3.eth.contract(address = checksum_address , abi = abi)
-        #Setting up DINT contract address for interaction 
-
-        dintAddress = settings.DINT_TOKEN_ADDRESS
-        #this is DINT Token address which we need to get approval for sending Dint
-        checksum_dintAddress = Web3.toChecksumAddress(dintAddress)
-        #This is checksum DINT Token address
-        dintABI = json.loads('[{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_amount","type":"uint256"}],"name":"approve","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"creationBlock","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_newController","type":"address"}],"name":"changeController","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_blockNumber","type":"uint256"}],"name":"balanceOfAt","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"version","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_cloneTokenName","type":"string"},{"name":"_cloneDecimalUnits","type":"uint8"},{"name":"_cloneTokenSymbol","type":"string"},{"name":"_snapshotBlock","type":"uint256"},{"name":"_transfersEnabled","type":"bool"}],"name":"createCloneToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"parentToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_owner","type":"address"},{"name":"_amount","type":"uint256"}],"name":"generateTokens","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_blockNumber","type":"uint256"}],"name":"totalSupplyAt","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"transfersEnabled","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"parentSnapShotBlock","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_amount","type":"uint256"},{"name":"_extraData","type":"bytes"}],"name":"approveAndCall","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_owner","type":"address"},{"name":"_amount","type":"uint256"}],"name":"destroyTokens","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_token","type":"address"}],"name":"claimTokens","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"tokenFactory","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_transfersEnabled","type":"bool"}],"name":"enableTransfers","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"controller","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_tokenFactory","type":"address"},{"name":"_parentToken","type":"address"},{"name":"_parentSnapShotBlock","type":"uint256"},{"name":"_tokenName","type":"string"},{"name":"_decimalUnits","type":"uint8"},{"name":"_tokenSymbol","type":"string"},{"name":"_transfersEnabled","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_token","type":"address"},{"indexed":true,"name":"_controller","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"ClaimedTokens","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_from","type":"address"},{"indexed":true,"name":"_to","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_cloneToken","type":"address"},{"indexed":false,"name":"_snapshotBlock","type":"uint256"}],"name":"NewCloneToken","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_owner","type":"address"},{"indexed":true,"name":"_spender","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"Approval","type":"event"}]')
-        #This is ABI of DINT Token that has all the fuctions that we can read and write
-        dintCont = web3.eth.contract(address = checksum_dintAddress , abi = dintABI)
-
-
-        receiver_add = '0xFB34ADF8b209ccA566Ab0d1E7F068F3d6d207aBD' #receiver_decwallet
-        #This is receiver's address.
-
-        nonce = web3.eth.getTransactionCount(user_address)
-        #this is nonce of sender. It is  used by authentication protocols to ensure that old communications cannot be reprocessed 
-
-        # Enter amount that you want to send
-        amount = request.data['amount']
-
-        balance = dintCont.functions.balanceOf(user_address).call()
-        # this is read function of DINT Token that will give us the balance of sender
-        print(balance, "Available Dint")
-
-
-        dint_approve = dintAllow = dintCont.functions.allowance(user_address, address).call() 
-        print("Approved Allowance Dint:", dintAllow, )
-        #this is approved allowance that user can send. To send any amount to anyone we first need to make sure that we have allowance for that amount. 
-
-
-        #we are calling dint approve function to get approval from Dint Token. 
-        # We need to make sure we don't have any allowance before executing this fuction. 
-        # Because this function will only execute when we have 0 allowance. 
-        #If we have some existing allowance we first need to get approval for 0 amount and then we can take approval for amount that we are sending. 
-        dint_approve = dintCont.functions.approve(address, amount).buildTransaction({  
-                    'from': user_address,
-                    'chainId': 80001,  
-                    'gasPrice': web3.toWei('30', 'gwei'),  
-                    'nonce': nonce,  
-                })  
-        print("Approval in Process...")
-
-        dint_txn = web3.eth.account.signTransaction(dint_approve, private_key)
-        resulDint = web3.eth.sendRawTransaction(dint_txn.rawTransaction)
-        dintReciept = web3.eth.wait_for_transaction_receipt(resulDint)
-        print(dintReciept.transactionHash.hex())
-        #this is transaction hash for Dint Approve Funtion
-
-
-        dintAllow = dintCont.functions.allowance(user_address, address).call() 
-        print("Approved Allowance Dint:", dintAllow, )
-        #This is Upadated Allowance 
-
-        new_nonce = web3.eth.getTransactionCount(user_address)  
-        #this is new nonce of user(sender)
-
-        print("Sending Dint...")
-        #this is sendDint fuction that will send dint from user_address(sender) to receiver_add(receiver)
-        sendDint = contract.functions.sendDint(receiver_add, amount).buildTransaction({  
-            'from': user_address,
-            'chainId': 80001,   
-            'gasPrice': web3.toWei('30', 'gwei'),  
-            'nonce': new_nonce,  
-        })  
-        
-        signed_txn = web3.eth.account.signTransaction(sendDint, private_key)  
-
-        result = web3.eth.sendRawTransaction(signed_txn.rawTransaction)  
-
-        tx_receipt = web3.eth.wait_for_transaction_receipt(result)  
-
-        print("Transaction Hash:", tx_receipt.transactionHash.hex())
-        #this is transaction hash for sendDint
-
-        balance = dintCont.functions.balanceOf(receiver_add).call()
-        print(balance, "Receiver Balance")
-        #This is updated balance of receiver
-
-        sender_balance = dintCont.functions.balanceOf(user_address).call()
-        print(sender_balance, "Updated Balance")
-        #This is updated balance of sender
-
-        return ({"data": [], "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
-
+        payload = json.dumps({
+        "sender_id" : request.data['sender_id'],
+        "receiver_id" : request.data['sender_id'],
+        "amount" : request.data['amount']
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        'apikey':settings.DINT_API_KEY
+        }
+        response = requests.post(url, headers = headers, data = payload)
+        return response
+       
     def send_reward_by_token(self, request, format=None):
         receiver = User.objects.get(id = request.user.id)
         receiver_wallet = receiver.wallet_address
