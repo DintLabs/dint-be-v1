@@ -279,6 +279,7 @@ class UserService(UserBaseService):
         "receiver_id" : request.data['receiver_id'],
         "amount" : request.data['amount']
         })
+        
         headers = {
         'Content-Type': 'application/json',
         'apikey':settings.DINT_API_KEY
