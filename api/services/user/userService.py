@@ -284,8 +284,13 @@ class UserService(UserBaseService):
         'Content-Type': 'application/json',
         'apikey':settings.DINT_API_KEY
         }
-        response = requests.post(url, headers = headers, data = payload)
-        return response
+        try:
+            response = requests.post(url, headers = headers, data = payload)
+            data = response.json()
+            return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
+        except:
+            return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
+        # return response
        
     def send_reward_by_token(self, request, format=None):
         receiver = User.objects.get(id = request.user.id)
