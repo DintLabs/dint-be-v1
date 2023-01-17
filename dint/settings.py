@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = 'st25b1&xgy9n^1s=zaq*21%*p)&3eqf5^2mn4&2+2g-knbowjn'
+
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -274,7 +274,5 @@ WISE_PROFILE_ID = config('WISE_PROFILE_ID')
 
 
 
-PRIVATE_KEY = config('PRIVATE_KEY')
-NODE_URL = config('NODE_URL')
-DINT_TOKEN_DISTRIBUTOR_ADDRESS = config('DINT_TOKEN_DISTRIBUTOR_ADDRESS')
-DINT_TOKEN_ADDRESS = config('DINT_TOKEN_ADDRESS')
+DINT_API_KEY = config('DINT_API_KEY')
+DINT_TOKEN_URL = config('DINT_TOKEN_URL')
