@@ -175,54 +175,30 @@ class UserService(UserBaseService):
             # **************************************************************WALLET CREATION START
             priv = secrets.token_hex(32)
             wallet_private_key = "0x" + priv
-            print("WALLET PRIVATE KEY",wallet_private_key)
-            print ("SAVE BUT DO NOT SHARE THIS:", wallet_private_key)
+           
             acct = Account.from_key(wallet_private_key)
-            print(acct)
+           
             wallet_address = acct.address
-            print("WALLET ADDRESS", acct.address)
+            
 
             
             address = wallet_address
-            # encrypted_wallet_address = self.wallet_address(address)
-            # encrypted_wallet_privatekey = self.wallet_privatekey(wallet_private_key)
-
             key = Fernet(settings.ENCRYPTION_KEY)
             
             encrypted_wallet_address = key.encrypt(address.encode())
-            print("ENCRYPTED WALLET ADDRESS *******************************", type(encrypted_wallet_address))
-
-           
-        
-            decwallet = key.decrypt(encrypted_wallet_address).decode()
-            print("*********************** DECRYPTED WALLET ADDRESS", decwallet)
-
-
             
             encrypted_wallet_privatekey = key.encrypt(wallet_private_key.encode())
-            print("**************************** ENCRYPTED WALLET PRIVATE KEY",encrypted_wallet_privatekey)
            
-
             decrypted_wallet_key = key.decrypt(encrypted_wallet_privatekey).decode()
-            print("DECRYPTED WALLET KEY",decrypted_wallet_key)
-
+           
             user.wallet_address = encrypted_wallet_address
             user.wallet_private_key = encrypted_wallet_privatekey
             user.save()
 
             user = User.objects.get(id = serializer.data.get('id'))
-            print(user.wallet_address)
-            print(type(user.wallet_address))
-            print("private key",user.wallet_private_key)
-            print("-------------",type(user.wallet_private_key))
-            
-
-            print("THIS IS SAVED WALLET ADDRESS",user.wallet_address)
-            print("THIS IS SAVED WALLET PRIVATE KEY", user.wallet_private_key)
-
     
             user_details['wallet_address'] = encrypted_wallet_address
-            user_details['wallet_private_key'] = encrypted_wallet_privatekey
+            # user_details['wallet_private_key'] = encrypted_wallet_privatekey
 
 
             # WALLET CREATION END
@@ -232,13 +208,13 @@ class UserService(UserBaseService):
             web3 = Web3(Web3.HTTPProvider(node_url))
             web3.middleware_onion.inject(geth_poa_middleware, layer=0)
             address = Web3.toChecksumAddress(settings.DINT_TOKEN_DISTRIBUTOR_ADDRESS)
-            private_key= settings.PRIVATE_KEY
+            private_key= settings.OWNER_PRIVATE_KEY
             
             user_ref = '0x0000000000000000000000000000000000000000'
             new_user = acct.address
             # new_user = '0x862c122b550a44D37a3F9402D7ea2649471C84F8'
 
-            abi = json.loads('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_sender","type":"address"},{"indexed":false,"internalType":"address","name":"_recipient","type":"address"}],"name":"tipSent","type":"event"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_blocked","type":"bool"}],"name":"blockUnblockReferrer","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"blockedReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"changeManagedState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"_isReferrer","type":"bool"}],"name":"changeReferrerState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"dintToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isManaged","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isRegistered","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"reward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_recipient","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"sendDint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeCollector","type":"address"}],"name":"setFeeCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"startedReferringAt","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"tipRecieverToReferrer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"unRegister","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"address","name":"_to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]') 
+            abi = json.loads('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_sender","type":"address"},{"indexed":false,"internalType":"address","name":"_recipient","type":"address"}],"name":"tipSent","type":"event"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_blocked","type":"bool"}],"name":"blockUnblockReferrer","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"blockedReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"changeManagedState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"_isReferrer","type":"bool"}],"name":"changeReferrerState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"dintToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isManaged","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isRegistered","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"reward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_sender","type":"address"},{"internalType":"address","name":"_recipient","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"sendDint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeCollector","type":"address"}],"name":"setFeeCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"startedReferringAt","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"tipRecieverToReferrer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"unRegister","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"address","name":"_to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]') 
 
             contract = web3.eth.contract(address = address , abi = abi)
     
@@ -250,8 +226,7 @@ class UserService(UserBaseService):
                 'gasPrice': web3.toWei('30', 'gwei'),  
                 'nonce': nonce,  
             })  
-            print(register)
-            print("Registering user...")
+          
 
             signed_txn = web3.eth.account.signTransaction(register, private_key)  
 
@@ -259,11 +234,7 @@ class UserService(UserBaseService):
 
             tx_receipt = web3.eth.wait_for_transaction_receipt(result)  
 
-            print("Transaction Hash:", tx_receipt.transactionHash.hex())
-
-            print("User Successfully Registered")
-            # WALLET REGISTER END
-
+           
             return ({"data": user_details, "code": status.HTTP_201_CREATED, "message": "User Created Successfully"})
         # if not valid
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
@@ -272,7 +243,7 @@ class UserService(UserBaseService):
     # SEND DINT START
 
     def send_dint(self, request, format=None):
-        url = settings.DINT_TOKEN_URL
+        url = settings.NODE_TOKEN_URL
 
         payload = json.dumps({
         "sender_id" : request.data['sender_id'],
@@ -282,16 +253,44 @@ class UserService(UserBaseService):
 
         headers = {
         'Content-Type': 'application/json',
-        'apikey':settings.DINT_API_KEY
+        'apikey':settings.NODE_API_KEY
         }
-        try:
-            response = requests.post(url, headers = headers, data = payload)
-            data = response.json()
+        response = requests.post(url, headers = headers, data = payload)
+        data = response.json()
+            
+        Hash = data['Hash']
+        node_url = settings.NODE_URL
+        web3 = Web3(Web3.HTTPProvider(node_url))
+
+        dintReciept = web3.eth.wait_for_transaction_receipt(Hash)  
+        print(dintReciept.status)
+        
+        if (dintReciept.status == 1):
             return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
-        except:
-            return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
-        # return response
-       
+
+        else:
+            return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
+
+        # try:
+        #     response = requests.post(url, headers = headers, data = payload)
+        #     data = response.json()
+            
+        #     Hash = data['Hash']
+        #     node_url = settings.NODE_URL
+        #     web3 = Web3(Web3.HTTPProvider(node_url))
+
+        #     dintReciept = web3.eth.wait_for_transaction_receipt(Hash)  
+        #     print(dintReciept.status)
+        
+        #     if (dintReciept.status == 1):
+        #         return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
+
+        #     else:
+        #         return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
+
+        # except:
+        #      return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
+        
     def send_reward_by_token(self, request, format=None):
         receiver = User.objects.get(id = request.user.id)
         receiver_wallet = receiver.wallet_address
@@ -309,7 +308,7 @@ class UserService(UserBaseService):
         web3 = Web3(Web3.HTTPProvider(node_url))
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
         address = Web3.toChecksumAddress(settings.ADDRESS)
-        private_key = settings.PRIVATE_KEY
+        private_key = settings.OWNER_PRIVATE_KEY
 
         abi = json.loads('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_sender","type":"address"},{"indexed":false,"internalType":"address","name":"_recipient","type":"address"}],"name":"tipSent","type":"event"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_blocked","type":"bool"}],"name":"blockUnblockReferrer","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"blockedReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"changeManagedState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"_isReferrer","type":"bool"}],"name":"changeReferrerState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"dintToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isManaged","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isRegistered","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"reward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_recipient","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"sendDint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeCollector","type":"address"}],"name":"setFeeCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"startedReferringAt","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"tipRecieverToReferrer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"unRegister","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"address","name":"_to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]') 
         contract = web3.eth.contract(address = address , abi = abi)
