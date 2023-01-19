@@ -220,11 +220,16 @@ class PostsService (PostsBaseService):
         """
         Create New Posts. 
         """
-        serializer = CreateUpdatePostLikeSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return ({"data": serializer.data, "code": status.HTTP_201_CREATED, "message": POST_CREATED})
-        return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
+       
+        already_liked = PostLikes.objects.filter(user = request.user.id, post = request.data['post'])
+        if already_liked:
+             return ({"code": status.HTTP_400_BAD_REQUEST, "message":"Post already liked"})
+        else:
+            serializer = CreateUpdatePostLikeSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return ({"data": serializer.data, "code": status.HTTP_201_CREATED, "message": POST_CREATED})
+        return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message":BAD_REQUEST})
 
 
     def unlike_post(self, request, format=None):
