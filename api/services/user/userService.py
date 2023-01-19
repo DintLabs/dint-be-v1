@@ -697,10 +697,13 @@ class UserService(UserBaseService):
     def search_any_user(self, request, format=None):
         search_text = request.GET.get('search')
         print(search_text)
-    
+        # logged_in_user = User.objects.get(id = request.user.id)
+        # logged_in_username = logged_in_user.custom_username
+        # logged_in_displayname = logged_in_user.display_name
+        # print(logged_in_username)
         if search_text is None:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Please provide Search Text"})
-        user_obj = User.objects.filter(Q(custom_username__icontains=search_text) | Q(
+        user_obj = User.objects.exclude(id = request.user.id).filter(Q(custom_username__icontains=search_text) | Q(
             display_name__icontains=search_text))
         serializer = UserLoginDetailSerializer(user_obj, many=True)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
