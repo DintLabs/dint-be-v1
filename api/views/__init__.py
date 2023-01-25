@@ -7,3 +7,4 @@ from .chatView import *
 from .eventView import *
 from .pageView import *
 from .connectionView import *
+from .wisetransferView import *

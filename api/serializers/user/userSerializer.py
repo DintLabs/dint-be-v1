@@ -7,7 +7,7 @@ from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet
 from api.models.userBookmarksModel import UserBookmarks
 
 from django.core.exceptions import ValidationError
-from api.models import UserRecepientAccount
+
 
 class UserLoginDetailSerializer(serializers.ModelSerializer):
     """
@@ -363,9 +363,5 @@ class UserStatusUpdateSerializer(serializers.ModelSerializer):
         model = User
         fields = ('is_online', 'last_login')
 
-class UserRecepientAccountSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = UserRecepientAccount
-        fields = "__all__"
+
 

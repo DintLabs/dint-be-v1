@@ -20,3 +20,6 @@ from .userSubscriptionHistory import *
 from .userBookmarksModel import *
 from .userFollowersModel import *
 from .UserRecepientAccount import *
+from .WiseRecepientsModel import *
+from .WisepaymentsModel import *
+from .WiseQuotesModel import *
