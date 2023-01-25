@@ -1,8 +1,7 @@
 from cryptography.fernet import Fernet
 from dint import settings
-from api.models import UserRecepientAccount
 from api.serializers.user import (UserLoginDetailSerializer, UserCreateUpdateSerializer,
-                                  UserCloseFriendsSerializer, UserStatusUpdateSerializer, UserRecepientAccountSerializer)
+                                  UserCloseFriendsSerializer, UserStatusUpdateSerializer)
 from api.models.userFollowersModel import UserFollowers
 from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks, Posts, UserCloseFriends
 from api.utils.messages.userMessages import *
@@ -758,110 +757,5 @@ class UserService(UserBaseService):
             serializer.save(user=request.user)
             return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "User status saved Successfully"})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
-
-    def create_transferwise_quotes_by_token(self, request, format=None):
-
-        url = settings.WISE_URL +'/v2/quotes'
-        token = settings.WISE_TOKEN
-
-        payload = json.dumps({
-        "sourceCurrency": request.data['sourceCurrency'],
-        "targetCurrency": request.data['targetCurrency'],
-        "sourceAmount": request.data['sourceAmount'],
-        "profile": settings.WISE_PROFILE_ID
-        })
-        headers = {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json'
-        }
-        response = requests.post(url, headers = headers, data = payload)
-        final = response.json()
-        return final
-
-    def create_recipient_account_by_token(self, request, format=None):
-        data = request.data
-       
-        details = data['details']
-        address = details['address']
-
-        url = settings.WISE_URL +'/v1/accounts'
-        token = settings.WISE_TOKEN
-       
-        payload = json.dumps({
-        "profile" : settings.WISE_PROFILE_ID,
-        "accountHolderName": request.data['accountHolderName'],
-        "currency": request.data['currency'],
-        "type": request.data['type'],
-        "details": {
-            "address": {
-            "city": address['city'],
-            "countryCode": address['countryCode'],
-            "postCode": address['postCode'],
-            "state": address['state'],
-            "firstLine": address['firstLine']
-            },
-            "legalType" : details['legalType'],
-            "abartn": details['abartn'],
-            "accountType": details['accountType'],
-            "accountNumber": details['accountNumber'],
-        }
-        })
-        headers = {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json'
-        }
-        response = requests.post(url, headers = headers, data = payload)
-        final = response.json()
-        details = final['details']
-        address =details['address']
-
-        last_digit = details['accountNumber'][-4:]
-      
-        RecepientAccount = UserRecepientAccount.objects.create(profile = final['profile'], accountHolderName = final['accountHolderName'], accountNumber = last_digit, receipt_id = final['id'], abartn = details['abartn'], country = address['countryCode'], city = address['city'], state = address['city'], postCode = address['postCode'], firstLine = address['firstLine'])
-
-        acnt_data = model_to_dict(RecepientAccount)
-     
-        serializer = UserRecepientAccountSerializer(RecepientAccount, data = acnt_data)
-        if serializer.is_valid():
-            serializer.save()
-           
-            return final
-
-    def get_recipient_account_by_token(self, request, format=None):
-        receipt_accounts = UserRecepientAccount.objects.all()
-       
-        if receipt_accounts:
-            serializer = UserRecepientAccountSerializer(receipt_accounts, many=True)
-            preference = serializer.data
-            return ({"data": preference, "code": status.HTTP_200_OK, "message": "Details fetched Successfully"})
-        else:
-            preference = None
-            return ({"data": preference, "code": status.HTTP_200_OK, "message": "Details fetched Successfully"})
-
-        return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "No data found"})
-
-    
-    def delete_recipient_account_by_token(self, request, pk, format=None):
-        receipt_accounts = UserRecepientAccount.objects.filter(id = pk)
-        if not receipt_accounts.exists():
-            return ({"code": status.HTTP_400_BAD_REQUEST, "message": "Account not exists"})
-        else:
-            receipt_accounts.delete()
-            return ({"code": status.HTTP_200_OK, "message": "Account deleted successfully"})
-
-    # def update_recipient_account_by_token(self, request, pk, format=None):
-    #     data = i
-    #     try:
-    #         account_obj = UserRecepientAccount.objects.get(id = pk)
-    #     except account_obj.DoesNotExist:
-    #         return ({"code": status.HTTP_400_BAD_REQUEST, "message": RECORD_NOT_FOUND})
-    #     if data['primary'] == 'True':
-    #         others = UserBookaccounts.objects.exclude(id = pk).filter(user = request.user).update( primary = False)
-    #     serializer = UserBankaccountsSerializer(bankaccount_obj, data=data)
-    #     if serializer.is_valid ():
-    #         serializer.save ()
-    #         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "Updated"})
-    #     else:
-    #         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
 
    
