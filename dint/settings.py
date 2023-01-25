@@ -31,7 +31,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1','api.dint.com', 'bedev.dint.com','paydev.dint.com', '32h19eg817.dint.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'bedev.dint.com','32h19eg817.dint.com']
 
 
 
