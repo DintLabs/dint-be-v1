@@ -33,9 +33,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'api.dint.com', 'bedev.dint.com','paydev.dint.com', '32h19eg817.dint.com', 'pay.dint.com']
 
-
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -159,7 +156,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ],
-    
+
     # Permission settings
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
