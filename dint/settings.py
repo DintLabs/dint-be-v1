@@ -31,7 +31,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', config('WALLET_URL_DINT'), config('BE_URL_DINT')]
+ALLOWED_HOSTS = ['127.0.0.1', 'bedev.dint.com','32h19eg817.dint.com']
 
 
 
@@ -159,7 +159,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ],
-    
+
     # Permission settings
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -280,4 +280,5 @@ DINT_TOKEN_DISTRIBUTOR_ADDRESS = config('DINT_TOKEN_DISTRIBUTOR_ADDRESS')
 DINT_TOKEN_ADDRESS = config('DINT_TOKEN_ADDRESS')
 
 NODE_API_KEY = config('NODE_API_KEY')
-NODE_TOKEN_URL = config('NODE_TOKEN_URL')
+SEND_DINT_TOKEN_URL = config('SEND_DINT_TOKEN_URL')
+WITHDRAW_DINT_TOKEN_URL = config('WITHDRAW_DINT_TOKEN_URL')

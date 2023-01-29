@@ -55,7 +55,7 @@ urlpatterns = [
     path('user/delete-stories/<int:pk>/', UserStoriesView.as_view(), name="delete-stories"),
     
     # USER SEND DINT
-    # path('user/send-dint/', UserSendDint.as_view(), name="send-dint-by-token"),
+    path('user/withdraw-dint/', WithdrawDint.as_view(), name="withdraw-dint"),
     path('user/send-dint/', UserSendDint.as_view(), name="send-dint-by-id"),
     path('user/send-reward/', UserDintReward.as_view(), name="send-reward-by-token"),
    
