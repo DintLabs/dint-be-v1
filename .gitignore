@@ -99,6 +99,9 @@ celerybeat-schedule.*
 
 # Environments 
 .env 
+.env.save
+.env.swo
+.env.swp
 .venv 
 env/ 
 venv/ 
@@ -136,3 +139,4 @@ GitHub.sublime-settings
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
+
