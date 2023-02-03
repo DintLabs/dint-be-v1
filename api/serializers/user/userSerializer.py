@@ -2,8 +2,7 @@ from dataclasses import field
 from api.models.pageModel import Page
 from api.models.userFollowersModel import UserFollowers
 from rest_framework import serializers
-from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet, UserPreferences, ConfineUsers,
-                        UserCustomLists, UserCustomGroupMembers, UserCloseFriends, UserStories)
+from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet, UserPreferences, ConfineUsers,UserCustomLists, UserCustomGroupMembers, UserCloseFriends, UserStories)
 from api.models.userBookmarksModel import UserBookmarks
 
 from django.core.exceptions import ValidationError
@@ -19,8 +18,7 @@ class UserLoginDetailSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = User
         fields = (
-            'id', 'email', 'first_name', 'last_name', 'phone_no', 'is_active', 'is_deleted', 'profile_image',
-            'display_name', 'custom_username', 'is_private')
+            'id', 'email', 'first_name', 'last_name', 'phone_no', 'is_active', 'is_deleted', 'profile_image','display_name', 'custom_username', 'is_private')
 
 
 class UserCreateUpdateSerializer(serializers.ModelSerializer):
@@ -81,8 +79,7 @@ class UpdateUserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-        'id', 'email', 'phone_no' ,'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
-        'city', 'twitter', 'instagram', 'discord', 'banner_image', 'location', 'is_private')
+        'id', 'email', 'phone_no' ,'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image','city', 'twitter', 'instagram', 'discord', 'banner_image', 'location', 'is_private')
 
 
 class GetUserPageSerializer(serializers.ModelSerializer):
@@ -128,9 +125,7 @@ class GetUserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-        'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
-        'city', 'twitter', 'instagram', 'discord', 'banner_image', 'user_posts', 'location', 'is_followed',
-        'is_private','is_online','last_login','is_active', 'user_stories')
+        'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image','city', 'twitter', 'instagram', 'discord', 'banner_image', 'user_posts', 'location', 'is_followed','is_private','is_online', 'last_login','is_active', 'user_stories')
 
 class UpdateUserWalletSerializer(serializers.ModelSerializer):
     """
@@ -171,8 +166,7 @@ class GetUserPageProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-        'id', 'email', 'phone_no', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
-        'city', 'twitter', 'instagram', 'discord', 'banner_image', 'location', 'is_followed', 'is_private', 'user_page', 'is_online', 'last_login','is_active')
+        'id', 'email', 'phone_no', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image','city', 'twitter', 'instagram', 'discord', 'banner_image', 'location', 'is_followed', 'is_private', 'user_page', 'is_online', 'last_login','is_active')
 
     def get_is_followed(self, obj):
         profile_user_id = self.context.get('profile_user_id')
@@ -331,9 +325,7 @@ class ProfileByUsernameSerializer(serializers.ModelSerializer):
      class Meta:
         model = User
         fields = fields = (
-        'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image',
-        'city', 'twitter', 'instagram', 'discord', 'banner_image', 'user_posts', 'location', 'is_followed',
-        'is_private','is_online', 'last_login','is_active')
+        'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image','city', 'twitter', 'instagram', 'discord', 'banner_image', 'user_posts', 'location', 'is_followed','is_private','is_online', 'connections', 'last_login', 'is_active')
 
      def get_is_followed(self, obj):
         profile_user_id = self.context.get('profile_user_id')

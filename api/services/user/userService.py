@@ -714,10 +714,16 @@ class UserService(UserBaseService):
         search_text = request.GET.get('search')
         if search_text is None:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Please provide Search Text"})
-        user_obj = User.objects.exclude(id = request.user.id).filter(Q(custom_username__icontains=search_text) | Q(
-            display_name__icontains=search_text))
-        serializer = UserLoginDetailSerializer(user_obj, many=True)
-        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
+        try:
+            followers = UserFollowers.objects.filter(follower = request.user.id, request_status = True).values_list('user')
+            followers_email = User.objects.filter(id__in = followers).values_list('email')
+            print(followers_email)
+            user_obj = User.objects.exclude(id = request.user.id).filter(Q(custom_username__icontains=search_text) | Q(display_name__icontains=search_text)).filter(email__in = followers_email)
+            print(user_obj)
+            serializer = UserLoginDetailSerializer(user_obj, many=True)
+            return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
+        except:
+            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "No user in the following list"})
 
     def get_closefriends(self, request, format=None):
         user_obj = User.objects.get(id=request.user.id)
