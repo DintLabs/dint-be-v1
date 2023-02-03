@@ -105,6 +105,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     last_login = models.DateTimeField(null=True, blank=True)
     
+    connections = models.IntegerField(default=0)
+
     def save(self, *args, **kwargs):
         super(User, self).save(*args, **kwargs)
 
