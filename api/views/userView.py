@@ -438,6 +438,10 @@ class VerifyIdentity(APIView):
         result = userService.verify_identity(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
 
-
-
-    
+class UserReferral(APIView):
+    """
+    APIs for referral code
+    """
+    def post(self, request, format=None):
+        result = userService.user_referral_by_token(request, format=None)
+        return Response(result, status = status.HTTP_200_OK)
