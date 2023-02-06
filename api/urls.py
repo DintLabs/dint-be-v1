@@ -2,15 +2,21 @@ from django.urls import path, include
 from .views import *
 from rest_framework.routers import DefaultRouter
 
+from django.urls import re_path
+
+from chat import consumers
+
+# websocket_urlpatterns = [
+#     re_path(r'ws/auth/login', consumers.ChatConsumer.as_asgi()),
+# ]
+
 app_name = 'api'
 routers = DefaultRouter()
-
 routers.register('referral', UserReferralWalletModelViewSet, base_name='referral')
 routers.register('tip-reference', UserTipReferenceModelViewSet, base_name='tip-reference')
 routers.register('confine-user', confineUserModelViewSet, base_name='confine-user')
 routers.register('user-list', UserCustomListsModelViewSet, base_name='user-list')
 routers.register('add-member-in-list', UserCustomGroupMembersModelViewSet, base_name='add-member-in-list')
-
 
 urlpatterns = [
     path('', include(routers.urls)),
@@ -23,7 +29,6 @@ urlpatterns = [
     path('user/wallet', UserWalletView.as_view(), name="get-user-wallet"),
     path('user/update-wallet-by-token/', UserWalletView.as_view(), name="update-user-wallet"),
 
-
     #user preferences
     path('user/get-user-preferences/', UserPreferencesView.as_view(), name="get-user-preferences"),
     path('user/update-user-preferences/', UserPreferencesView.as_view(), name="update-user-preferences"),
@@ -32,28 +37,26 @@ urlpatterns = [
     path('user/get-user-bookmarks/', UserBookmarksView.as_view(), name="get-user-bookmarks"),
     path('user/create-user-bookmarks/', UserBookmarksView.as_view(), name="create-user-bookmarks"),
     path('user/delete-user-bookmarks/<int:pk>/', UserBookmarksView.as_view(), name="delete-user-bookmarks"),
-    
-    #Wise payment payouts
-    
+
     # update user status
     path('user/update-status/', UserUpdateStatusView.as_view(),  name="update-user-status"),
-    
+
     #OTP
     path('user/verify-otp/', VarifyOtpView.as_view(), name="verify-otp"),
     path('user/send-otp-to-old-user/', SendOtpForOldUser.as_view(), name="send-otp-to-old-user"),
-    
+
     #profile
     path('user/get-profile-by-token/', ProfileView.as_view(), name="verify-otp"),
     path('user/get-page-profile-by-token/', PageProfileView.as_view(), name="verify-otp"),
     path('user/get-profile-by-username/', ProfileUsernameView.as_view(), name="verify-otp"),
     path('user/update-profile-by-token/', ProfileView.as_view(), name="verify-otp"),
-    
+
     # user stories
     path('user/get-stories/',UserStoriesView.as_view(), name="get-stories"),
     path('user/get-stories-by-user/',UserStoriesByUserView.as_view(), name="get-stories-by-user"),
     path('user/create-stories/',UserStoriesView.as_view(), name="create-stories"),
     path('user/delete-stories/<int:pk>/', UserStoriesView.as_view(), name="delete-stories"),
-    
+
     # USER SEND DINT
     path('user/withdraw-dint/', WithdrawDint.as_view(), name="withdraw-dint"),
     path('user/send-dint/', UserSendDint.as_view(), name="send-dint-by-id"),
@@ -77,6 +80,10 @@ urlpatterns = [
     path('posts/update/<int:pk>/', ListCreateUpdateDeletePostView.as_view(), name="create-posts"),
     path('posts/delete/<int:pk>/', ListCreateUpdateDeletePostView.as_view(), name="create-posts"),
     path('posts/list/page/<int:pk>/', PostPaginationByPageIDView.as_view(), name="get-all-posts/list_by_page_id"),
+    path('posts/fetch-post-counts/<int:user_name>/', GetPostCountsByUserIDView.as_view(), name="create-posts"),
+    path('posts/like/', LikePostView.as_view(), name="create-posts"),
+    path('posts/comment/', CommentPostView.as_view(), name="create-posts"),
+    path('posts/unlike/', UnLikePostView.as_view(), name="unlike-posts"),
 
     #Events
     path('events/list/', ListCreateUpdateDeleteEventView.as_view(), name="get-all-posts"),
@@ -85,6 +92,7 @@ urlpatterns = [
     path('events/get/<int:pk>/', GetEventByIDView.as_view(), name="create-posts"),
     path('events/update/<int:pk>/', ListCreateUpdateDeleteEventView.as_view(), name="create-posts"),
     path('events/delete/<int:pk>/', ListCreateUpdateDeleteEventView.as_view(), name="create-posts"),
+
     #Venues
     path('venue/list/', ListCreateUpdateDeleteVenueView.as_view(), name="get-all-posts"),
     path('venue/list_by_user_id/<int:pk>/', GetVenueByUserIDView.as_view(), name="create-posts"),
@@ -93,16 +101,9 @@ urlpatterns = [
     path('venue/update/<int:pk>/', ListCreateUpdateDeleteVenueView.as_view(), name="create-posts"),
     path('venue/delete/<int:pk>/', ListCreateUpdateDeleteVenueView.as_view(), name="create-posts"),
 
-    path('posts/fetch-post-counts/<int:user_name>/', GetPostCountsByUserIDView.as_view(), name="create-posts"),
-
     #Lounge
     path('lounge/pagination/list/', GetLoungePostPaginationView.as_view(), name="get-all-posts"),
     path('lounge/fetch-post-counts/', GetTotalPostCountsView.as_view(), name="create-posts"),
-
-    path('posts/like/', LikePostView.as_view(), name="create-posts"),
-    path('posts/comment/', CommentPostView.as_view(), name="create-posts"),
-    path('posts/unlike/', UnLikePostView.as_view(), name="unlike-posts"),
-
 
     #Subscription
     path('subscription-tier/list-by-user/', ListCreateUpdateDeleteSubscriptionTierView.as_view(), name="get-all-posts"),
@@ -110,24 +111,20 @@ urlpatterns = [
     path('subscription-tier/get/<int:pk>/', GetSubscriptionTierView.as_view(), name="create-posts"),
     path('subscription-tier/update/<int:pk>/', ListCreateUpdateDeleteSubscriptionTierView.as_view(), name="create-posts"),
     path('subscription-tier/delete/<int:pk>/', ListCreateUpdateDeleteSubscriptionTierView.as_view(), name="create-posts"),
-
     path('subscription/active/list-by-user/', SubscriptionView.as_view(), name="create-posts"),
     path('subscription/all/list-by-user/', GetActiveSubscriptionView.as_view(), name="create-posts"),
     path('subscription/subscribe/', SubscriptionView.as_view(), name="create-posts"),
     path('subscription/unsubscribe/<int:pk>/', SubscriptionView.as_view(), name="create-posts"),
-
     path('subscription/promotion-campaign/list-by-user/', ListCreateUpdateDeletePromotionCampaignView.as_view(), name="get-all-posts"),
     path('subscription/promotion-campaign/create/', ListCreateUpdateDeletePromotionCampaignView.as_view(), name="create-posts"),
     path('subscription/promotion-campaign/get/<int:pk>/', GetPromotionCampaignView.as_view(), name="create-posts"),
     path('subscription/promotion-campaign/update/<int:pk>/', ListCreateUpdateDeletePromotionCampaignView.as_view(), name="create-posts"),
     path('subscription/promotion-campaign/delete/<int:pk>/', ListCreateUpdateDeletePromotionCampaignView.as_view(), name="create-posts"),
-
     path('subscription/free-trial/list-by-user/', ListCreateUpdateDeleteFreeTrialView.as_view(), name="get-all-posts"),
     path('subscription/free-trial/create/', ListCreateUpdateDeleteFreeTrialView.as_view(), name="create-posts"),
     path('subscription/free-trial/get/<int:pk>/', GetFreeTrialView.as_view(), name="create-posts"),
     path('subscription/free-trial/update/<int:pk>/', ListCreateUpdateDeleteFreeTrialView.as_view(), name="create-posts"),
     path('subscription/free-trial/delete/<int:pk>/', ListCreateUpdateDeleteFreeTrialView.as_view(), name="create-posts"),
-
     path('subscription/get-subscriber-by-page-id/<int:pk>/', GetSubscribersByPageView.as_view(), name="create-posts"),
     path('subscription/get-pages-by-subscriber-id/<int:pk>/', GetPageBySubscriberIDView.as_view(), name="create-posts"),
 
@@ -152,10 +149,7 @@ urlpatterns = [
     path('page/delete/<int:pk>/', ListCreateUpdateDeletePageView.as_view(), name="create-page"),
     path('page/search/', SearchPageView.as_view(), name="create-page"),    
     path('page/get-by-page_name/<str:page_name>/', GetPageByPageNameView.as_view(), name="create-page"),
-   
     path('page/check-user-name-availability/<str:user_name>/', CheckUsernameAvailabilityView.as_view(), name="create-page"),
-
-    
 
     #Connection
     path('connection/follow/<int:pk>/', FollowView.as_view(), name="create-page"),
@@ -167,14 +161,14 @@ urlpatterns = [
     path('connection/get-following-list/', GetFollowingListView.as_view(), name="create-page"),
     path('connection/delete-follow-request/<int:pk>/', DeleteFollowRequestView.as_view(), name="create-page"),
     path('connection/update-privacy-status/', UpdatePrivacyStatusView.as_view(), name="create-page"),
-
     path('stripe/', include('api.payments.urls')),
     path('search-user/', SearchAnyUserView.as_view(), name="search-user"),
-    
     path('user/get-close-friends/', CloseFriendsView.as_view(), name="close-friend"),
     path('user/create-close-friends/', CloseFriendsView.as_view(), name="create-close-friend"),
     path('user/delete-close-friends/<int:pk>/', CloseFriendsView.as_view(), name="delete-close-friend"),
 
+    #verify user identity
+    path('user/verify_indentity/', VerifyIdentity.as_view(), name="verify-identity"), 
 
      #Wise Quotes
     path('wise/create-quotes/', WiseQuotesView.as_view(), name="create-quotes"),
@@ -185,12 +179,9 @@ urlpatterns = [
     path('wise/get-recipients/', WiseRecepientsView.as_view(), name="get-recipient-details"),
     path('wise/delete-recipient/<int:pk>/', WiseRecepientsView.as_view(), name="delete-recipients"),
     # path('user/update-recipient-account/<int:pk>/', ReceiptTransferWiseView.as_view(), name="update-transferwise-details"),
-
     # Wise Transfers
     path('wise/create-transfer/', WiseTransferView.as_view(), name="create-wise-transfer"),
-    
     # Wise Payments
     path('wise/create-payment/', WisePaymentView.as_view(), name="create-wise-payment")
-
 ]
 
