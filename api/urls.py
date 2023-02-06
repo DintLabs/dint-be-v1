@@ -61,7 +61,8 @@ urlpatterns = [
     path('user/withdraw-dint/', WithdrawDint.as_view(), name="withdraw-dint"),
     path('user/send-dint/', UserSendDint.as_view(), name="send-dint-by-id"),
     path('user/send-reward/', UserDintReward.as_view(), name="send-reward-by-token"),
-   
+    
+    path('user/validate_referral_code/', UserReferral.as_view(), name="user-referral"),
     #role
     path('role/get-all-roles/', RoleListView.as_view(), name="get-all-role"),
     path('role/create-role/', RoleCreateView.as_view(), name="create-role"),

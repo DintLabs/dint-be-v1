@@ -781,6 +781,17 @@ class UserService(UserBaseService):
             return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "User status saved Successfully"})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
 
+    def user_referral_by_token(self, request, format=None):
+        user_obj = User.objects.get(id=request.user.id)
+        referred_code = request.data['referred_code']
+        try:
+            is_valid =  User.objects.get(referral_id=request.data['referred_code'])
+            if is_valid:
+                return ({"data": [], "code": status.HTTP_200_OK, "message": "code validated"})
+        except User.DoesNotExist:
+            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Provided Referral ID is not correct!"})
+
+    
     def verify_identity(self, request, format=None):
         face_image = request.data['face_image']
         document = request.data['document']
