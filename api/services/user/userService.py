@@ -1,9 +1,9 @@
 from cryptography.fernet import Fernet
 from dint import settings
 from api.serializers.user import (UserLoginDetailSerializer, UserCreateUpdateSerializer,
-                                  UserCloseFriendsSerializer, UserStatusUpdateSerializer)
+                                  UserCloseFriendsSerializer, UserStatusUpdateSerializer, UserIdentitySerializer)
 from api.models.userFollowersModel import UserFollowers
-from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks, Posts, UserCloseFriends
+from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks, Posts, UserCloseFriends, UserIdentity
 from api.utils.messages.userMessages import *
 from .userBaseService import UserBaseService
 from django.core.files.base import ContentFile
@@ -11,7 +11,7 @@ from curses.ascii import US
 from multiprocessing import managers
 import re
 import requests
-from api.serializers.user.userSerializer import GetUserPageProfileSerializer, GetUserProfileSerializer, UpdateUserProfileSerializer, UpdateUserWalletSerializer, GetUserPreferencesSerializer, UpdateUserPreferencesUpdateSerializer, GetUserBookmarksSerializer, CreateUpdatePostsSerializer, ProfileByUsernameSerializer
+from api.serializers.user.userSerializer import GetUserPageProfileSerializer, GetUserProfileSerializer, UpdateUserProfileSerializer, UpdateUserWalletSerializer, GetUserPreferencesSerializer, UpdateUserPreferencesUpdateSerializer, GetUserBookmarksSerializer, CreateUserBookmarksSerializer, ProfileByUsernameSerializer
 from api.utils.messages.commonMessages import BAD_REQUEST, RECORD_NOT_FOUND
 from rest_framework import status
 from rest_framework.response import Response
@@ -22,7 +22,7 @@ import string
 import json
 import base64
 import random
-from datetime import datetime
+import datetime
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate, login
@@ -32,9 +32,7 @@ from datetime import datetime, timedelta
 import jwt
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
-
 from django.forms.models import model_to_dict
-
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 from dotenv import load_dotenv
@@ -42,8 +40,14 @@ from eth_account import Account
 import secrets
 from binascii import hexlify
 load_dotenv()
-
-
+import idanalyzer
+from dint import settings
+import os
+from PIL import Image
+from base64 import b64encode
+from api.services.uploadMedia import uploadMediaService
+from api.utils.saveImage import saveImage
+from django.forms.models import model_to_dict
 
 class UserService(UserBaseService):
     """
@@ -242,7 +246,6 @@ class UserService(UserBaseService):
     # SEND DINT START
     def withdraw_dint_token(self, request, format=None):
         url = settings.WITHDRAW_DINT_TOKEN_URL
-        requested_data = request.data
         payload = json.dumps({
         "user_id" : request.data['user_id'],
         "amount" : request.data['amount']
@@ -263,7 +266,7 @@ class UserService(UserBaseService):
             else:
                 return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
         except:
-            return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
+            return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
 
     def send_dint_token(self, request, format=None):
         url = settings.SEND_DINT_TOKEN_URL
@@ -599,7 +602,7 @@ class UserService(UserBaseService):
         post_exist = UserBookmarks.objects.filter(
             user=request.user, post=request.data['post']).exists()
         if not post_exist:
-            serializer = CreateUpdatePostsSerializer(data=request.data)
+            serializer = CreateUserBookmarksSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save(user=request.user)
                 res_data = GetUserBookmarksSerializer(
@@ -757,15 +760,13 @@ class UserService(UserBaseService):
                 create_close_friend, data=request.data)
             if serializer.is_valid():
                 serializer.save(user=request.user)
-                res_data = UserCloseFriendsSerializer(
-                    UserCloseFriends.objects.get(id=serializer.data['id'])).data
+                res_data = UserCloseFriendsSerializer(UserCloseFriends.objects.get(id=serializer.data['id'])).data
                 return ({"data": res_data, "code": status.HTTP_201_CREATED, "message": "Close friend created successfully"})
             return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
         return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Close friend alrerady there."})
 
     def delete_closefriends(self, request, pk, format=None):
-        post_exist = UserCloseFriends.objects.filter(
-            main_user=request.user, close_friend=pk)
+        post_exist = UserCloseFriends.objects.filter(main_user=request.user, close_friend=pk)
         if not post_exist.exists():
             return ({"code": status.HTTP_400_BAD_REQUEST, "message": "Close friend not exists"})
         else:
@@ -774,11 +775,94 @@ class UserService(UserBaseService):
 
     def update_user_status_by_token(self, request, format=None):
         user_obj = User.objects.get(id=request.user.id)
-
         serializer = UserStatusUpdateSerializer(user_obj, data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
             return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "User status saved Successfully"})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
 
-   
+    def verify_identity(self, request, format=None):
+        face_image = request.data['face_image']
+        document = request.data['document']
+      
+        folder = "IDS"
+        try:
+            for im in dict((request.data).lists())['document']:
+                image_url, image_name = saveImage(im, folder)
+                # print(image_url)
+                document_url = image_url
+            for im in dict((request.data).lists())['face_image']:
+                image_url, image_name = saveImage(im, folder)
+                # print(image_url)
+                face_image_url = image_url
+        except Exception as e:
+            print(e)
+            pass
+        id_analyzer_key = settings.ID_ANALYZER_KEY
+        try:
+            coreapi = idanalyzer.CoreAPI(id_analyzer_key, "US")
+            coreapi.throw_api_exception(True)
+            coreapi.enable_authentication(True, 'quick')
+            # response = coreapi.scan(document_primary = document_url, biometric_photo = face_image_url)
+             # perform scan
+            response = coreapi.scan(document_primary = document_url, biometric_photo = face_image_url)
+            print(response)
+            if response.get('result'):
+                data_result = response['result']
+                # print("Hello your name is {} {}".format(data_result['firstName'],data_result['lastName']))
+                print(response)
+
+            if response.get('face'):
+                face_result = response['face']
+                if face_result['isIdentical']:
+                    print("Face verification PASSED!")
+                else:
+                    print("Face verification FAILED!")
+
+                print("Confidence Score: "+face_result['confidence'])
+
+            if response.get('authentication'):
+                authentication_result = response['authentication']
+                if authentication_result['score'] > 0.5:
+                    try:
+                        already_verified = UserIdentity.objects.get(documentNumber = result['documentNumber'], document_type = result['documentType'])
+                        if already_verified:
+                            return ({"data": [], "code": status.HTTP_200_OK, "message": "Already verified"})
+                        print("already verified")
+                    except:
+                        result = response['result']
+                        print("result" , result)
+                        user_obj = User.objects.get(id = request.user.id)
+                        user_identity = UserIdentity.objects.create(user = user_obj,fullname = result['fullName'], document_type = result['documentType'], documentNumber = result['documentNumber'], nationality = result['nationality_full'], verified = True)
+                        user_identity.save()
+                        try:
+                            dob = result['dob']
+                            temp_date = datetime.strptime(dob, "%Y/%m/%d").date()
+                            print(type(temp_date))
+                            print("result", result)
+                            user_identity.date_of_birth = temp_date
+                            user_identity.save()
+                        except Exception as e:
+                            print(e)
+                            pass
+                        try:
+                            gender = result['sex']
+                            user_identity.gender = gender
+                            user_identity.save()
+                        except:
+                            pass
+                        data = model_to_dict(user_identity)
+                        # print(data)
+                        serializer = UserIdentitySerializer(user_identity, data=data)
+                        if serializer.is_valid():
+                            serializer.save(user=request.user)
+                            print(serializer.data)
+                            return ({"data": response, "code": status.HTTP_200_OK, "message": "User verified Successfully"})
+                elif authentication_result['score'] > 0.3:
+                    return ({"data": [response], "code": status.HTTP_400_BAD_REQUEST, "message": "Document looks little suspicious"})
+                else:
+                    return ({"data": [response], "code": status.HTTP_400_BAD_REQUEST, "message": "Document uploaded is fake"})
+            
+        except Exception as e:
+            print(e)
+            return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "something went wrong"})

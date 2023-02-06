@@ -66,12 +66,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     desription = models.TextField(null=True, blank=True)
     fire_base_auth_key = models.CharField(max_length=250, null=True, blank=True)
     referral_id = models.CharField(max_length=30, null=True, blank=True)
-    # profile_image = models.ForeignKey(UploadMedia)
-  
     wallet_address = models.BinaryField(null = True, blank=True)
     wallet_private_key = models.BinaryField(null=True, blank=True)
-
-    #Profile
     custom_username = models.CharField(max_length=50, blank=True, null=True)
     display_name = models.CharField(max_length=40, blank=True, null=True)
     bio = models.CharField(max_length=1000, blank=True, null=True)
@@ -85,19 +81,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     instagram = models.CharField(max_length=1000, blank=True, null=True)
     discord = models.CharField(max_length=1000, blank=True, null=True)
     is_private = models.BooleanField(default=False)
-
     is_active = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(blank=True, null=True)
     otp_varification = models.BooleanField(default=False)
     otp = models.CharField(max_length=6, blank=True, null=True)
     otp_send_time = models.DateTimeField(blank=True, null=True)
-   
     objects = UserManager()
-
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name']
-
     history = HistoricalRecords(table_name='user_history')
     is_active = models.BooleanField(default=True)
     is_online = models.BooleanField(default=False)
@@ -133,8 +125,6 @@ class UserPreferences(models.Model):
     new_comment = models.BooleanField(default=False)
     new_like = models.BooleanField(default=False)
     language = models.ForeignKey(Language,on_delete=models.DO_NOTHING, null=True)
-    
-
 
 class UserReferralWallet(models.Model):
     referred_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='referred_by' )
@@ -142,7 +132,6 @@ class UserReferralWallet(models.Model):
     wallet = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
 class ConfineUsers(models.Model):
     USER_BLOCK_TYPE = (
@@ -156,13 +145,11 @@ class ConfineUsers(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
 class UserCustomLists(models.Model):
     name = models.CharField(max_length=32)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
 class UserCustomGroupMembers(models.Model):
     user_custom_lists = models.ForeignKey(UserCustomLists, on_delete=models.CASCADE)
@@ -175,3 +162,19 @@ class UserCloseFriends(models.Model):
     close_friend = models.ForeignKey(User, on_delete=models.CASCADE, related_name="close_friend")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+class UserIdentity(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    fullname = models.CharField(max_length=255, blank=True, null=True)
+    gender = models.CharField(max_length=6, blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+    documentNumber = models.CharField(max_length=255, blank=True, null=True)
+    document_type = models.CharField(max_length=20, blank=True, null=True)
+    nationality = models.CharField(max_length=50, blank=True, null=True)
+    verified = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'user_identity'
+        indexes = [
+            models.Index(fields=['id'])
+        ]
