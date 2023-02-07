@@ -31,7 +31,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', config('WALLET_URL_DINT'), config('BE_URL_DINT')]
+ALLOWED_HOSTS = ['127.0.0.1', config('WALLET_URL_DINT'), config('BE_URL_DINT'), '7a40-103-183-31-33.in.ngrok.io']
 
 
 
