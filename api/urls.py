@@ -62,7 +62,7 @@ urlpatterns = [
     path('user/send-dint/', UserSendDint.as_view(), name="send-dint-by-id"),
     path('user/send-reward/', UserDintReward.as_view(), name="send-reward-by-token"),
     
-    # path('user/validate_referral_code/', ValidateUserReferral.as_view(), name="validate-user-referral"),
+    path('user/validate_referral_code/', ValidateUserReferral.as_view(), name="validate-user-referral"),
     # path('user/referral_code/', Referral_code.as_view(), name="referral_code"),
    
     #role
