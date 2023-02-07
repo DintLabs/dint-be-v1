@@ -793,6 +793,30 @@ class UserService(UserBaseService):
         except User.DoesNotExist:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Provided Referral ID is not correct!"})
 
+    def add_user_referral(self, request, format=None):
+        user = request.data['email']
+        referral_code = request.data['referral_code']
+        user_obj = User.objects.get(email = user)
+        try:
+            referred_by = User.objects.get(referral_id=referral_code)
+            if referred_by:
+                already_exists = UserReferralWallet(referred_by=referred_by, user_referral = user_obj)
+                if not already_exists:
+                    user_referral_wallet = UserReferralWallet(referred_by=referred_by, user_referral = user_obj)
+                    user_referral_wallet.save()
+                    return ({"data": [], "code": status.HTTP_200_OK, "message": "Referral code added"})
+                else:
+                     return ({"data": [], "code": status.HTTP_200_OK, "message": "Already added"})
+        except Exception as e:
+            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Provided Referral ID is not correct!"})
+
+
+#  user_referred_by = User.objects.get(referral_id=request.data['referred_by'])
+#                 print(user_referred_by)
+#                 user_referral_wallet = UserReferralWallet(referred_by=user_referred_by)
+#                 user_referral_wallet.user_referral = user
+#                 user_referral_wallet.save()
+
     def verify_identity(self, request, format=None):
         face_image = request.data['face_image']
     
