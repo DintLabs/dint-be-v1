@@ -60,32 +60,34 @@ class UserService(UserBaseService):
     def login(self, request, format=None):
 
         validated_data = self.validate_auth_data(request)
-
         username = request.data['email']
         fire_base_auth_key = request.data['fire_base_auth_key']
         username = username.lower()
 
         user = self.user_authenticate(username, fire_base_auth_key)
-
+    
         if user is not None:
-
             login(request, user)
-
             serializer = UserLoginDetailSerializer(user)
-
             payload = jwt_payload_handler(user)
             token = jwt.encode(payload, settings.SECRET_KEY)
-
             user_details = serializer.data
             user_details['token'] = token
             # User.objects.filter(pk=user.pk).update(auth_token=token)
-
             user_session = self.create_update_user_session(
                 user, token, request)
             user.is_online = True
             user.save()
 
-            return ({"data": user_details, "code": status.HTTP_200_OK, "message": "LOGIN_SUCCESSFULLY"})
+            try:
+                user_obj = User.objects.get(email = username)
+                referral = UserReferralWallet.objects.get(user_referral = user_obj)
+                if referral:
+                    return ({"data": user_details, "code": status.HTTP_200_OK, "message": "LOGIN_SUCCESSFULLY"})
+            except:
+                return ({"data": user_details, "code": status.HTTP_200_OK, "message": "User don't have referral code"})
+
+           
         return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "INVALID_CREDENTIALS"})
 
     def user_authenticate(self, user_name, fire_base_auth_key):
@@ -149,7 +151,6 @@ class UserService(UserBaseService):
 
     def sign_up(self, request, format=None):
         request.data['referral_id'] = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-        print(request.data['referral_id'])
         if 'referred_by' in request.data:
             try:
                 User.objects.get(referral_id=request.data['referred_by'])
@@ -162,11 +163,13 @@ class UserService(UserBaseService):
             user.is_active = True
             user.is_online = True
             user.save()
-            if request.data.get('referral_by', None):
+            if request.data.get('referred_by', None):
                 user_referred_by = User.objects.get(referral_id=request.data['referred_by'])
+                print(user_referred_by)
                 user_referral_wallet = UserReferralWallet(referred_by=user_referred_by)
                 user_referral_wallet.user_referral = user
                 user_referral_wallet.save()
+                
             payload = jwt_payload_handler(user)
             token = jwt.encode(payload, settings.SECRET_KEY)
 
@@ -781,8 +784,7 @@ class UserService(UserBaseService):
             return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "User status saved Successfully"})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
 
-    def user_referral_by_token(self, request, format=None):
-        user_obj = User.objects.get(id=request.user.id)
+    def validate_user_referral(self, request, format=None):
         referred_code = request.data['referred_code']
         try:
             is_valid =  User.objects.get(referral_id=request.data['referred_code'])
@@ -791,14 +793,13 @@ class UserService(UserBaseService):
         except User.DoesNotExist:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Provided Referral ID is not correct!"})
 
-    
     def verify_identity(self, request, format=None):
         face_image = request.data['face_image']
         document = request.data['document']
-      
+
         folder = "IDS"
         try:
-            for im in dict((request.data).lists())['document']:
+            for im in dict((request.data))['document']:
                 image_url, image_name = saveImage(im, folder)
                 # print(image_url)
                 document_url = image_url
