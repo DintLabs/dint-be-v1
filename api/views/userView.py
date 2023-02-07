@@ -446,3 +446,11 @@ class ValidateUserReferral(APIView):
     def post(self, request, format=None):
         result = userService.validate_user_referral(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
+
+class AddReferral_code(APIView):
+    """
+    APIs to validating referral code
+    """
+    def post(self, request, format=None):
+        result = userService.add_user_referral(request, format=None)
+        return Response(result, status = status.HTTP_200_OK)
