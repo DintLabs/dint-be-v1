@@ -12,8 +12,7 @@ from datetime import datetime
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # user = self.scope['user']
-        user = "avinash@gmail.com"
+        user = self.scope['user']
         await self.connection_incre(user)
 
         self.room_name = self.scope['url_route']['kwargs']['room_name']
@@ -26,8 +25,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
-        user = "avinash@gmail.com"
-        # user = self.scope['user']
+        user = self.scope['user']
         await self.connection_decre(user)
         await self.update_user_status(user)
 
