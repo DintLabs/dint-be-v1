@@ -171,7 +171,9 @@ urlpatterns = [
     path('user/delete-close-friends/<int:pk>/', CloseFriendsView.as_view(), name="delete-close-friend"),
 
     #verify user identity
-    path('user/verify_indentity/', VerifyIdentity.as_view(), name="verify-identity"), 
+    path('user/verify_identity/', VerifyIdentity.as_view(), name="verify-identity"), 
+    path('user/send_verification_email/<int:pk>/', SendVerificationEmail.as_view(), name="send_verification_email"),
+    path('user/validate_verification_token/', ValidateVerificationtoken.as_view(), name="validate_verification_token"),
 
      #Wise Quotes
     path('wise/create-quotes/', WiseQuotesView.as_view(), name="create-quotes"),

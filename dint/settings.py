@@ -27,17 +27,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 
 SECRET_KEY = config('SECRET_KEY')
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = ['127.0.0.1', config('WALLET_URL_DINT'), config('BE_URL_DINT'), '7a40-103-183-31-33.in.ngrok.io']
-
-
-
+ALLOWED_HOSTS = ['127.0.0.1', config('WALLET_URL_DINT'), config('BE_URL_DINT')]
 
 # Application definition
-
 INSTALLED_APPS = [
     'daphne',
     'chat',
@@ -56,7 +50,6 @@ INSTALLED_APPS = [
 ]
 
 ASGI_APPLICATION = "dint.asgi.application"
-
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
@@ -74,9 +67,7 @@ MIDDLEWARE = [
     'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
-
 ROOT_URLCONF = 'dint.urls'
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -221,6 +212,7 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
+
 USE_I18N = True
 
 USE_TZ = True
@@ -280,3 +272,4 @@ NODE_API_KEY = config('NODE_API_KEY')
 SEND_DINT_TOKEN_URL = config('SEND_DINT_TOKEN_URL')
 WITHDRAW_DINT_TOKEN_URL = config('WITHDRAW_DINT_TOKEN_URL')
 ID_ANALYZER_KEY = config('ID_ANALYZER_KEY')
+SENDINBLUE_API = config('SENDINBLUE_API')
