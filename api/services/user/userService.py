@@ -87,7 +87,7 @@ class UserService(UserBaseService):
 
             try:
                 user_obj = User.objects.get(email = username)
-                referral = UserReferralWallet.objects.get(user_referral = user_obj)
+                referral = UserReferralWallet.objects.filter(user_referral = user_obj)
                 if referral:
                     return ({"data": user_details, "code": status.HTTP_200_OK, "message": "LOGIN_SUCCESSFULLY"})
             except:
@@ -776,11 +776,15 @@ class UserService(UserBaseService):
         user = request.data['email']
         referral_code = request.data['referral_code']
         user_obj = User.objects.get(email = user)
+        print(user_obj)
         try:
             referred_by = User.objects.get(referral_id=referral_code)
+            print(referred_by)
             if referred_by:
-                already_exists = UserReferralWallet(referred_by=referred_by, user_referral = user_obj)
+                already_exists = UserReferralWallet.objects.filter(referred_by=referred_by, user_referral = user_obj)
+              
                 if not already_exists:
+                    print("something")
                     user_referral_wallet = UserReferralWallet(referred_by=referred_by, user_referral = user_obj)
                     user_referral_wallet.save()
                     return ({"data": [], "code": status.HTTP_200_OK, "message": "Referral code added"})
