@@ -809,10 +809,8 @@ class UserService(UserBaseService):
         #     print(e)
         #     print("IP already exists")
          
-
         face_image = request.data['face_image']
-    
-        # document = request.data['document']
+        document = request.data['document']
 
         folder = "IDS"
         try:
@@ -828,28 +826,20 @@ class UserService(UserBaseService):
             print(e)
             pass
         id_analyzer_key = settings.ID_ANALYZER_KEY
-        
         coreapi = idanalyzer.CoreAPI(id_analyzer_key, "US")
         coreapi.throw_api_exception(True)
         coreapi.enable_authentication(True, 'quick')
-        # response = coreapi.scan(document_primary = document_url, biometric_photo = face_image_url)
-            # perform scan
-        response = coreapi.scan(document_primary = "https://www.idanalyzer.com/img/sampleid1.jpg", biometric_photo = face_image)
-        print(response)
+        response = coreapi.scan(document_primary = document_url, biometric_photo = face_image)
         if response.get('result'):
             data_result = response['result']
             # print("Hello your name is {} {}".format(data_result['firstName'],data_result['lastName']))
-            print(response)
-    
         if response.get('face'):
             face_result = response['face']
             if face_result['isIdentical']:
                 print("Face verification PASSED!")
             else:
                 return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "face verification failed"})
-
             print("Confidence Score: "+face_result['confidence'])
-           
         if response.get('authentication'):
             authentication_result = response['authentication']
             if authentication_result['score'] > 0.5:
@@ -881,7 +871,6 @@ class UserService(UserBaseService):
                     except:
                         pass
                     data = model_to_dict(user_identity)
-                    # print(data)
                     serializer = UserIdentitySerializer(user_identity, data=data)
                     if serializer.is_valid():
                         serializer.save(user=request.user)
@@ -891,69 +880,6 @@ class UserService(UserBaseService):
                 return ({"data": [response], "code": status.HTTP_400_BAD_REQUEST, "message": "Document looks little suspicious"})
             else:
                 return ({"data": [response], "code": status.HTTP_400_BAD_REQUEST, "message": "Document uploaded is fake"})
-            
-     
-        # coreapi = idanalyzer.CoreAPI(id_analyzer_key, "US")
-        # coreapi.throw_api_exception(True)
-        # coreapi.enable_authentication(True, 'quick')
-        # response = coreapi.scan(document_primary = "https://www.idanalyzer.com/img/sampleid1.jpg", biometric_photo = face_image)
-        # print(response)
-        # if response.get('result'):
-        #     data_result = response['result']
-        #     # print("Hello your name is {} {}".format(data_result['firstName'],data_result['lastName']))
-        #     print(response)
-
-        # if response.get('face'):
-        #     face_result = response['face']
-        #     print(face_result)
-        #     if face_result['isIdentical']:
-        #         print("Face verification PASSED!")
-        #     else:
-        #         print("Face verification FAILED!")
-
-        #     print("Confidence Score: "+face_result['confidence'])
-
-        # if response.get('authentication'):
-        #     authentication_result = response['authentication']
-        #     if authentication_result['score'] > 0.5:
-        #         try:
-        #             already_verified = UserIdentity.objects.get(documentNumber = result['documentNumber'], document_type = result['documentType'])
-        #             if already_verified:
-        #                 return ({"data": [], "code": status.HTTP_200_OK, "message": "Already verified"})
-        #             print("already verified")
-        #         except:
-        #             result = response['result']
-        #             print("result" , result)
-        #             user_obj = User.objects.get(id = request.user.id)
-        #             user_identity = UserIdentity.objects.create(user = user_obj,fullname = result['fullName'], document_type = result['documentType'], documentNumber = result['documentNumber'], nationality = result['nationality_full'], verified = True)
-        #             user_identity.save()
-        #             try:
-        #                 dob = result['dob']
-        #                 temp_date = datetime.strptime(dob, "%Y/%m/%d").date()
-        #                 print(type(temp_date))
-        #                 print("result", result)
-        #                 user_identity.date_of_birth = temp_date
-        #                 user_identity.save()
-        #             except Exception as e:
-        #                 print(e)
-        #                 pass
-        #             try:
-        #                 gender = result['sex']
-        #                 user_identity.gender = gender
-        #                 user_identity.save()
-        #             except:
-        #                 pass
-        #             data = model_to_dict(user_identity)
-        #             # print(data)
-        #             serializer = UserIdentitySerializer(user_identity, data=data)
-        #             if serializer.is_valid():
-        #                 serializer.save(user=request.user)
-        #                 print(serializer.data)
-        #                 return ({"data": response, "code": status.HTTP_200_OK, "message": "User verified Successfully"})
-        #     elif authentication_result['score'] > 0.3:
-        #         return ({"data": [response], "code": status.HTTP_400_BAD_REQUEST, "message": "Document looks little suspicious"})
-        #     else:
-        #         return ({"data": [response], "code": status.HTTP_400_BAD_REQUEST, "message": "Document uploaded is fake"})
         
     def get_ip_address(self, user, request):
         user_obj = User.objects.get(email = user)
