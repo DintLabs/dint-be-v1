@@ -1,3 +1,4 @@
+from __future__ import print_function
 from cryptography.fernet import Fernet
 from dint import settings
 from api.serializers.user import (UserLoginDetailSerializer, UserCreateUpdateSerializer,
@@ -22,7 +23,7 @@ import string
 import json
 import base64
 import random
-import datetime
+# import datetime
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate, login
@@ -48,6 +49,11 @@ from base64 import b64encode
 from api.services.uploadMedia import uploadMediaService
 from api.utils.saveImage import saveImage
 from django.forms.models import model_to_dict
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+
+from api.utils.token import account_activation_token
 
 class UserService(UserBaseService):
     """
@@ -165,65 +171,38 @@ class UserService(UserBaseService):
             user.save()
             if request.data.get('referred_by', None):
                 user_referred_by = User.objects.get(referral_id=request.data['referred_by'])
-                print(user_referred_by)
                 user_referral_wallet = UserReferralWallet(referred_by=user_referred_by)
                 user_referral_wallet.user_referral = user
                 user_referral_wallet.save()
                 
             payload = jwt_payload_handler(user)
             token = jwt.encode(payload, settings.SECRET_KEY)
-
             user_details = serializer.data
             user_details['token'] = token
             user_details['is_online'] = True
-            # user_details['wallet_token'] = wallet_token
-
-            # **************************************************************WALLET CREATION START
             priv = secrets.token_hex(32)
             wallet_private_key = "0x" + priv
-           
             acct = Account.from_key(wallet_private_key)
-           
             wallet_address = acct.address
-            
-
-            
             address = wallet_address
             key = Fernet(settings.ENCRYPTION_KEY)
-            
             encrypted_wallet_address = key.encrypt(address.encode())
-            
             encrypted_wallet_privatekey = key.encrypt(wallet_private_key.encode())
-           
-            decrypted_wallet_key = key.decrypt(encrypted_wallet_privatekey).decode()
-           
             user.wallet_address = encrypted_wallet_address
             user.wallet_private_key = encrypted_wallet_privatekey
             user.save()
-
-            user = User.objects.get(id = serializer.data.get('id'))
-    
             user_details['wallet_address'] = encrypted_wallet_address
-            # user_details['wallet_private_key'] = encrypted_wallet_privatekey
-
-
-            # WALLET CREATION END
-
-            # ***********************************************************WALLET REGISTER START
             node_url = settings.NODE_URL
             web3 = Web3(Web3.HTTPProvider(node_url))
             web3.middleware_onion.inject(geth_poa_middleware, layer=0)
             address = Web3.toChecksumAddress(settings.DINT_TOKEN_DISTRIBUTOR_ADDRESS)
             private_key= settings.OWNER_PRIVATE_KEY
-            
+
             user_ref = '0x0000000000000000000000000000000000000000'
             new_user = acct.address
-            # new_user = '0x862c122b550a44D37a3F9402D7ea2649471C84F8'
-
             abi = json.loads('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_sender","type":"address"},{"indexed":false,"internalType":"address","name":"_recipient","type":"address"}],"name":"tipSent","type":"event"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_blocked","type":"bool"}],"name":"blockUnblockReferrer","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"blockedReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"changeManagedState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"_isReferrer","type":"bool"}],"name":"changeReferrerState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"dintToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isManaged","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isRegistered","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"reward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_sender","type":"address"},{"internalType":"address","name":"_recipient","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"sendDint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeCollector","type":"address"}],"name":"setFeeCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"startedReferringAt","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"tipRecieverToReferrer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"unRegister","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"address","name":"_to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]') 
 
             contract = web3.eth.contract(address = address , abi = abi)
-    
             user_address = contract.functions.owner().call()
             nonce = web3.eth.getTransactionCount(user_address) 
             register = contract.functions.register(new_user, user_ref, True).buildTransaction({  
@@ -233,20 +212,20 @@ class UserService(UserBaseService):
                 'nonce': nonce,  
             })  
           
-
             signed_txn = web3.eth.account.signTransaction(register, private_key)  
-
             result = web3.eth.sendRawTransaction(signed_txn.rawTransaction)   
-
             tx_receipt = web3.eth.wait_for_transaction_receipt(result)  
-
-           
-            return ({"data": user_details, "code": status.HTTP_201_CREATED, "message": "User Created Successfully"})
+            try:
+                user = User.objects.get(id = serializer.data.get('id'))
+                pk = user.id
+                print(pk)
+                sending_verification_email = self.send_verification_email_by_token(request, pk)
+                return ({"data": user_details, "code": status.HTTP_201_CREATED, "message": "User Created Successfully and email sent successfully for the verification"})
+            except:
+                return ({"data": user_details, "code": status.HTTP_201_CREATED, "message": "User Created Successfully"})
         # if not valid
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
     
-
-    # SEND DINT START
     def withdraw_dint_token(self, request, format=None):
         url = settings.WITHDRAW_DINT_TOKEN_URL
         payload = json.dumps({
@@ -806,18 +785,27 @@ class UserService(UserBaseService):
                     user_referral_wallet.save()
                     return ({"data": [], "code": status.HTTP_200_OK, "message": "Referral code added"})
                 else:
-                     return ({"data": [], "code": status.HTTP_200_OK, "message": "Already added"})
+                    return ({"data": [], "code": status.HTTP_200_OK, "message": "Already added"})
         except Exception as e:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Provided Referral ID is not correct!"})
 
-
-#  user_referred_by = User.objects.get(referral_id=request.data['referred_by'])
-#                 print(user_referred_by)
-#                 user_referral_wallet = UserReferralWallet(referred_by=user_referred_by)
-#                 user_referral_wallet.user_referral = user
-#                 user_referral_wallet.save()
-
     def verify_identity(self, request, format=None):
+        # try:
+        #     user = User.objects.get(id = request.user.id)
+        #     ip_address = self.get_ip_address(user , request)
+        #     print(ip_address)
+        #     already_existed = UserIdentity.objects.filter(ip_address = ip_address)
+        #     print(already_existed)
+        #     if not already_existed:
+        #         user_ip = UserIdentity.objects.create(user = user, ip_address = ip_address)
+        #         print(user_ip)
+        #     else:
+        #        print("IP already exists")
+        # except Exception as e:
+        #     print(e)
+        #     print("IP already exists")
+         
+
         face_image = request.data['face_image']
     
         # document = request.data['document']
@@ -962,4 +950,66 @@ class UserService(UserBaseService):
         #         return ({"data": [response], "code": status.HTTP_400_BAD_REQUEST, "message": "Document looks little suspicious"})
         #     else:
         #         return ({"data": [response], "code": status.HTTP_400_BAD_REQUEST, "message": "Document uploaded is fake"})
-            
+        
+    def get_ip_address(self, user, request):
+        user_obj = User.objects.get(email = user)
+        user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
+        if user_ip_address:
+            ip = user_ip_address.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+    
+    def send_verification_email_by_token(self, request, pk, format=None):
+        try:
+            user_obj = User.objects.get(id = pk)
+            print(user_obj)
+            date = datetime.now()
+            print(date)
+            token = account_activation_token.make_token(user_obj.id)
+            save_token = User.objects.filter(id = pk).update(email_token = token, email_token_valid = date)
+            first_name = user_obj.email
+            email = user_obj.email
+            configuration = sib_api_v3_sdk.Configuration()
+            configuration.api_key['api-key'] = settings.SENDINBLUE_API
+            api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+            subject = "This is the verification email from Dint"
+            sender = {"name":"Sendinblue","email":"support@dint.com"}
+            to = [{"email": email,"name":first_name}]
+            html_content = "<html><body><h3>Hii "+first_name+"</h3><p>click here to verify <span style =color:#1A73E8><a href=https://fedev.dint.com>https://fedev.dint.com/"+token+"</a></span</p></body></html>"
+        
+            headers = {
+                "accept": "application/json",
+                "api-key": settings.SENDINBLUE_API
+            }
+            send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(to=to, headers=headers, html_content=html_content, sender=sender, subject=subject)
+            try:
+                api_response = api_instance.send_transac_email(send_smtp_email)
+                return ({"data": [], "code": status.HTTP_200_OK, "message": "Email sent successfully"})
+                print("email sent")
+            except ApiException as e:
+                print("Exception when calling SMTPApi->send_transac_email: %s\n" % e)
+        except Exception as e:
+            print(e)
+            return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Something went wrong"})
+    
+    def validate_verification_token(self, request, format=None):
+        token = request.data['token']
+        user = request.user.id
+        tz = pytz.timezone('Asia/Kolkata')
+        current_time = datetime.now(tz)
+        try:
+            user_obj = User.objects.get(id = request.user.id)
+            user_token = user_obj.email_token
+            token_send_time = user_obj.email_token_valid
+            token_expire_time = token_send_time.astimezone(tz) + timedelta(minutes=15)
+            if token_expire_time <= current_time:
+                return ({"data": [], "code": status.HTTP_200_OK, "message": "Token is expired"})
+            else:
+                user_obj.is_email_verified = True
+                user_obj.save()
+                return ({"data": [], "code": status.HTTP_200_OK, "message": "Token validated"})  
+        except:
+             return {"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Something went wrong"}
+        
+       
