@@ -84,16 +84,13 @@ class UserService(UserBaseService):
                 user, token, request)
             user.is_online = True
             user.save()
-
-            try:
-                user_obj = User.objects.get(email = username)
-                referral = UserReferralWallet.objects.filter(user_referral = user_obj)
-                if referral:
-                    return ({"data": user_details, "code": status.HTTP_200_OK, "message": "LOGIN_SUCCESSFULLY"})
-            except:
+            user_obj = User.objects.get(email = username)
+            referral = UserReferralWallet.objects.filter(user_referral = user_obj)
+            if referral:
+                return ({"data": user_details, "code": status.HTTP_200_OK, "message": "LOGIN_SUCCESSFULLY"})
+            else:
+                print("code")
                 return ({"data": user_details, "code": status.HTTP_200_OK, "message": "User don't have referral code"})
-
-           
         return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "INVALID_CREDENTIALS"})
 
     def user_authenticate(self, user_name, fire_base_auth_key):
