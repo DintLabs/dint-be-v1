@@ -21,4 +21,5 @@ class CreditCardSerializer(serializers.Serializer):
 class CreditCardModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditCard
+        fields = '__all__'
         exclude = ['created_at', 'updated_at', 'user' ]
