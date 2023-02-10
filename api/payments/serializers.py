@@ -20,4 +20,4 @@ class CreditCardSerializer(serializers.Serializer):
 class CreditCardModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditCard
-        exclude = ['created_at', 'updated_at', 'user', 'customer_id' ]
+        exclude = ['created_at', 'updated_at', 'user' ]
