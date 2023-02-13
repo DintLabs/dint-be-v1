@@ -100,7 +100,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email_token = models.CharField(max_length=255, null=True, blank=True)
     email_token_valid = models.DateTimeField(blank=True, null=True)
     is_email_verified = models.BooleanField(default=False)
-    
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         super(User, self).save(*args, **kwargs)
@@ -174,7 +174,7 @@ class UserIdentity(models.Model):
     documentNumber = models.CharField(max_length=255, blank=True, null=True)
     document_type = models.CharField(max_length=20, blank=True, null=True)
     nationality = models.CharField(max_length=50, blank=True, null=True)
-    ip_address = models. GenericIPAddressField(null=True, blank=True)
+   
     verified = models.BooleanField(default=False)
 
     class Meta:

@@ -868,14 +868,18 @@ class UserService(UserBaseService):
             else:
                 return ({"data": [response], "code": status.HTTP_400_BAD_REQUEST, "message": "Document uploaded is fake"})
         
-    def get_ip_address(self, user, request):
-        user_obj = User.objects.get(email = user)
+    def track_ip_address(self, request, format = None):
         user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
         if user_ip_address:
             ip = user_ip_address.split(',')[0]
         else:
             ip = request.META.get('REMOTE_ADDR')
-        return ip
+        already_exists = User.objects.filter(ip_address = ip)
+        if already_exists:
+            return ({"data": [], "code": status.HTTP_200_OK, "message": "IP address already exists"})
+        else:
+            create_address = User.objects.filter(id = request.user.id).update(ip_address = ip)
+            return ({"data": ip, "code": status.HTTP_200_OK, "message": "IP address tracked successfully"})
     
     def send_verification_email_by_token(self, request, pk, format=None):
         try:
