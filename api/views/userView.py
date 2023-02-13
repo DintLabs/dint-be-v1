@@ -478,3 +478,11 @@ class ValidateVerificationtoken(APIView):
     def post(self, request, format=None):
         result = userService.validate_verification_token(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
+
+class TrackUserIpAddress(APIView):
+    """
+    API to get ip address by token
+    """
+    def get(self, request, format=None):
+        result = userService.track_ip_address(request, format=None)
+        return Response(result, status = status.HTTP_200_OK)
