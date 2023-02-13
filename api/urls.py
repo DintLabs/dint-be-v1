@@ -63,8 +63,8 @@ urlpatterns = [
     path('user/send-reward/', UserDintReward.as_view(), name="send-reward-by-token"),
     
     path('user/validate_referral_code/', ValidateUserReferral.as_view(), name="validate-user-referral"),
-    path('user/add_referral_code/', AddReferral_code.as_view(), name="add_referral_code"),
-   
+    path('user/add_referral_code/', AddReferralCode.as_view(), name="add_referral_code"),
+    path('user/referral_code/', UserReferralCode.as_view(), name="user_referral_code"),
     #role
     path('role/get-all-roles/', RoleListView.as_view(), name="get-all-role"),
     path('role/create-role/', RoleCreateView.as_view(), name="create-role"),
