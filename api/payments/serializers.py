@@ -4,7 +4,6 @@ from api.payments.models import CreditCard
 
 
 class CreditCardSerializer(serializers.Serializer):
-    customer_id = serializers.CharField(max_length=32)
     country = serializers.CharField(max_length=32)
     state = serializers.CharField(max_length=32)
     street = serializers.CharField(max_length=128)
@@ -21,5 +20,4 @@ class CreditCardSerializer(serializers.Serializer):
 class CreditCardModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditCard
-        fields = '__all__'
         exclude = ['created_at', 'updated_at', 'user' ]
