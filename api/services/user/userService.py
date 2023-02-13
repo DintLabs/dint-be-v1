@@ -773,15 +773,12 @@ class UserService(UserBaseService):
         user = request.data['email']
         referral_code = request.data['referral_code']
         user_obj = User.objects.get(email = user)
-        print(user_obj)
+        
         try:
             referred_by = User.objects.get(referral_id=referral_code)
-            print(referred_by)
             if referred_by:
                 already_exists = UserReferralWallet.objects.filter(referred_by=referred_by, user_referral = user_obj)
-              
                 if not already_exists:
-                    print("something")
                     user_referral_wallet = UserReferralWallet(referred_by=referred_by, user_referral = user_obj)
                     user_referral_wallet.save()
                     return ({"data": [], "code": status.HTTP_200_OK, "message": "Referral code added"})
@@ -790,25 +787,17 @@ class UserService(UserBaseService):
         except Exception as e:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Provided Referral ID is not correct!"})
 
+    def user_referral_code_by_token(self, request, format=None):
+        user = request.user
+        already_exists = UserReferralWallet.objects.filter(user_referral = user)
+        if not already_exists:
+            return ({"data": [], "code": status.HTTP_200_OK, "message": "user do not have referral code"})
+        else:
+            return ({"data": [], "code": status.HTTP_200_OK, "message": "User already have referral code"})
+        
     def verify_identity(self, request, format=None):
-        # try:
-        #     user = User.objects.get(id = request.user.id)
-        #     ip_address = self.get_ip_address(user , request)
-        #     print(ip_address)
-        #     already_existed = UserIdentity.objects.filter(ip_address = ip_address)
-        #     print(already_existed)
-        #     if not already_existed:
-        #         user_ip = UserIdentity.objects.create(user = user, ip_address = ip_address)
-        #         print(user_ip)
-        #     else:
-        #        print("IP already exists")
-        # except Exception as e:
-        #     print(e)
-        #     print("IP already exists")
-         
         face_image = request.data['face_image']
         document = request.data['document']
-
         folder = "IDS"
         try:
             for im in dict((request.data))['document']:
@@ -832,6 +821,7 @@ class UserService(UserBaseService):
             # print("Hello your name is {} {}".format(data_result['firstName'],data_result['lastName']))
         if response.get('face'):
             face_result = response['face']
+            print(face_result)
             if face_result['isIdentical']:
                 print("Face verification PASSED!")
             else:
@@ -938,5 +928,7 @@ class UserService(UserBaseService):
                 return ({"data": [], "code": status.HTTP_200_OK, "message": "Token validated"})  
         except:
              return {"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Something went wrong"}
-        
-       
+
+
+
+
