@@ -36,6 +36,7 @@ class CreditCardViewSet(ModelViewSet):
                 email=serializer.validated_data['email'],
             )
 
+
             credit_card = CreditCard(
                 country=serializer.validated_data['country'],
                 state=serializer.validated_data['state'],

@@ -773,13 +773,10 @@ class UserService(UserBaseService):
         user = request.data['email']
         referral_code = request.data['referral_code']
         user_obj = User.objects.get(email = user)
-        print(user_obj)
         try:
             referred_by = User.objects.get(referral_id=referral_code)
-            print(referred_by)
             if referred_by:
                 already_exists = UserReferralWallet.objects.filter(referred_by=referred_by, user_referral = user_obj)
-              
                 if not already_exists:
                     print("something")
                     user_referral_wallet = UserReferralWallet(referred_by=referred_by, user_referral = user_obj)
@@ -789,6 +786,14 @@ class UserService(UserBaseService):
                     return ({"data": [], "code": status.HTTP_200_OK, "message": "Already added"})
         except Exception as e:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Provided Referral ID is not correct!"})
+    
+    def check_referral_code_by_token(self, request, format=None):
+        user = request.user
+        already_exists = UserReferralWallet.objects.filter(user_referral = user)
+        if not already_exists:
+            return ({"data": [], "code": status.HTTP_200_OK, "message": "User do noe have referral code"})
+        else:
+            return ({"data": [], "code": status.HTTP_200_OK, "message": "User already have referral code"})
 
     def verify_identity(self, request, format=None):
         # try:
@@ -807,7 +812,7 @@ class UserService(UserBaseService):
         #     print("IP already exists")
          
         face_image = request.data['face_image']
-        document = request.data['document']
+        # document = request.data['document']
 
         folder = "IDS"
         try:
@@ -826,7 +831,8 @@ class UserService(UserBaseService):
         coreapi = idanalyzer.CoreAPI(id_analyzer_key, "US")
         coreapi.throw_api_exception(True)
         coreapi.enable_authentication(True, 'quick')
-        response = coreapi.scan(document_primary = document_url, biometric_photo = face_image)
+        response = coreapi.scan(document_primary = "https://images.saymedia-content.com/.image/t_share/MTc2NzIzNjg5NzY4MTAxNzU0/photoshop-lesson3.jpg", face_base64 = face_image)
+        print(response)
         if response.get('result'):
             data_result = response['result']
             # print("Hello your name is {} {}".format(data_result['firstName'],data_result['lastName']))

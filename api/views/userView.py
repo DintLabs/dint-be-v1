@@ -447,12 +447,20 @@ class ValidateUserReferral(APIView):
         result = userService.validate_user_referral(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
 
-class AddReferral_code(APIView):
+class AddReferralCode(APIView):
     """
     APIs to validating referral code
     """
     def post(self, request, format=None):
         result = userService.add_user_referral(request, format=None)
+        return Response(result, status = status.HTTP_200_OK)
+
+class UserReferralCode(APIView):
+    """
+    API to check whether user has referral code or not
+    """
+    def get(self, request, format=None):
+        result = userService.check_referral_code_by_token(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
 
 class SendVerificationEmail(APIView):
@@ -470,3 +478,4 @@ class ValidateVerificationtoken(APIView):
     def post(self, request, format=None):
         result = userService.validate_verification_token(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
+
