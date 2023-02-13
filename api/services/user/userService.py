@@ -796,24 +796,8 @@ class UserService(UserBaseService):
             return ({"data": [], "code": status.HTTP_200_OK, "message": "User already have referral code"})
         
     def verify_identity(self, request, format=None):
-        # try:
-        #     user = User.objects.get(id = request.user.id)
-        #     ip_address = self.get_ip_address(user , request)
-        #     print(ip_address)
-        #     already_existed = UserIdentity.objects.filter(ip_address = ip_address)
-        #     print(already_existed)
-        #     if not already_existed:
-        #         user_ip = UserIdentity.objects.create(user = user, ip_address = ip_address)
-        #         print(user_ip)
-        #     else:
-        #        print("IP already exists")
-        # except Exception as e:
-        #     print(e)
-        #     print("IP already exists")
-         
         face_image = request.data['face_image']
         document = request.data['document']
-
         folder = "IDS"
         try:
             for im in dict((request.data))['document']:
@@ -837,6 +821,7 @@ class UserService(UserBaseService):
             # print("Hello your name is {} {}".format(data_result['firstName'],data_result['lastName']))
         if response.get('face'):
             face_result = response['face']
+            print(face_result)
             if face_result['isIdentical']:
                 print("Face verification PASSED!")
             else:
@@ -943,5 +928,7 @@ class UserService(UserBaseService):
                 return ({"data": [], "code": status.HTTP_200_OK, "message": "Token validated"})  
         except:
              return {"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Something went wrong"}
-        
-       
+
+
+
+
