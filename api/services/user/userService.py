@@ -89,7 +89,6 @@ class UserService(UserBaseService):
             if referral:
                 return ({"data": user_details, "code": status.HTTP_200_OK, "message": "LOGIN_SUCCESSFULLY"})
             else:
-                print("code")
                 return ({"data": user_details, "code": status.HTTP_200_OK, "message": "User don't have referral code"})
         return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "INVALID_CREDENTIALS"})
 
@@ -791,7 +790,7 @@ class UserService(UserBaseService):
         user = request.user
         already_exists = UserReferralWallet.objects.filter(user_referral = user)
         if not already_exists:
-            return ({"data": [], "code": status.HTTP_200_OK, "message": "user do not have referral code"})
+            return ({"data": [], "code": status.HTTP_405_METHOD_NOT_ALLOWED , "message": "user do not have referral code"})
         else:
             return ({"data": [], "code": status.HTTP_200_OK, "message": "User already have referral code"})
         
@@ -825,7 +824,8 @@ class UserService(UserBaseService):
             if face_result['isIdentical']:
                 print("Face verification PASSED!")
             else:
-                return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "face verification failed"})
+                # return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "face verification failed"})
+                print("face verification failed")
             print("Confidence Score: "+face_result['confidence'])
         if response.get('authentication'):
             authentication_result = response['authentication']
@@ -835,7 +835,8 @@ class UserService(UserBaseService):
                     if already_verified:
                         return ({"data": [], "code": status.HTTP_200_OK, "message": "Already verified"})
                     print("already verified")
-                except:
+                except Exception as e:
+                    print(e)
                     result = response['result']
                     print("result" , result)
                     user_obj = User.objects.get(id = request.user.id)
@@ -844,12 +845,9 @@ class UserService(UserBaseService):
                     try:
                         dob = result['dob']
                         temp_date = datetime.strptime(dob, "%Y/%m/%d").date()
-                        print(type(temp_date))
-                        print("result", result)
                         user_identity.date_of_birth = temp_date
                         user_identity.save()
                     except Exception as e:
-                        print(e)
                         pass
                     try:
                         gender = result['sex']
@@ -861,7 +859,7 @@ class UserService(UserBaseService):
                     serializer = UserIdentitySerializer(user_identity, data=data)
                     if serializer.is_valid():
                         serializer.save(user=request.user)
-                        print(serializer.data)
+                        print("serializer data",serializer.data)
                         return ({"data": response, "code": status.HTTP_200_OK, "message": "User verified Successfully"})
             elif authentication_result['score'] > 0.3:
                 return ({"data": [response], "code": status.HTTP_400_BAD_REQUEST, "message": "Document looks little suspicious"})
