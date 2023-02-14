@@ -23,3 +23,5 @@ from .UserRecepientAccount import *
 from .WiseRecepientsModel import *
 from .WisepaymentsModel import *
 from .WiseQuotesModel import *
+from .BankAccountsModel import *
+from .PayoutsModel import *
