@@ -8,3 +8,5 @@ from .eventView import *
 from .pageView import *
 from .connectionView import *
 from .wisetransferView import *
+from .bankaccountsView import *
+from .payoutsView import *

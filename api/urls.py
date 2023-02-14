@@ -188,6 +188,14 @@ urlpatterns = [
     # Wise Transfers
     path('wise/create-transfer/', WiseTransferView.as_view(), name="create-wise-transfer"),
     # Wise Payments
-    path('wise/create-payment/', WisePaymentView.as_view(), name="create-wise-payment")
+    path('wise/create-payment/', WisePaymentView.as_view(), name="create-wise-payment"),
+
+    # user bank accounts
+    path('user/add_bank_accounts/', UserBankAccounts.as_view(), name="add_bank_accounts"),
+    path('user/get_bank_accounts/', UserBankAccounts.as_view(), name="get_bank_accounts"),
+    path('user/update_bank_account/<int:id>/', UserBankAccounts.as_view(), name="update_bank_accounts"),
+    path('user/request_payouts/', UserPayouts.as_view(), name="add_payouts"),
+    path('user/get_requested_payouts/', UserPayouts.as_view(), name="get_requested_payouts"),
+    path('user/get_payouts_by_token/', UserPayoutsByToken.as_view(), name="get_payouts_by_token")
 ]
 
