@@ -486,3 +486,12 @@ class TrackUserIpAddress(APIView):
     def get(self, request, format=None):
         result = userService.track_ip_address(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
+
+class UserSuggestions(APIView):
+    """
+    API to get suggestions
+    """
+    def get(self, request, format=None):
+        result = userService.get_suggestions(request, format=None)
+        return Response(result, status = status.HTTP_200_OK)
+    
