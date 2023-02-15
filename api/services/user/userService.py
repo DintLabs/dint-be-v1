@@ -662,36 +662,15 @@ class UserService(UserBaseService):
         search_text = request.GET.get('search')
         if search_text is None:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Please provide Search Text"})
-        # fetch user that able to found
-        user = User.objects.filter(able_to_be_found = True).filter(Q(custom_username__icontains=search_text) | Q(display_name__icontains=search_text))
-        print(user)
-        followers = UserFollowers.objects.filter(follower = request.user.id, request_status = True)
-        followers_obj = User.objects.filter(id__in = followers).filter(Q(custom_username__icontains=search_text) | Q(display_name__icontains=search_text))
-        result = list(chain(user, followers_obj))
-        serializer = UserLoginDetailSerializer(result, many=True)
-
-        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
-
-        # # fetch user that logged in user follows
-        # followers = UserFollowers.objects.filter(follower = request.user.id, request_status = True).values_list('user')
-        # followers_email = User.objects.filter(id__in = followers).values_list('email')
-
-        # user_obj = User.objects.exclude(id = request.user.id).filter(Q(custom_username__icontains=search_text) | Q(display_name__icontains=search_text)).filter(email__in = followers_email)
-
-        # if user:
-        #     user_obj = User.objects.filter(id__in = user)
-        #     serializer = UserLoginDetailSerializer(user_obj, many=True)
-        #     return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
-
-        # # try:
-        #     followers = UserFollowers.objects.filter(follower = request.user.id, request_status = True).values_list('user')
-        #     followers_email = User.objects.filter(id__in = followers).values_list('email')
-        #     print(followers_email)
-        #     user_obj = User.objects.exclude(id = request.user.id).filter(Q(custom_username__icontains=search_text) | Q(display_name__icontains=search_text)).filter(email__in = followers_email)
-        #     serializer = UserLoginDetailSerializer(user_obj, many=True)
-        #     return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
-        # except:
-        #     return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "No user in the following list"})
+        try:
+            user = User.objects.filter(able_to_be_found = True).filter(Q(custom_username__icontains=search_text) | Q(display_name__icontains=search_text))
+            followers = UserFollowers.objects.filter(follower = request.user.id, request_status = True)
+            followers_obj = User.objects.filter(id__in = followers).filter(Q(custom_username__icontains=search_text) | Q(display_name__icontains=search_text))
+            result = list(chain(user, followers_obj))
+            serializer = UserLoginDetailSerializer(result, many=True)
+            return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
+        except:
+            return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Something went wrong"})
 
     def get_closefriends(self, request, format=None):
         user_obj = User.objects.get(id=request.user.id)
@@ -919,11 +898,10 @@ class UserService(UserBaseService):
              return {"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Something went wrong"}
 
     def get_suggestions(self, request, format=None):
-       
         user_obj = User.objects.filter(able_to_be_found = True).order_by('?')[:5]
         if user_obj:
             serializer = UserLoginDetailSerializer(user_obj, many=True)
             return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
         else:
             user_obj= None
-            return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
+            return ({"data": [], "code": status.HTTP_200_OK, "message": "OK"})
