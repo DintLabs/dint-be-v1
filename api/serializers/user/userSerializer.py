@@ -148,7 +148,7 @@ class GetUserPageProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-        'id', 'email', 'phone_no', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image','city', 'twitter', 'instagram', 'discord', 'banner_image', 'location', 'is_followed', 'is_private', 'user_page', 'is_online', 'last_login','is_active')
+        'id', 'email', 'phone_no', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image','city', 'twitter', 'instagram', 'discord', 'banner_image', 'location', 'is_followed', 'is_private', 'user_page', 'is_online', 'last_login','is_active', 'able_to_be_found')
 
     def get_is_followed(self, obj):
         profile_user_id = self.context.get('profile_user_id')
