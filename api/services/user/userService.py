@@ -52,7 +52,7 @@ from django.forms.models import model_to_dict
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-
+from itertools import chain
 from api.utils.token import account_activation_token
 
 class UserService(UserBaseService):
@@ -331,8 +331,6 @@ class UserService(UserBaseService):
         balance = dintCont.functions.balanceOf(receiver_add).call()
         print(balance, "Available Dint")
 
-    # SEND DINT REWARD END
-
     def send_otp(self, user):
         try:
             tz = pytz.timezone('Asia/Kolkata')
@@ -470,57 +468,26 @@ class UserService(UserBaseService):
         user_obj = User.objects.filter(id = request.user.id)
         user = User.objects.get(id = request.user.id)
         wallet = user.wallet_address
-        print(wallet)
-
         wallet_address = wallet.tobytes()
         key = Fernet(settings.ENCRYPTION_KEY)
         user_decwallet = key.decrypt(wallet_address).decode()
-        print(user_decwallet)
-        
         node_url = settings.NODE_URL
-        # this is RPC url saved in ENV as node_url
-
         web3 = Web3(Web3.HTTPProvider(node_url))
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
-
         address = settings.DINT_TOKEN_DISTRIBUTOR_ADDRESS
-        #this is DINT contract address that we saved on ENV
-
         checksum_address = Web3.toChecksumAddress(address)
-        #this is the checksum DINT contract address. It prevent users from sending transactions to the wrong address.
-
-      
-
         user_address = user_decwallet
-        #This is wallet address of the user(sender)
 
         abi = json.loads('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_sender","type":"address"},{"indexed":false,"internalType":"address","name":"_recipient","type":"address"}],"name":"tipSent","type":"event"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_blocked","type":"bool"}],"name":"blockUnblockReferrer","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"blockedReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"changeManagedState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"_isReferrer","type":"bool"}],"name":"changeReferrerState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"dintToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isManaged","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isRegistered","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"reward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_recipient","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"sendDint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeCollector","type":"address"}],"name":"setFeeCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"startedReferringAt","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"tipRecieverToReferrer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"unRegister","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"address","name":"_to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]') 
-        #This is ABI of DINT Contract all the fuctions that we can read and write
-
         contract = web3.eth.contract(address = checksum_address , abi = abi)
-        #Setting up DINT contract address for interaction 
-
         dintAddress = settings.DINT_TOKEN_ADDRESS
-        #this is DINT Token address which we need to get approval for sending Dint
         checksum_dintAddress = Web3.toChecksumAddress(dintAddress)
-        #This is checksum DINT Token address
         dintABI = json.loads('[{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_amount","type":"uint256"}],"name":"approve","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"creationBlock","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_newController","type":"address"}],"name":"changeController","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_blockNumber","type":"uint256"}],"name":"balanceOfAt","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"version","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_cloneTokenName","type":"string"},{"name":"_cloneDecimalUnits","type":"uint8"},{"name":"_cloneTokenSymbol","type":"string"},{"name":"_snapshotBlock","type":"uint256"},{"name":"_transfersEnabled","type":"bool"}],"name":"createCloneToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"parentToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_owner","type":"address"},{"name":"_amount","type":"uint256"}],"name":"generateTokens","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_blockNumber","type":"uint256"}],"name":"totalSupplyAt","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"transfersEnabled","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"parentSnapShotBlock","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_amount","type":"uint256"},{"name":"_extraData","type":"bytes"}],"name":"approveAndCall","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_owner","type":"address"},{"name":"_amount","type":"uint256"}],"name":"destroyTokens","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_token","type":"address"}],"name":"claimTokens","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"tokenFactory","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_transfersEnabled","type":"bool"}],"name":"enableTransfers","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"controller","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_tokenFactory","type":"address"},{"name":"_parentToken","type":"address"},{"name":"_parentSnapShotBlock","type":"uint256"},{"name":"_tokenName","type":"string"},{"name":"_decimalUnits","type":"uint8"},{"name":"_tokenSymbol","type":"string"},{"name":"_transfersEnabled","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_token","type":"address"},{"indexed":true,"name":"_controller","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"ClaimedTokens","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_from","type":"address"},{"indexed":true,"name":"_to","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_cloneToken","type":"address"},{"indexed":false,"name":"_snapshotBlock","type":"uint256"}],"name":"NewCloneToken","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_owner","type":"address"},{"indexed":true,"name":"_spender","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"Approval","type":"event"}]')
-        #This is ABI of DINT Token that has all the fuctions that we can read and write
         dintCont = web3.eth.contract(address = checksum_dintAddress , abi = dintABI)
-
-
         balance = dintCont.functions.balanceOf(user_address).call()
-        # this is read function of DINT Token that will give us the balance of sender
-        print(balance, "Available Dint")
-
-        
         balance = web3.fromWei(balance, 'ether')
-
-        print(balance, "Available Dint")
-        
         return ({"data": {'wallet_balance': balance, 'wallet_address': user_address}, "code": status.HTTP_200_OK, "message": "User Wallet fetched Successfully"})
 
-      
     def update_wallet_by_token(self, request, format=None):
         user_obj = User.objects.get(id=request.user.id)
         serializer = UpdateUserWalletSerializer(user_obj, data=request.data)
@@ -695,16 +662,36 @@ class UserService(UserBaseService):
         search_text = request.GET.get('search')
         if search_text is None:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Please provide Search Text"})
-        try:
-            followers = UserFollowers.objects.filter(follower = request.user.id, request_status = True).values_list('user')
-            followers_email = User.objects.filter(id__in = followers).values_list('email')
-            print(followers_email)
-            user_obj = User.objects.exclude(id = request.user.id).filter(Q(custom_username__icontains=search_text) | Q(display_name__icontains=search_text)).filter(email__in = followers_email)
-            print(user_obj)
-            serializer = UserLoginDetailSerializer(user_obj, many=True)
-            return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
-        except:
-            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "No user in the following list"})
+        # fetch user that able to found
+        user = User.objects.filter(able_to_be_found = True).filter(Q(custom_username__icontains=search_text) | Q(display_name__icontains=search_text))
+        print(user)
+        followers = UserFollowers.objects.filter(follower = request.user.id, request_status = True)
+        followers_obj = User.objects.filter(id__in = followers).filter(Q(custom_username__icontains=search_text) | Q(display_name__icontains=search_text))
+        result = list(chain(user, followers_obj))
+        serializer = UserLoginDetailSerializer(result, many=True)
+
+        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
+
+        # # fetch user that logged in user follows
+        # followers = UserFollowers.objects.filter(follower = request.user.id, request_status = True).values_list('user')
+        # followers_email = User.objects.filter(id__in = followers).values_list('email')
+
+        # user_obj = User.objects.exclude(id = request.user.id).filter(Q(custom_username__icontains=search_text) | Q(display_name__icontains=search_text)).filter(email__in = followers_email)
+
+        # if user:
+        #     user_obj = User.objects.filter(id__in = user)
+        #     serializer = UserLoginDetailSerializer(user_obj, many=True)
+        #     return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
+
+        # # try:
+        #     followers = UserFollowers.objects.filter(follower = request.user.id, request_status = True).values_list('user')
+        #     followers_email = User.objects.filter(id__in = followers).values_list('email')
+        #     print(followers_email)
+        #     user_obj = User.objects.exclude(id = request.user.id).filter(Q(custom_username__icontains=search_text) | Q(display_name__icontains=search_text)).filter(email__in = followers_email)
+        #     serializer = UserLoginDetailSerializer(user_obj, many=True)
+        #     return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
+        # except:
+        #     return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "No user in the following list"})
 
     def get_closefriends(self, request, format=None):
         user_obj = User.objects.get(id=request.user.id)
@@ -931,6 +918,12 @@ class UserService(UserBaseService):
         except:
              return {"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Something went wrong"}
 
-
-
-
+    def get_suggestions(self, request, format=None):
+       
+        user_obj = User.objects.filter(able_to_be_found = True).order_by('?')[:5]
+        if user_obj:
+            serializer = UserLoginDetailSerializer(user_obj, many=True)
+            return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
+        else:
+            user_obj= None
+            return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})

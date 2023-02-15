@@ -81,6 +81,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     instagram = models.CharField(max_length=1000, blank=True, null=True)
     discord = models.CharField(max_length=1000, blank=True, null=True)
     is_private = models.BooleanField(default=False)
+    able_to_be_found = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(blank=True, null=True)
@@ -128,6 +129,7 @@ class UserPreferences(models.Model):
     new_comment = models.BooleanField(default=False)
     new_like = models.BooleanField(default=False)
     language = models.ForeignKey(Language,on_delete=models.DO_NOTHING, null=True)
+   
 
 class UserReferralWallet(models.Model):
     referred_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='referred_by' )
