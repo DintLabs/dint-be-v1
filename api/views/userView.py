@@ -494,4 +494,12 @@ class UserSuggestions(APIView):
     def get(self, request, format=None):
         result = userService.get_suggestions(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
+
+class GetUserReferralId(APIView):
+    """
+    API to get referral id
+    """
+    def get(self, request, format=None):
+        result = userService.get_referral_id_by_tokem(request, format=None)
+        return Response(result, status = status.HTTP_200_OK)
     
