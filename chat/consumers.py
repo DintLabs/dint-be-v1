@@ -42,7 +42,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             message = text_data_json['message']
         except:
             message = text_data_json
-  
+        
+        # Send notification on message send
+        await(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': 'send_notification',
+                'message': message
+            }
+        )
         await(self.channel_layer.group_send)(
             self.room_group_name,
             {
@@ -50,7 +58,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'message': message
             }
         )
+
+    async def send_notification(self, event):
+        message = event['message']
+        user = self.scope['user']
+
+        # Send message to WebSocket on new message
+        text = 'Got new message from '+ user.name
+        await self.send(json.dumps({
+            "type": "notification",
+            "event": text,
+            "message": message
+        }))
         
+        
+
     async def chat_message(self, event):
         message = event['message']
 
@@ -58,7 +80,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'message': message
         }))
-      
+
+    async def chat_message(self, event):
+        message = event['message']
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps({
+            'message': message
+        }))
 
     async def _create_message(self, message_data):
         """
@@ -84,7 +112,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def connection_decre(self, user):
         user_connection = User.objects.filter(email = user).update(connections = F('connections')-1)
-       
+
     @database_sync_to_async
     def update_user_status(self, user):
         user = User.objects.get(email = user)
@@ -96,5 +124,5 @@ class ChatConsumer(AsyncWebsocketConsumer):
             user.is_online = False
             user.last_login = datetime.now()
             user.save()
-          
+
             

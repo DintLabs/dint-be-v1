@@ -41,6 +41,26 @@ class ListCreateUpdateDeleteMessageView(APIView):
         result = chatService.delete_messsage(request, pk, format=None)
         return Response(result, status=status.HTTP_200_OK)
 
+
+class ListCreateUpdateDeleteNotificationView(APIView):
+
+    def post(self, request, format=None):
+        """
+        Create New Posts. 
+        """
+        result = chatService.create_notification(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+class ListNotificationsChunksView(APIView):
+
+    def post(self, request,pk, format=None):
+        """
+        Retun all the Posts.
+        """
+        result = chatService.get_notification_chunks_by_user(request,pk, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+
 class ListMessageChunksView(APIView):
 
     def post(self, request,pk, format=None):

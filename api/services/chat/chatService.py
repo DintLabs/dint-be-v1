@@ -33,6 +33,16 @@ class ChatService (ChatBaseService):
         serializer = GetMessageSerializer(messages_obj, many=True, context = context)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
+    # list of notifications where messages are unread
+    def get_notification_chunks_by_user(self, request, pk, format=None):
+        """
+        Return all the Posts.
+        """
+        notifications_obj = Notifications.objects.filter(message__reciever=request.user.id,message__is_seen=False)
+        notifications_obj = notifications_obj.order_by('-created_at')
+        context = {"user_id":request.user.id}
+        serializer = GetNotificationSerializer(notifications_obj, many=True, context = context)
+        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
 
     def get_chat_chunks_by_user(self, request, pk, format=None):
@@ -56,6 +66,8 @@ class ChatService (ChatBaseService):
         Messages.objects.filter(sender = pk, reciever = request.user.id).update(is_seen = True)
         serializer = GetMessageSerializer(messages_obj, many=True, context = context)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
+
+
 
     def get_chat_chat_list_by_token(self, request, format=None):
         """
@@ -100,6 +112,19 @@ class ChatService (ChatBaseService):
             return ({"data": result_data, "code": status.HTTP_201_CREATED, "message": POST_CREATED})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
 
+    # create notification 
+    def create_notification(self, request, format=None):
+        """
+        Create New Posts. 
+        """
+        serializer = CreateUpdateNotificationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            res_obj = Notifications.objects.get(id=int(serializer.data['id']))
+            result_data = GetNotificationSerializer(res_obj).data
+            return ({"data": result_data, "code": status.HTTP_201_CREATED, "message": POST_CREATED})
+        return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
+
     def delete_messsage(self, request, pk, format=None):
         """
         Delete Posts.   
@@ -108,7 +133,7 @@ class ChatService (ChatBaseService):
             post_obj = Messages.objects.get(id = pk)
         except Messages.DoesNotExist:
             return ({"code": status.HTTP_400_BAD_REQUEST, "message": RECORD_NOT_FOUND})
-        
+
         post_obj.delete()
         return ({"code": status.HTTP_200_OK, "message": POST_DELETED})
 
@@ -116,7 +141,7 @@ class ChatService (ChatBaseService):
     def update_message(self, request, pk, format=None):
         """
         Updates Post
-        """ 
+        """
         data = request.data
         try:
             message_obj = Messages.objects.get(id = pk)
@@ -129,7 +154,7 @@ class ChatService (ChatBaseService):
             return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_UPDATED})
         else:
             return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
-     
+
     def get_message(self, request, pk, format=None):
         """
         Retrieve a Post by ID
@@ -138,7 +163,7 @@ class ChatService (ChatBaseService):
             message_obj = Messages.objects.get(id = pk)
         except Messages.DoesNotExist:
             return ({"code": status.HTTP_400_BAD_REQUEST, "message": RECORD_NOT_FOUND})
-        
+
         context = {"user_id":request.user.id}
         serializer = GetMessageSerializer(message_obj, context = context)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
