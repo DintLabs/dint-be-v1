@@ -906,7 +906,7 @@ class UserService(UserBaseService):
             user_obj= None
             return ({"data": [], "code": status.HTTP_200_OK, "message": "OK"})
 
-    def get_referral_id_by_tokem(self, request, format=None):
+    def get_referral_id_by_token(self, request, format=None):
         user = request.user.id
         user_obj = User.objects.get(id = user)
         if user_obj:
