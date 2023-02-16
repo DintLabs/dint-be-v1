@@ -905,3 +905,12 @@ class UserService(UserBaseService):
         else:
             user_obj= None
             return ({"data": [], "code": status.HTTP_200_OK, "message": "OK"})
+
+    def get_referral_id_by_token(self, request, format=None):
+        user = request.user.id
+        user_obj = User.objects.get(id = user)
+        if user_obj:
+            user_referral_id = user_obj.referral_id
+            return ({"data": [user_referral_id], "code": status.HTTP_200_OK, "message": "OK"})
+        else:
+            return {"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "User not found"}
