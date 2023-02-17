@@ -898,7 +898,7 @@ class UserService(UserBaseService):
              return {"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Something went wrong"}
 
     def get_suggestions(self, request, format=None):
-        user_obj = User.objects.filter(able_to_be_found = True).order_by('?')[:5]
+        user_obj = User.objects.exclude(id = request.user.id).filter(able_to_be_found = True).order_by('?')[:5]
         if user_obj:
             serializer = UserLoginDetailSerializer(user_obj, many=True)
             return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
