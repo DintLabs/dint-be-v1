@@ -14,7 +14,7 @@ class UserLoginDetailSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = User
         fields = (
-            'id', 'email', 'first_name', 'last_name', 'phone_no', 'is_active', 'is_deleted', 'profile_image','display_name', 'custom_username', 'is_private')
+            'id', 'email', 'first_name', 'last_name', 'phone_no', 'is_active', 'is_deleted', 'profile_image','display_name', 'custom_username', 'is_private' , 'able_to_be_found')
 
 class UserCreateUpdateSerializer(serializers.ModelSerializer):
     """
