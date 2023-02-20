@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models.PayoutsModel import Payouts
+from .models import *
 
 # Register your models here.
-admin.site.register(Payouts)
+admin.site.register(User)
