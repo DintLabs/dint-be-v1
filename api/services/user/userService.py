@@ -762,6 +762,8 @@ class UserService(UserBaseService):
         
     def verify_identity(self, request, format=None):
         face_image = request.data['face_image']
+        with open("imageToSave.png", "wb") as fh:
+            fh.write(face_image.decode('base64'))
         document = request.data['document']
         folder = "IDS"
         try:
@@ -780,7 +782,8 @@ class UserService(UserBaseService):
         coreapi = idanalyzer.CoreAPI(id_analyzer_key, "US")
         coreapi.throw_api_exception(True)
         coreapi.enable_authentication(True, 'quick')
-        response = coreapi.scan(document_primary = document_url, biometric_photo = face_image)
+        fh = open("imageToSave.png", "r")
+        response = coreapi.scan(document_primary = document_url, biometric_photo = fh)
         if response.get('result'):
             data_result = response['result']
             # print("Hello your name is {} {}".format(data_result['firstName'],data_result['lastName']))
