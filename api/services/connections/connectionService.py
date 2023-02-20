@@ -9,7 +9,7 @@ from api.utils import CustomPagination
 from rest_framework import status
 from api.utils.messages.commonMessages import *
 from api.utils.messages.eventMessages import *
-
+from rest_framework.parsers import MultiPartParser, FormParser
 from .connectionBaseService import ConnectionBaseService
 import datetime
 from django.utils import timezone
@@ -161,9 +161,10 @@ class ConnectionService(ConnectionBaseService):
 
     
     def create_stories(self, request, format=None):
+        parser_classes = (MultiPartParser, FormParser)
         user_obj = User.objects.get(id = request.user.id)
       
-        user_story = UserStories.objects.create(user = user_obj, story = request.FILES['story'])
+        #user_story = UserStories.objects.create(user = user_obj, story = request.FILES['story'])
         serializer = UserStoriesModelSerializer(data = request.data)
 
         if serializer.is_valid():
