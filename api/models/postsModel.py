@@ -20,7 +20,7 @@ class Posts(models.Model):
     is_deleted = models.BooleanField(default=False)
     history = HistoricalRecords(table_name='posts_history')
     can_delete = models.BooleanField(default=True)
-    is_locked = models.BooleanField(default=True)
+    is_locked = models.BooleanField(default=False)
     amount = models.IntegerField(default=False, null=True, blank=True)
 
     def bookmarks_count(self):
