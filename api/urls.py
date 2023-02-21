@@ -90,8 +90,10 @@ urlpatterns = [
     path('posts/list/page/<int:pk>/', PostPaginationByPageIDView.as_view(), name="get-all-posts/list_by_page_id"),
     path('posts/fetch-post-counts/<int:user_name>/', GetPostCountsByUserIDView.as_view(), name="create-posts"),
     path('posts/like/', LikePostView.as_view(), name="create-posts"),
-    path('posts/comment/', CommentPostView.as_view(), name="create-posts"),
+    path('posts/comment/', CommentPostView.as_view(), name="comment-posts"),
     path('posts/unlike/', UnLikePostView.as_view(), name="unlike-posts"),
+    path('posts/send_payment/', PostPayment.as_view(), name="send_payment"),
+    path('posts/unlock_post/', PostPayment.as_view(), name="post_unlock"),
 
     #Events
     path('events/list/', ListCreateUpdateDeleteEventView.as_view(), name="get-all-posts"),
