@@ -447,12 +447,20 @@ class ValidateUserReferral(APIView):
         result = userService.validate_user_referral(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
 
-class AddReferral_code(APIView):
+class AddReferralCode(APIView):
     """
     APIs to validating referral code
     """
     def post(self, request, format=None):
         result = userService.add_user_referral(request, format=None)
+        return Response(result, status = status.HTTP_200_OK)
+
+class UserReferralCode(APIView):
+    """
+    APIs to validating referral code
+    """
+    def get(self, request, format=None):
+        result = userService.user_referral_code_by_token(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
 
 class SendVerificationEmail(APIView):
@@ -470,3 +478,28 @@ class ValidateVerificationtoken(APIView):
     def post(self, request, format=None):
         result = userService.validate_verification_token(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
+
+class TrackUserIpAddress(APIView):
+    """
+    API to get ip address by token
+    """
+    def get(self, request, format=None):
+        result = userService.track_ip_address(request, format=None)
+        return Response(result, status = status.HTTP_200_OK)
+
+class UserSuggestions(APIView):
+    """
+    API to get suggestions
+    """
+    def get(self, request, format=None):
+        result = userService.get_suggestions(request, format=None)
+        return Response(result, status = status.HTTP_200_OK)
+
+class GetUserReferralId(APIView):
+    """
+    API to get referral id
+    """
+    def get(self, request, format=None):
+        result = userService.get_referral_id_by_token(request, format=None)
+        return Response(result, status = status.HTTP_200_OK)
+    

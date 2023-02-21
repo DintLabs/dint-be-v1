@@ -9,7 +9,7 @@ from api.utils import CustomPagination
 from rest_framework import status
 from api.utils.messages.commonMessages import *
 from api.utils.messages.eventMessages import *
-
+from rest_framework.parsers import MultiPartParser, FormParser
 from .connectionBaseService import ConnectionBaseService
 import datetime
 from django.utils import timezone
@@ -161,14 +161,18 @@ class ConnectionService(ConnectionBaseService):
 
     
     def create_stories(self, request, format=None):
+        parser_classes = (MultiPartParser, FormParser)
         user_obj = User.objects.get(id = request.user.id)
       
-        user_story = UserStories.objects.create(user = user_obj, story = request.data.get('story'))
+        #user_story = UserStories.objects.create(user = user_obj, story = request.FILES['story'])
         serializer = UserStoriesModelSerializer(data = request.data)
 
         if serializer.is_valid():
             serializer.save()
-            return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "Story posted successfully."})
+            res = serializer.data
+            storyURL = request.build_absolute_uri(res["story"])
+            res["story"] = storyURL
+            return ({"data": res, "code": status.HTTP_200_OK, "message": "Story posted successfully."})
         else:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Something went wrong."}) 
 

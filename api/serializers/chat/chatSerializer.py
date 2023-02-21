@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from api.models import *
+from api.models.messageNotificationModel import *
 from api.serializers.user import UserLoginDetailSerializer
 
 
@@ -12,6 +13,15 @@ class CreateUpdateMessageSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class CreateUpdateNotificationSerializer(serializers.ModelSerializer):
+    """
+    This is for update ,Create
+    """
+    class Meta(object):
+        model = Notifications
+        fields = '__all__'
+
+
 class UpdateMessageSerializer(serializers.ModelSerializer):
     """
     This is for update ,Create
@@ -19,6 +29,8 @@ class UpdateMessageSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Messages
         fields = ['content']
+
+
 
 class GetMessageSerializer(serializers.ModelSerializer):
     """
@@ -45,6 +57,20 @@ class GetMessageSerializer(serializers.ModelSerializer):
         chat_room_obj = _get_chat_room(obj.sender.id, obj.reciever.id)
         return chat_room_obj.id
 
+
+
+# GetNotificationSerializer
+class GetNotificationSerializer(serializers.ModelSerializer):
+    """
+    This is for Get
+    """
+    message = GetMessageSerializer()
+    # type_of_notification = serializers.SerializerMethodField()
+    class Meta(object):
+        model = Notifications
+        fields = '__all__'
+
+
 class GetSocketMessageSerializer(serializers.ModelSerializer):
     """
     This is for Get
@@ -69,7 +95,7 @@ class GetSocketMessageSerializer(serializers.ModelSerializer):
     def get_chat_room(self, obj):
         chat_room_obj = _get_chat_room(obj.sender.id, obj.reciever.id)
         return chat_room_obj.id
-            
+
 class ChatListSerializer(serializers.ModelSerializer):
 
     latest_message = serializers.SerializerMethodField()
@@ -106,19 +132,19 @@ class ChatListSerializer(serializers.ModelSerializer):
         user2_id = obj.id
         chat_room_obj = _get_chat_room(user1_id, user2_id)
         return chat_room_obj.id
-    
+
 
 def _get_chat_room(sender, reciever):
+    try:
+        obj = ChatRoom.objects.get(sender=sender, reciever=reciever)
+        return obj
+    except ChatRoom.DoesNotExist:
         try:
-            obj = ChatRoom.objects.get(sender = sender, reciever = reciever)
+            obj = ChatRoom.objects.get(sender=reciever, reciever=sender)
             return obj
         except ChatRoom.DoesNotExist:
-            try:
-                obj = ChatRoom.objects.get(sender = reciever, reciever = sender)
-                return obj
-            except ChatRoom.DoesNotExist:
-                obj = ChatRoom()
-                obj.sender = User.objects.get(id = sender)
-                obj.reciever = User.objects.get(id = reciever)
-                obj.save()
-                return obj
+            obj = ChatRoom()
+            obj.sender = User.objects.get(id=sender)
+            obj.reciever = User.objects.get(id=reciever)
+            obj.save()
+            return obj

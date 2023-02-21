@@ -63,8 +63,13 @@ urlpatterns = [
     path('user/send-reward/', UserDintReward.as_view(), name="send-reward-by-token"),
     
     path('user/validate_referral_code/', ValidateUserReferral.as_view(), name="validate-user-referral"),
-    path('user/add_referral_code/', AddReferral_code.as_view(), name="add_referral_code"),
-   
+    path('user/add_referral_code/', AddReferralCode.as_view(), name="add_referral_code"),
+    path('user/referral_code/', UserReferralCode.as_view(), name="user_referral_code"),
+    path('user/track_ip_address/', TrackUserIpAddress.as_view(), name = "track_user_ip_address"),
+    path('user/get_referral_id/', GetUserReferralId.as_view(), name="get_user_referral_id"),
+
+    # suggestions to user
+    path('user/get_suggestions/', UserSuggestions.as_view(), name = "get_suggestions"),
     #role
     path('role/get-all-roles/', RoleListView.as_view(), name="get-all-role"),
     path('role/create-role/', RoleCreateView.as_view(), name="create-role"),
@@ -85,8 +90,10 @@ urlpatterns = [
     path('posts/list/page/<int:pk>/', PostPaginationByPageIDView.as_view(), name="get-all-posts/list_by_page_id"),
     path('posts/fetch-post-counts/<int:user_name>/', GetPostCountsByUserIDView.as_view(), name="create-posts"),
     path('posts/like/', LikePostView.as_view(), name="create-posts"),
-    path('posts/comment/', CommentPostView.as_view(), name="create-posts"),
+    path('posts/comment/', CommentPostView.as_view(), name="comment-posts"),
     path('posts/unlike/', UnLikePostView.as_view(), name="unlike-posts"),
+    path('posts/send_payment/', PostPayment.as_view(), name="send_payment"),
+    path('posts/unlock_post/', PostPayment.as_view(), name="post_unlock"),
 
     #Events
     path('events/list/', ListCreateUpdateDeleteEventView.as_view(), name="get-all-posts"),
@@ -140,7 +147,9 @@ urlpatterns = [
     path('chat/get-message/<int:pk>/', GetMessageByIDView.as_view(), name="create-posts"),
     path('chat/get-chat-list-by-token/', GetChatListByTokenView.as_view(), name="create-posts"),
     path('chat/search_user/', SearchUserView.as_view(), name="create-posts"),
-
+    path('chat/create-notification/', ListCreateUpdateDeleteNotificationView.as_view(), name="create-notification"),
+    path('chat/get-notification-by-user-in-chunks/<int:pk>/', ListNotificationsChunksView.as_view(), name="create-notification"),
+    path('chat/get-unseen-message/', GetUnseenChatByUser.as_view(), name="unseen-chat"),
     #Page
     path('page/list/', ListCreateUpdateDeletePageView.as_view(), name="get-all-page"),
     path('page/pagination/list/', GetPagePaginationView.as_view(), name="get-all-page"),
@@ -187,6 +196,14 @@ urlpatterns = [
     # Wise Transfers
     path('wise/create-transfer/', WiseTransferView.as_view(), name="create-wise-transfer"),
     # Wise Payments
-    path('wise/create-payment/', WisePaymentView.as_view(), name="create-wise-payment")
+    path('wise/create-payment/', WisePaymentView.as_view(), name="create-wise-payment"),
+
+    # user bank accounts
+    path('user/add_bank_accounts/', UserBankAccounts.as_view(), name="add_bank_accounts"),
+    path('user/get_bank_accounts/', UserBankAccounts.as_view(), name="get_bank_accounts"),
+    path('user/update_bank_account/<int:id>/', UserBankAccounts.as_view(), name="update_bank_accounts"),
+    path('user/request_payouts/', UserPayouts.as_view(), name="add_payouts"),
+    path('user/get_requested_payouts/', UserPayouts.as_view(), name="get_requested_payouts"),
+    path('user/get_payouts_by_token/', UserPayoutsByToken.as_view(), name="get_payouts_by_token")
 ]
 

@@ -81,6 +81,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     instagram = models.CharField(max_length=1000, blank=True, null=True)
     discord = models.CharField(max_length=1000, blank=True, null=True)
     is_private = models.BooleanField(default=False)
+    able_to_be_found = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(blank=True, null=True)
@@ -100,7 +101,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email_token = models.CharField(max_length=255, null=True, blank=True)
     email_token_valid = models.DateTimeField(blank=True, null=True)
     is_email_verified = models.BooleanField(default=False)
-    
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         super(User, self).save(*args, **kwargs)
@@ -128,6 +129,7 @@ class UserPreferences(models.Model):
     new_comment = models.BooleanField(default=False)
     new_like = models.BooleanField(default=False)
     language = models.ForeignKey(Language,on_delete=models.DO_NOTHING, null=True)
+   
 
 class UserReferralWallet(models.Model):
     referred_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='referred_by' )
@@ -174,7 +176,7 @@ class UserIdentity(models.Model):
     documentNumber = models.CharField(max_length=255, blank=True, null=True)
     document_type = models.CharField(max_length=20, blank=True, null=True)
     nationality = models.CharField(max_length=50, blank=True, null=True)
-    ip_address = models. GenericIPAddressField(null=True, blank=True)
+   
     verified = models.BooleanField(default=False)
 
     class Meta:
