@@ -762,34 +762,34 @@ class UserService(UserBaseService):
         
     def verify_identity(self, request, format=None):
         face_image = request.data['face_image']
-        with open("imageToSave.png", "wb") as fh:
-            fh.write(face_image.decode('base64'))
-        document = request.data['document']
+    
+        with open("imageToSave.jpeg", "wb") as fh:
+            fh.write(base64.b64decode(face_image))
+
         folder = "IDS"
+        document_url=''
         try:
-            for im in dict((request.data))['document']:
-                image_url, image_name = saveImage(im, folder)
-                # print(image_url)
-                document_url = image_url
-            for im in dict((request.data).lists())['face_image']:
-                image_url, image_name = saveImage(im, folder)
-                # print(image_url)
-                face_image_url = image_url
+            image_url, image_name = saveImage(request.data['document'], folder)
+            document_url = image_url
+            # for im in dict((request.data).lists())['face_image']:
+            image_url, image_name = saveImage("imageToSave.jpeg", folder)
+            #     # print(image_url)
+            #     face_image_url = image_url
         except Exception as e:
-            print(e)
+            print('exception',  e)
             pass
         id_analyzer_key = settings.ID_ANALYZER_KEY
-        coreapi = idanalyzer.CoreAPI(id_analyzer_key, "US")
+        coreapi = idanalyzer.CoreAPI(id_analyzer_key, "US") 
         coreapi.throw_api_exception(True)
         coreapi.enable_authentication(True, 'quick')
-        fh = open("imageToSave.png", "r")
-        response = coreapi.scan(document_primary = document_url, biometric_photo = fh)
+
+        response = coreapi.scan(document_primary = document_url, biometric_photo = "imageToSave.jpeg")
         if response.get('result'):
             data_result = response['result']
-            # print("Hello your name is {} {}".format(data_result['firstName'],data_result['lastName']))
+            print("Hello your name is {} {}".format(data_result['firstName'],data_result['lastName']))
         if response.get('face'):
             face_result = response['face']
-            print(face_result)
+            print('res' , face_result)
             if face_result['isIdentical']:
                 print("Face verification PASSED!")
             else:
