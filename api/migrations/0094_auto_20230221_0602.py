@@ -25,9 +25,5 @@ class Migration(migrations.Migration):
             model_name='notifications',
             name='type_of_notification',
             field=models.CharField(blank=True, max_length=264, null=True),
-        ),
-        migrations.AddIndex(
-            model_name='notifications',
-            index=models.Index(fields=['id'], name='notificatio_id_d0ee49_idx'),
-        ),
+        )
     ]
