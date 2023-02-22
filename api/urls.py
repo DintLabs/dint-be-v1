@@ -201,6 +201,10 @@ urlpatterns = [
     path('user/update_bank_account/<int:id>/', UserBankAccounts.as_view(), name="update_bank_accounts"),
     path('user/request_payouts/', UserPayouts.as_view(), name="add_payouts"),
     path('user/get_requested_payouts/', UserPayouts.as_view(), name="get_requested_payouts"),
-    path('user/get_payouts_by_token/', UserPayoutsByToken.as_view(), name="get_payouts_by_token")
+    path('user/get_payouts_by_token/', UserPayoutsByToken.as_view(), name="get_payouts_by_token"),
+
+    # notifications
+    path('user/get-unread-notifications/', GetUnreadNotifications.as_view(), name="get_unread_notification_list_by_user"),
+    path('user/read-notification/<int:pk>/', ReadNotification.as_view(), name="read_notification"),
 ]
 

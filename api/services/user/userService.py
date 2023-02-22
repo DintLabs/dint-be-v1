@@ -1,10 +1,13 @@
 from __future__ import print_function
+from api.utils.messages.postMessages import MESSAGE, POST_FETCHED
 from cryptography.fernet import Fernet
 from dint import settings
 from api.serializers.user import (UserLoginDetailSerializer, UserCreateUpdateSerializer,
-                                  UserCloseFriendsSerializer, UserStatusUpdateSerializer, UserIdentitySerializer)
+                                  UserCloseFriendsSerializer, UserStatusUpdateSerializer, UserIdentitySerializer, GetNotificationSerializer)
+
 from api.models.userFollowersModel import UserFollowers
-from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks, Posts, UserCloseFriends, UserIdentity
+from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks, Posts, UserCloseFriends, UserIdentity, UserSubscription, Messages
+from api.models.messageNotificationModel import Notifications
 from api.utils.messages.userMessages import *
 from .userBaseService import UserBaseService
 from django.core.files.base import ContentFile
@@ -917,3 +920,33 @@ class UserService(UserBaseService):
             return ({"data": [user_referral_id], "code": status.HTTP_200_OK, "message": "OK"})
         else:
             return {"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "User not found"}
+    
+     # list of unread notifications 
+    def get_unread_notification_list_by_user(self, request, format=None):
+        """
+        Return all the Unseen Messages.
+        """
+        id1 = list(UserSubscription.objects.filter(user = request.user.id).values_list('id'))
+        id2 = list(UserFollowers.objects.filter(user=request.user.id).values_list('id'))
+        id3 = list(Messages.objects.filter(reciever=request.user.id, is_seen=False)) 
+        notification_obj = Notifications.objects.filter(subscribe__in = id1, is_active=True) | Notifications.objects.filter(followrequest__in = id2, is_active=True) | Notifications.objects.filter(message__in = id3, is_active=True) 
+        notification_obj = notification_obj.order_by('-created_at')
+        context = {"user_id":request.user.id}
+        serializer = GetNotificationSerializer(notification_obj, many=True, context = context)
+        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": MESSAGE})
+
+    def read_notification(self, request, pk, format=None):
+        '''
+        Read the notification
+        '''
+        Notifications.objects.filter(id=pk).update(is_active=False)
+        id1 = list(UserSubscription.objects.filter(user = request.user.id).values_list('id'))
+        id2 = list(UserFollowers.objects.filter(user=request.user.id).values_list('id'))
+        id3 = list(Messages.objects.filter(reciever=request.user.id, is_seen=False)) 
+        notification_obj = Notifications.objects.filter(subscribe__in = id1, is_active=True) | Notifications.objects.filter(followrequest__in = id2, is_active=True) | Notifications.objects.filter(message__in = id3, is_active=True) 
+        notification_obj = notification_obj.order_by('-created_at')
+        context = {"user_id":request.user.id}
+        serializer = GetNotificationSerializer(notification_obj, many=True, context = context)
+        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": MESSAGE})
+        
+
