@@ -27,7 +27,7 @@ class BankAccountsService(BankAccountsBaseService):
         return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Account already there."})
 
     def get_bank_accounts_by_token(self, request, format=None):
-        bank_account = UserBankAccounts.objects.filter(user = request.user)
+        bank_account = UserBankAccounts.objects.filter(user = request.user.id)
         if bank_account:
             serializer = UserBankAccountsSerializer(bank_account, many=True)
             return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "Account Fetched successfully."})
@@ -36,11 +36,12 @@ class BankAccountsService(BankAccountsBaseService):
             return ({"data": bank_account, "code": status.HTTP_200_OK, "message": "Account Fetched successfully."})
     
     def update_bank_accounts_by_token(self, request, id, format=None):
-        bank_obj = UserBankAccounts.objects.filter(id = id, user = request.user.id).exists
+        bank_obj = UserBankAccounts.objects.filter(id = id, user = request.user.id)
         if bank_obj:
             rest_acnts = UserBankAccounts.objects.filter(user = request.user.id).update(primary = False)
-            primary_acnt = UserBankAccounts.objects.filter(id = id).update(primary = True)
-            serializer = UserBankAccountsSerializer(primary_acnt, many=True)
-            return ({"data": [], "code": status.HTTP_200_OK, "message": "Account Updated successfully."})
+            primary_acnt = UserBankAccounts.objects.filter(user = request.user.id ,id = id).update(primary = True)
+            primary_acnt_obj = UserBankAccounts.objects.filter(user = request.user.id , id = id)
+            serializer = UserBankAccountsSerializer(bank_obj,many=True)
+            return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "Account Updated successfully."})
         else:
             return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Account not found."})

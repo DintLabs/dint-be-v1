@@ -247,7 +247,7 @@ class UserService(UserBaseService):
             else:
                 return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
         except:
-            return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
+            return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
 
     def send_dint_token(self, request, format=None):
         url = settings.SEND_DINT_TOKEN_URL
@@ -854,9 +854,7 @@ class UserService(UserBaseService):
     def send_verification_email_by_token(self, request, pk, format=None):
         try:
             user_obj = User.objects.get(id = pk)
-            print(user_obj)
             date = datetime.now()
-            print(date)
             token = account_activation_token.make_token(user_obj.id)
             save_token = User.objects.filter(id = pk).update(email_token = token, email_token_valid = date)
             first_name = user_obj.email

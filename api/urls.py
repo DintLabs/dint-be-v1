@@ -56,6 +56,15 @@ urlpatterns = [
     path('user/get-stories-by-user/',UserStoriesByUserView.as_view(), name="get-stories-by-user"),
     path('user/create-stories/',UserStoriesView.as_view(), name="create-stories"),
     path('user/delete-stories/<int:pk>/', UserStoriesView.as_view(), name="delete-stories"),
+    path('user/like_stories/<int:pk>/', UserLikeStories.as_view(), name="like_stories"),
+    path('user/unlike_stories/<int:pk>/', UserUnlikeStories.as_view(), name="unlike_stories"),
+    path('user/get_story_likes/<int:pk>/', UserLikeStories.as_view(), name = "get_story_likes"),
+    path('user/create_story_archive/', UserStoryArchive.as_view(), name="create_story_archive"),
+    path('user/get_story_archive/', UserStoryArchive.as_view(), name="get_story_archive"),
+    path('user/delete_story_archive/<int:pk>/', UserStoryArchive.as_view(), name="remove_story_archive"),
+    path('user/create_stories_highlights/', UserStoriesHighlights.as_view(), name="create_story_highlights" ),
+    path('user/get_story_hightlihts/', UserStoriesHighlights.as_view(), name="get_story_highlights"),
+    path('user/delete_story_highlight/<int:pk>/', UserStoriesHighlights.as_view(), name="delete_story_highlight"),
 
     # USER SEND DINT
     path('user/withdraw-dint/', WithdrawDint.as_view(), name="withdraw-dint"),
