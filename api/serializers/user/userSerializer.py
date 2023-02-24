@@ -2,6 +2,7 @@ from dataclasses import field
 from api.models.pageModel import Page
 from api.models.userFollowersModel import UserFollowers
 from rest_framework import serializers
+from api.models.UserStoriesModel import *
 from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet, UserPreferences, ConfineUsers,UserCustomLists, UserCustomGroupMembers, UserCloseFriends, UserStories)
 from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet, UserPreferences, ConfineUsers, UserCustomLists, UserCustomGroupMembers, UserCloseFriends, UserStories, UserIdentity)
 from api.models.userBookmarksModel import UserBookmarks
