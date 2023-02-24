@@ -4,25 +4,22 @@ from statistics import mode
 from django.db import models
 from django.utils import timezone
 from api.models.chatRoomModel import ChatRoom
+from api.models.userFollowersModel import UserFollowers
 from simple_history.models import HistoricalRecords
 from .userModel import User
 from .postsModel import *
 from .userFeedsModel import *
 from .UploadMediaModel import *
 from .messagesModel import *
-
-
-
-
-
+from .UserSubscriptionModel import *
 
 
 class Notifications(models.Model):
-    id = models.AutoField(primary_key=True)
-    # message = models.ForeignKey(Messages, related_name='notification_message', on_delete=models.DO_NOTHING, null=True, blank=True)
-    message = models.ForeignKey(Messages, on_delete=models.CASCADE, related_name='notification_message' )
+    #id = models.AutoField(primary_key=True)
+    message = models.ForeignKey(Messages, on_delete=models.DO_NOTHING, null=True, blank=True, related_name='notification_message' )
     type_of_notification=models.CharField(max_length=264,null=True,blank=True)
-    
+    subscribe = models.ForeignKey(UserSubscription, on_delete=models.DO_NOTHING, related_name='notification_subscribe', null=True, blank=True)
+    followrequest = models.ForeignKey(UserFollowers, on_delete=models.DO_NOTHING, related_name='notification_followrequest', null=True, blank=True)
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
@@ -37,6 +34,6 @@ class Notifications(models.Model):
 
     class Meta:
         db_table = 'notifications'
-        indexes = [
-            models.Index(fields=['id'])
-        ]
+        # indexes = [
+        #     models.Index(fields=['id'])
+        # ]

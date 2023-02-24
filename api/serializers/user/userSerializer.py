@@ -7,6 +7,7 @@ from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet
 from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet, UserPreferences, ConfineUsers, UserCustomLists, UserCustomGroupMembers, UserCloseFriends, UserStories, UserIdentity)
 from api.models.userBookmarksModel import UserBookmarks
 from django.core.exceptions import ValidationError
+from api.models.messageNotificationModel import Notifications
 
 class UserLoginDetailSerializer(serializers.ModelSerializer):
     """
@@ -355,3 +356,13 @@ class UserIdentitySerializer(serializers.ModelSerializer):
         model = UserIdentity
         fields = "__all__"
 
+
+# GetNotificationSerializer
+class GetNotificationSerializer(serializers.ModelSerializer):
+    """
+    This is for Get
+    """
+    # type_of_notification = serializers.SerializerMethodField()
+    class Meta(object):
+        model = Notifications
+        fields = '__all__'
