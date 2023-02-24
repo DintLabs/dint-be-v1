@@ -25,3 +25,4 @@ from .WisepaymentsModel import *
 from .WiseQuotesModel import *
 from .BankAccountsModel import *
 from .PayoutsModel import *
+from .UserStoriesModel import *
