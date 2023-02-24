@@ -100,3 +100,12 @@ class SearchUserView(APIView):
         """
         result = chatService.search_user(request, format=None)
         return Response(result, status=status.HTTP_200_OK)
+
+class GetUnseenChatByUser(APIView):
+
+    def get(self, request, format=None):
+        """
+        Retrieve a Unseen Chat
+        """
+        result = chatService.get_unseen_chat_list_by_user(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)

@@ -56,6 +56,15 @@ urlpatterns = [
     path('user/get-stories-by-user/',UserStoriesByUserView.as_view(), name="get-stories-by-user"),
     path('user/create-stories/',UserStoriesView.as_view(), name="create-stories"),
     path('user/delete-stories/<int:pk>/', UserStoriesView.as_view(), name="delete-stories"),
+    path('user/like_stories/<int:pk>/', UserLikeStories.as_view(), name="like_stories"),
+    path('user/unlike_stories/<int:pk>/', UserUnlikeStories.as_view(), name="unlike_stories"),
+    path('user/get_story_likes/<int:pk>/', UserLikeStories.as_view(), name = "get_story_likes"),
+    path('user/create_story_archive/', UserStoryArchive.as_view(), name="create_story_archive"),
+    path('user/get_story_archive/', UserStoryArchive.as_view(), name="get_story_archive"),
+    path('user/delete_story_archive/<int:pk>/', UserStoryArchive.as_view(), name="remove_story_archive"),
+    path('user/create_stories_highlights/', UserStoriesHighlights.as_view(), name="create_story_highlights" ),
+    path('user/get_story_hightlihts/', UserStoriesHighlights.as_view(), name="get_story_highlights"),
+    path('user/delete_story_highlight/<int:pk>/', UserStoriesHighlights.as_view(), name="delete_story_highlight"),
 
     # USER SEND DINT
     path('user/withdraw-dint/', WithdrawDint.as_view(), name="withdraw-dint"),
@@ -90,8 +99,10 @@ urlpatterns = [
     path('posts/list/page/<int:pk>/', PostPaginationByPageIDView.as_view(), name="get-all-posts/list_by_page_id"),
     path('posts/fetch-post-counts/<int:user_name>/', GetPostCountsByUserIDView.as_view(), name="create-posts"),
     path('posts/like/', LikePostView.as_view(), name="create-posts"),
-    path('posts/comment/', CommentPostView.as_view(), name="create-posts"),
+    path('posts/comment/', CommentPostView.as_view(), name="comment-posts"),
     path('posts/unlike/', UnLikePostView.as_view(), name="unlike-posts"),
+    path('posts/send_payment/', PostPayment.as_view(), name="send_payment"),
+    path('posts/unlock_post/', PostPayment.as_view(), name="post_unlock"),
 
     #Events
     path('events/list/', ListCreateUpdateDeleteEventView.as_view(), name="get-all-posts"),
@@ -147,6 +158,7 @@ urlpatterns = [
     path('chat/search_user/', SearchUserView.as_view(), name="create-posts"),
     path('chat/create-notification/', ListCreateUpdateDeleteNotificationView.as_view(), name="create-notification"),
     path('chat/get-notification-by-user-in-chunks/<int:pk>/', ListNotificationsChunksView.as_view(), name="create-notification"),
+    path('chat/get-unseen-message/', GetUnseenChatByUser.as_view(), name="unseen-chat"),
     #Page
     path('page/list/', ListCreateUpdateDeletePageView.as_view(), name="get-all-page"),
     path('page/pagination/list/', GetPagePaginationView.as_view(), name="get-all-page"),

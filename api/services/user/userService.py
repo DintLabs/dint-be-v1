@@ -168,12 +168,18 @@ class UserService(UserBaseService):
             user.is_active = True
             user.is_online = True
             user.save()
+            referral_address = '0x0000000000000000000000000000000000000000'
             if request.data.get('referred_by', None):
                 user_referred_by = User.objects.get(referral_id=request.data['referred_by'])
                 user_referral_wallet = UserReferralWallet(referred_by=user_referred_by)
                 user_referral_wallet.user_referral = user
                 user_referral_wallet.save()
-                
+                referral_user = User.objects.get(email = user_referred_by)
+                encrypted_address = referral_user.wallet_address
+                wallet_bytes = bytes(encrypted_address)
+                key = Fernet(settings.ENCRYPTION_KEY)
+                referral_decwallet = key.decrypt(wallet_bytes).decode()
+                referral_address = referral_decwallet
             payload = jwt_payload_handler(user)
             token = jwt.encode(payload, settings.SECRET_KEY)
             user_details = serializer.data
@@ -196,21 +202,18 @@ class UserService(UserBaseService):
             web3.middleware_onion.inject(geth_poa_middleware, layer=0)
             address = Web3.toChecksumAddress(settings.DINT_TOKEN_DISTRIBUTOR_ADDRESS)
             private_key= settings.OWNER_PRIVATE_KEY
-
-            user_ref = '0x0000000000000000000000000000000000000000'
             new_user = acct.address
             abi = json.loads('[{"inputs":[{"internalType":"address","name":"_dintToken","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_recipient","type":"address"},{"indexed":false,"internalType":"uint256","name":"_amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_id","type":"uint256"}],"name":"rewardSent","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_sender","type":"address"},{"indexed":false,"internalType":"address","name":"_recipient","type":"address"},{"indexed":false,"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"tipSent","type":"event"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_blocked","type":"bool"}],"name":"blockUnblockReferrer","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"changeManagedState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_isReferrer","type":"bool"}],"name":"changeReferrerState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"dintToken","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"isRewardSent","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxDuration","outputs":[{"internalType":"uint64","name":"","type":"uint64"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referrer","type":"address"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"uint256","name":"_postId","type":"uint256"}],"name":"reward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_sender","type":"address"},{"internalType":"address","name":"_recipient","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"sendDint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeCollector","type":"address"}],"name":"setFeeCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint64","name":"_durationInSeconds","type":"uint64"}],"name":"setMaxDuration","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"unRegister","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"user","outputs":[{"internalType":"bool","name":"isRegistered","type":"bool"},{"internalType":"bool","name":"isManaged","type":"bool"},{"internalType":"bool","name":"isReferrer","type":"bool"},{"internalType":"bool","name":"blockedReferrer","type":"bool"},{"internalType":"uint64","name":"startedReferringAt","type":"uint64"},{"internalType":"address","name":"tipReceiverToReferrer","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"address","name":"_to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]') 
 
             contract = web3.eth.contract(address = address , abi = abi)
             user_address = contract.functions.owner().call()
             nonce = web3.eth.getTransactionCount(user_address) 
-            register = contract.functions.register(new_user, user_ref, True).buildTransaction({  
+            register = contract.functions.register(new_user, referral_address).buildTransaction({  
                 'from': user_address,
                 'chainId': 80001,   
                 'gasPrice': web3.toWei('30', 'gwei'),  
                 'nonce': nonce,  
             })  
-          
             signed_txn = web3.eth.account.signTransaction(register, private_key)  
             result = web3.eth.sendRawTransaction(signed_txn.rawTransaction)   
             tx_receipt = web3.eth.wait_for_transaction_receipt(result)  
@@ -247,7 +250,7 @@ class UserService(UserBaseService):
             else:
                 return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
         except:
-            return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
+            return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
 
     def send_dint_token(self, request, format=None):
         url = settings.SEND_DINT_TOKEN_URL
@@ -765,34 +768,34 @@ class UserService(UserBaseService):
         
     def verify_identity(self, request, format=None):
         face_image = request.data['face_image']
-        with open("imageToSave.png", "wb") as fh:
-            fh.write(face_image.decode('base64'))
-        document = request.data['document']
+    
+        with open("imageToSave.jpeg", "wb") as fh:
+            fh.write(base64.b64decode(face_image))
+
         folder = "IDS"
+        document_url=''
         try:
-            for im in dict((request.data))['document']:
-                image_url, image_name = saveImage(im, folder)
-                # print(image_url)
-                document_url = image_url
-            for im in dict((request.data).lists())['face_image']:
-                image_url, image_name = saveImage(im, folder)
-                # print(image_url)
-                face_image_url = image_url
+            image_url, image_name = saveImage(request.data['document'], folder)
+            document_url = image_url
+            # for im in dict((request.data).lists())['face_image']:
+            image_url, image_name = saveImage("imageToSave.jpeg", folder)
+            #     # print(image_url)
+            #     face_image_url = image_url
         except Exception as e:
-            print(e)
+            print('exception',  e)
             pass
         id_analyzer_key = settings.ID_ANALYZER_KEY
-        coreapi = idanalyzer.CoreAPI(id_analyzer_key, "US")
+        coreapi = idanalyzer.CoreAPI(id_analyzer_key, "US") 
         coreapi.throw_api_exception(True)
         coreapi.enable_authentication(True, 'quick')
-        fh = open("imageToSave.png", "r")
-        response = coreapi.scan(document_primary = document_url, biometric_photo = fh)
+
+        response = coreapi.scan(document_primary = document_url, biometric_photo = "imageToSave.jpeg")
         if response.get('result'):
             data_result = response['result']
-            # print("Hello your name is {} {}".format(data_result['firstName'],data_result['lastName']))
+            print("Hello your name is {} {}".format(data_result['firstName'],data_result['lastName']))
         if response.get('face'):
             face_result = response['face']
-            print(face_result)
+            print('res' , face_result)
             if face_result['isIdentical']:
                 print("Face verification PASSED!")
             else:
@@ -854,9 +857,7 @@ class UserService(UserBaseService):
     def send_verification_email_by_token(self, request, pk, format=None):
         try:
             user_obj = User.objects.get(id = pk)
-            print(user_obj)
             date = datetime.now()
-            print(date)
             token = account_activation_token.make_token(user_obj.id)
             save_token = User.objects.filter(id = pk).update(email_token = token, email_token_valid = date)
             first_name = user_obj.email

@@ -19,7 +19,6 @@ role_schema = AutoSchema(manual_fields=[
 
 
 class ListCreateUpdateDeletePostView(APIView):
-
     def get(self, request, format=None):
         """
         Retun all the Posts.
@@ -66,8 +65,6 @@ class GetTotalPostCountsView(APIView):
         result = postService.get_total_post_count(request, format=None)
         return Response(result, status=status.HTTP_200_OK)
 
-
-
 class GetPostPaginationView(APIView):
     def post(self, request, format=None):
         """
@@ -84,9 +81,7 @@ class GetLoungePostPaginationView(APIView):
         result = postService.get_lounge_post_list_with_pagination(request, format=None)
         return Response(result, status=status.HTTP_200_OK)  
 
-
 class GetPostView(APIView):
-
     def get(self, request,pk, format=None):
         """
         Retrieve a Post by ID
@@ -94,10 +89,7 @@ class GetPostView(APIView):
         result = postService.get_post(request, pk, format=None)
         return Response(result, status=status.HTTP_200_OK)
 
-
-
 class PostByUserIDView(APIView):
-
     def get(self, request,pk, format=None):
         """
         Retrieve a Post by ID
@@ -116,7 +108,6 @@ class PostPaginationByUserIDView(APIView):
         return Response(result, status=status.HTTP_200_OK)
 
 class LikePostView(APIView):
-
     def post(self, request, format=None):
         """
         Retrieve a Post by ID
@@ -125,7 +116,6 @@ class LikePostView(APIView):
         return Response(result, status=status.HTTP_200_OK)
 
 class UnLikePostView(APIView):
-
     def post(self, request, format=None):
         """
         Retrieve a Post by ID
@@ -136,7 +126,6 @@ class UnLikePostView(APIView):
    
 
 class CommentPostView(APIView):
-
     def post(self, request, format=None):
         """
         Retrieve a Post by ID
@@ -146,10 +135,20 @@ class CommentPostView(APIView):
 
 
 class PostPaginationByPageIDView(APIView):
-
     def get(self, request, pk, format=None):
         """
         Retrieve a Post by ID
         """
         result = postService.get_posts_by_page_id(request, pk, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+
+
+class PostPayment(APIView):
+    def post(self, request, format=None):
+        result = postService.send_payment_for_post(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+
+    def get(self, request, format=None):
+        result = postService.unlock_post(request, format=None)
         return Response(result, status=status.HTTP_200_OK)
