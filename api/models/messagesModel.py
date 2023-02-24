@@ -28,6 +28,7 @@ class Messages(models.Model):
     history = HistoricalRecords(table_name='messages_history')
     can_delete = models.BooleanField(default=True)
 
+
     def __unicode__(self):
         return self.id
 

@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from api.models.UserSubscriptionModel import UserSubscription
+from api.models.messageNotificationModel import Notifications
 from api.models.userSubscriptionTierModel import UserSubscriptionTier
 from api.serializers.subscription import *
 from api.utils import CustomPagination
@@ -9,6 +10,8 @@ from api.utils.messages.postMessages import *
 from api.utils.messages.subscriptionMessages import *
 from api.serializers.page import GetPageSubscriptionSerializer
 from .subscriptionBaseService import SubscriptionBaseService
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 
 
 class SubscriptionService(SubscriptionBaseService):
@@ -85,6 +88,14 @@ class SubscriptionService(SubscriptionBaseService):
             serializer.save()
             return ({"data": serializer.data, "code": status.HTTP_201_CREATED, "message": POST_CREATED})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
+
+    @receiver(post_save, sender=UserSubscription)
+    def subscribe_saved(sender,instance,created,**kwargs):
+        if created:
+            #print("New Subscriber Created", instance.id)
+            NotificationInstance = Notifications(subscribe=instance, type_of_notification='New Subscriber')
+            NotificationInstance.save()
+            #print(NotificationInstance.id)
 
 
     def cancel_subscription(self, request,pk, format=None):

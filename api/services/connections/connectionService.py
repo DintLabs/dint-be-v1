@@ -2,6 +2,7 @@ from ast import excepthandler
 import re
 from urllib import response
 from api.models.UserSubscriptionModel import UserSubscription
+from api.models.messageNotificationModel import Notifications
 from api.models.userModel import User
 from api.models.userSubscriptionTierModel import UserSubscriptionTier
 from api.serializers.connections import *
@@ -13,6 +14,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .connectionBaseService import ConnectionBaseService
 import datetime
 from django.utils import timezone
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 
 class ConnectionService(ConnectionBaseService):
     """
@@ -53,6 +56,8 @@ class ConnectionService(ConnectionBaseService):
             return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": message})
         else:
             return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
+
+        
         
 
     def unfollow(self, request, pk, format=None):
@@ -192,3 +197,11 @@ class ConnectionService(ConnectionBaseService):
             return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "User Stories List Fecthed."})
         except:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": RECORD_NOT_FOUND})
+
+@receiver(post_save, sender=UserFollowers)
+def subscribe_saved(sender,instance,created,**kwargs):
+    if created:
+        #print("New Request Created", instance.id)
+        NotificationInstance = Notifications(followrequest=instance, type_of_notification='New Follow Request')
+        NotificationInstance.save()
+        #print(NotificationInstance.id)
