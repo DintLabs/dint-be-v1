@@ -99,3 +99,8 @@ class GetPostsSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Posts
         fields = '__all__'
+    
+class PostsPaymentSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = PostsPayment
+        fields = '__all__'
