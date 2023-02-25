@@ -169,6 +169,7 @@ class UserService(UserBaseService):
             user.is_online = True
             user.save()
             referral_address = '0x0000000000000000000000000000000000000000'
+            code_used = None
             if request.data.get('referred_by', None):
                 user_referred_by = User.objects.get(referral_id=request.data['referred_by'])
                 user_referral_wallet = UserReferralWallet(referred_by=user_referred_by)
@@ -180,8 +181,8 @@ class UserService(UserBaseService):
                 key = Fernet(settings.ENCRYPTION_KEY)
                 referral_decwallet = key.decrypt(wallet_bytes).decode()
                 referral_address = referral_decwallet
-
                 code_used = UserReferralWallet.objects.filter(referred_by=user_referred_by)
+                print(code_used)           
             payload = jwt_payload_handler(user)
             token = jwt.encode(payload, settings.SECRET_KEY)
             user_details = serializer.data
@@ -211,23 +212,17 @@ class UserService(UserBaseService):
                 contract = web3.eth.contract(address = address , abi = abi)
                 user_address = contract.functions.owner().call()
 
-                if (referral_address == '0x0000000000000000000000000000000000000000'):
+                if (referral_address == '0x0000000000000000000000000000000000000000') and (code_used == None):
                     pass
-                elif code_used:
-                    pass
-                else:
-
+                
+                if(referral_address != '0x0000000000000000000000000000000000000000') and (code_used == None):
                     nonce = web3.eth.getTransactionCount(user_address) 
                     data = contract.functions.changeReferrerState(referral_address, True).buildTransaction({ 'from': user_address,
                         'gasPrice': web3.toWei('30', 'gwei'),  
                         'nonce': nonce,})
-                    print(data)
                     signed_txn = web3.eth.account.signTransaction(data, private_key=private_key)
-                    print("signed_txn", signed_txn)
                     tx_hash = web3.eth.sendRawTransaction(signed_txn.rawTransaction)
-                    print(tx_hash, "tx_hash")
                     tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
-                    print("tx_receipt",tx_receipt)
                 nonce = web3.eth.getTransactionCount(user_address) 
                 register = contract.functions.register(new_user, referral_address).buildTransaction({  
                     'from': user_address,
@@ -246,7 +241,6 @@ class UserService(UserBaseService):
                 except:
                     return ({"data": user_details, "code": status.HTTP_201_CREATED, "message": "User Created Successfully"})
             except Exception as e:
-                print(e)
                 return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong. Please try again"})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong. Please try again"})
 
