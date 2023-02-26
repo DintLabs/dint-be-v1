@@ -176,7 +176,8 @@ class UserService(UserBaseService):
                 user_referral_wallet.user_referral = user
                 user_referral_wallet.save()
                 referral_user = User.objects.get(email = user_referred_by)
-                encrypted_address = referral_user.wallet_address
+
+                encrypted_address = '0x0000000000000000000000000000000000000000'
                 wallet_bytes = bytes(encrypted_address)
                 key = Fernet(settings.ENCRYPTION_KEY)
                 referral_decwallet = key.decrypt(wallet_bytes).decode()
