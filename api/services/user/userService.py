@@ -154,7 +154,7 @@ class UserService(UserBaseService):
         except UserSession.DoesNotExist:
             return None
 
-    def sign_up(self, request, format=None):
+    def sign_up(self, request):
         request.data['referral_id'] = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
         if 'referred_by' in request.data:
             try:
@@ -176,6 +176,7 @@ class UserService(UserBaseService):
                 user_referral_wallet.user_referral = user
                 user_referral_wallet.save()
                 referral_user = User.objects.get(email = user_referred_by)
+                
                 encrypted_address = referral_user.wallet_address
                 wallet_bytes = bytes(encrypted_address)
                 key = Fernet(settings.ENCRYPTION_KEY)
