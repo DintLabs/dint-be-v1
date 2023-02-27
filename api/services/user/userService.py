@@ -156,11 +156,11 @@ class UserService(UserBaseService):
 
     def sign_up(self, request):
         request.data['referral_id'] = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-        if 'referred_by' in request.data:
-            try:
-                User.objects.get(referral_id=request.data['referred_by'])
-            except User.DoesNotExist:
-                return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Provided Referral ID is not correct!"})
+        # if 'referred_by' in request.data:
+        try:
+            User.objects.get(referral_id=request.data['referred_by'])
+        except User.DoesNotExist: 
+            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Provided Referral ID is not correct!"})
         serializer = UserCreateUpdateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -170,23 +170,33 @@ class UserService(UserBaseService):
             user.save()
             referral_address = '0x0000000000000000000000000000000000000000'
             code_used = False
-            if request.data.get('referred_by', None):
+            # if request.data.get('referred_by', None):
+            try:
                 user_referred_by = User.objects.get(referral_id=request.data['referred_by'])
                 user_referral_wallet = UserReferralWallet(referred_by=user_referred_by)
                 user_referral_wallet.user_referral = user
                 user_referral_wallet.save()
                 referral_user = User.objects.get(email = user_referred_by)
-                
                 encrypted_address = referral_user.wallet_address
                 wallet_bytes = bytes(encrypted_address)
                 key = Fernet(settings.ENCRYPTION_KEY)
                 referral_decwallet = key.decrypt(wallet_bytes).decode()
                 referral_address = referral_decwallet
-                already_code_used = UserReferralWallet.objects.filter(referred_by=user_referred_by)
-               
-                length = len(already_code_used)
+                code_already_used = UserReferralWallet.objects.filter(referred_by=user_referred_by)
+                length = len(code_already_used)
                 if length > 1:
                     code_used = True
+                else:
+                    code_used = False
+
+                user.is_referred = True
+                user.user_referred_by = user_referred_by
+                user.save()
+                
+            except Exception as e:
+                print(e)
+                pass
+            print(code_used)
             payload = jwt_payload_handler(user)
             token = jwt.encode(payload, settings.SECRET_KEY)
             user_details = serializer.data
@@ -211,16 +221,19 @@ class UserService(UserBaseService):
                 address = Web3.toChecksumAddress(settings.DINT_TOKEN_DISTRIBUTOR_ADDRESS)
                 private_key= settings.OWNER_PRIVATE_KEY
                 new_user = acct.address
-                abi = json.loads('[{"inputs":[{"internalType":"address","name":"_dintToken","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_recipient","type":"address"},{"indexed":false,"internalType":"uint256","name":"_amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_id","type":"uint256"}],"name":"rewardSent","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_sender","type":"address"},{"indexed":false,"internalType":"address","name":"_recipient","type":"address"},{"indexed":false,"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"tipSent","type":"event"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_blocked","type":"bool"}],"name":"blockUnblockReferrer","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"changeManagedState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_isReferrer","type":"bool"}],"name":"changeReferrerState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"dintToken","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"isRewardSent","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxDuration","outputs":[{"internalType":"uint64","name":"","type":"uint64"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referrer","type":"address"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"uint256","name":"_postId","type":"uint256"}],"name":"reward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_sender","type":"address"},{"internalType":"address","name":"_recipient","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"sendDint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeCollector","type":"address"}],"name":"setFeeCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint64","name":"_durationInSeconds","type":"uint64"}],"name":"setMaxDuration","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"unRegister","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"user","outputs":[{"internalType":"bool","name":"isRegistered","type":"bool"},{"internalType":"bool","name":"isManaged","type":"bool"},{"internalType":"bool","name":"isReferrer","type":"bool"},{"internalType":"bool","name":"blockedReferrer","type":"bool"},{"internalType":"uint64","name":"startedReferringAt","type":"uint64"},{"internalType":"address","name":"tipReceiverToReferrer","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"address","name":"_to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]') 
+                abi = json.loads('[{"inputs":[{"internalType":"address","name":"_dintToken","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_recipient","type":"address"},{"indexed":false,"internalType":"uint256","name":"_amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_id","type":"uint256"}],"name":"rewardSent","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_sender","type":"address"},{"indexed":false,"internalType":"address","name":"_recipient","type":"address"},{"indexed":false,"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"tipSent","type":"event"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_blocked","type":"bool"}],"name":"blockUnblockReferrer","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"changeManagedState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"dintToken","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"isRewardSent","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxDuration","outputs":[{"internalType":"uint64","name":"","type":"uint64"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referrer","type":"address"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"uint256","name":"_postId","type":"uint256"}],"name":"reward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_sender","type":"address"},{"internalType":"address","name":"_recipient","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"sendDint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeCollector","type":"address"}],"name":"setFeeCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint64","name":"_durationInSeconds","type":"uint64"}],"name":"setMaxDuration","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"unRegister","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"user","outputs":[{"internalType":"bool","name":"isRegistered","type":"bool"},{"internalType":"bool","name":"isManaged","type":"bool"},{"internalType":"bool","name":"isReferrer","type":"bool"},{"internalType":"bool","name":"blockedReferrer","type":"bool"},{"internalType":"uint64","name":"startedReferringAt","type":"uint64"},{"internalType":"address","name":"tipReceiverToReferrer","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"address","name":"_to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]') 
 
                 contract = web3.eth.contract(address = address , abi = abi)
                 user_address = contract.functions.owner().call()
 
                 if (referral_address == '0x0000000000000000000000000000000000000000') and (code_used == False):
+                    print("user does not have referral code")
                     pass
                 if (referral_address != '0x0000000000000000000000000000000000000000') and (code_used == True):
+                    print("user have used referral code")
                     pass
                 if (referral_address != '0x0000000000000000000000000000000000000000') and (code_used == False):
+                    print("to change referral state")
                     nonce = web3.eth.getTransactionCount(user_address) 
                     data = contract.functions.changeReferrerState(referral_address, True).buildTransaction({ 'from': user_address,
                         'gasPrice': web3.toWei('30', 'gwei'),  
