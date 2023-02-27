@@ -102,6 +102,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     email_token_valid = models.DateTimeField(blank=True, null=True)
     is_email_verified = models.BooleanField(default=False)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
+    is_referred = models.BooleanField(default=False)
+    user_referred_by = models.ForeignKey(to='User', on_delete=models.DO_NOTHING, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         super(User, self).save(*args, **kwargs)
@@ -111,6 +113,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         indexes = [
             models.Index(fields=['id', 'first_name', 'last_name', 'email', 'is_active'])
         ]
+
+    def __str__(self):
+        return str(self.email)
 
 class UserPreferences(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
