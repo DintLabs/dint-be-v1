@@ -156,11 +156,11 @@ class UserService(UserBaseService):
 
     def sign_up(self, request):
         request.data['referral_id'] = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-        # if 'referred_by' in request.data:
-        try:
-            User.objects.get(referral_id=request.data['referred_by'])
-        except User.DoesNotExist: 
-            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Provided Referral ID is not correct!"})
+        if 'referred_by' in request.data:
+            try:
+                User.objects.get(referral_id=request.data['referred_by'])
+            except User.DoesNotExist: 
+                return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Provided Referral ID is not correct!"})
         serializer = UserCreateUpdateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -170,8 +170,7 @@ class UserService(UserBaseService):
             user.save()
             referral_address = '0x0000000000000000000000000000000000000000'
             code_used = False
-            # if request.data.get('referred_by', None):
-            try:
+            if request.data.get('referred_by', None):
                 user_referred_by = User.objects.get(referral_id=request.data['referred_by'])
                 user_referral_wallet = UserReferralWallet(referred_by=user_referred_by)
                 user_referral_wallet.user_referral = user
@@ -192,11 +191,6 @@ class UserService(UserBaseService):
                 user.is_referred = True
                 user.user_referred_by = user_referred_by
                 user.save()
-                
-            except Exception as e:
-                print(e)
-                pass
-            print(code_used)
             payload = jwt_payload_handler(user)
             token = jwt.encode(payload, settings.SECRET_KEY)
             user_details = serializer.data
