@@ -768,15 +768,18 @@ class UserService(UserBaseService):
         
         try:
             referred_by = User.objects.get(referral_id=referral_code)
+            print(referred_by)
             if referred_by:
                 already_exists = UserReferralWallet.objects.filter(referred_by=referred_by, user_referral = user_obj)
                 if not already_exists:
                     user_referral_wallet = UserReferralWallet(referred_by=referred_by, user_referral = user_obj)
                     user_referral_wallet.save()
+                    user = User.objects.filter(email = user).update(is_referred = True, user_referred_by = referred_by.id)
                     return ({"data": [], "code": status.HTTP_200_OK, "message": "Referral code added"})
                 else:
                     return ({"data": [], "code": status.HTTP_200_OK, "message": "Already added"})
         except Exception as e:
+            print(e)
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Provided Referral ID is not correct!"})
 
     def user_referral_code_by_token(self, request, format=None):
