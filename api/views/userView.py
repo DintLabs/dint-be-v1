@@ -518,3 +518,11 @@ class ReadNotification(APIView):
     def get(self, request,pk, format=None):
         result = userService.read_notification(request, pk, format=None)
         return Response(result, status=status.HTTP_200_OK)
+
+class UserId(APIView):
+    '''
+    API to get current user's logged in id
+    '''
+    def get(self, request, format=None):
+        result = userService.userid(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)

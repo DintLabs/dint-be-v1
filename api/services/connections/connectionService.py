@@ -129,13 +129,18 @@ class ConnectionService(ConnectionBaseService):
 
     def delete_follow_request(self, request, pk, format=None):
         """
-        Cancel Follow Request
+        Cancel Follow Request and delete its notification
         """
         try:
             obj = UserFollowers.objects.get(user = pk, follower = request.user.id)
         except UserFollowers.DoesNotExist:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": RECORD_NOT_FOUND})
+        notobj = Notifications.objects.get(followrequest = obj)
+        notobj.delete()
+        #print('deleted notification')
         obj.delete()
+        #print('deleted request')
+
         return ({"data": None, "code": status.HTTP_200_OK, "message": "Follow Request Canceled Successfully."})
 
     def update_privacy_status(self, request, format=None):

@@ -57,6 +57,8 @@ from sib_api_v3_sdk.rest import ApiException
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from itertools import chain
 from api.utils.token import account_activation_token
+from api.services.chat.chatService import *
+from api.services.user import msgScheduler
 
 class UserService(UserBaseService):
     """
@@ -597,9 +599,20 @@ class UserService(UserBaseService):
                 user_preferences_obj, data=request.data)
             if serializer.is_valid():
                 serializer.save(user=request.user)
+            
+            if serializer.data['enable_email_notification'] == True:
+                #get all unread messages
+                preference = UserPreferences.objects.filter(user = request.user.id, enable_email_notification = True).values().count()
+                d = {}
+                if preference == 1:
+                    d = ChatService.getdictionary(self,request)
+            
+                msgScheduler.start(self,request, serializer.data['new_private_msg_summary_time'], d)
+
                 return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "User Preferences saved Successfully"})
             return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
         return ({"data": [{error: 'User not found'}], "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
+        #call cron job 
 
     def get_profile_by_username(self, request, format=None):
         try:
@@ -948,5 +961,12 @@ class UserService(UserBaseService):
         context = {"user_id":request.user.id}
         serializer = GetNotificationSerializer(notification_obj, many=True, context = context)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": MESSAGE})
-        
+    
+    #schedule email notifications
+    def schedule_api(self, request, id, format=None):
+            ChatService.send_notification(id)
 
+    
+   
+
+    
