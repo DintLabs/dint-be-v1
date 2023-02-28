@@ -116,7 +116,7 @@ class SignupView(APIView):
         """
         Create User/ Signup User
         """
-        result = userService.sign_up(request, format=None)
+        result = userService.sign_up(request)
         return Response(result, status=status.HTTP_200_OK)
 
 class VarifyOtpView(APIView):
@@ -503,12 +503,12 @@ class GetUserReferralId(APIView):
         result = userService.get_referral_id_by_token(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
     
-class GetAllNotifications(APIView):
+class GetUnreadNotifications(APIView):
     '''
-    API to get all notifications for user
+    API to get unread notifications for user
     '''
     def get(self, request, format=None):
-        result = userService.get_all_notification_list_by_user(request, format=None)
+        result = userService.get_unread_notification_list_by_user(request, format=None)
         return Response(result, status=status.HTTP_200_OK)
 
 class ReadNotification(APIView):
@@ -518,12 +518,3 @@ class ReadNotification(APIView):
     def get(self, request,pk, format=None):
         result = userService.read_notification(request, pk, format=None)
         return Response(result, status=status.HTTP_200_OK)
-
-class GetNotifications(APIView):
-    '''
-    API to get all notifications for user (PAGINATION IMPLEMENTED)
-    '''
-    def post(self, request, format=None):
-        result = userService.get_notifications_by_pagination(request, format=None)
-        return Response(result, status=status.HTTP_200_OK)
-
