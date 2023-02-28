@@ -220,22 +220,6 @@ class UserService(UserBaseService):
                 contract = web3.eth.contract(address = address , abi = abi)
                 user_address = contract.functions.owner().call()
 
-                if (referral_address == '0x0000000000000000000000000000000000000000') and (code_used == False):
-                    print("user does not have referral code")
-                    pass
-                if (referral_address != '0x0000000000000000000000000000000000000000') and (code_used == True):
-                    print("user have used referral code")
-                    pass
-                if (referral_address != '0x0000000000000000000000000000000000000000') and (code_used == False):
-                    print("to change referral state")
-                    nonce = web3.eth.getTransactionCount(user_address) 
-                    data = contract.functions.changeReferrerState(referral_address, True).buildTransaction({ 'from': user_address,
-                        'gasPrice': web3.toWei('30', 'gwei'),  
-                        'nonce': nonce,})
-                   
-                    signed_txn = web3.eth.account.signTransaction(data, private_key=private_key)
-                    tx_hash = web3.eth.sendRawTransaction(signed_txn.rawTransaction)
-                    tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
                 nonce = web3.eth.getTransactionCount(user_address) 
                 register = contract.functions.register(new_user, referral_address).buildTransaction({  
                     'from': user_address,
