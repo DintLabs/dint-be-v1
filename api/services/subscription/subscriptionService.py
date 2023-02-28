@@ -110,6 +110,12 @@ class SubscriptionService(SubscriptionBaseService):
         sub_obj.is_active = False
         sub_obj.reject_reason = request.data['reject_reason']
         sub_obj.save()
+        #delete subscribe notification
+        notobj = Notifications.objects.get(subscribe = sub_obj)
+        print(notobj)
+        notobj.delete()
+        print('deleted notification')
+
         return ({"data": None, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
     def get_active_subscriptions_by_token(self, request, format=None):
