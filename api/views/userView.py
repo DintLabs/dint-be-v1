@@ -519,3 +519,11 @@ class ReadNotification(APIView):
         result = userService.read_notification(request, pk, format=None)
         return Response(result, status=status.HTTP_200_OK)
 
+class GetNotifications(APIView):
+    '''
+    API to get all notifications for user (PAGINATION IMPLEMENTED)
+    '''
+    def post(self, request, format=None):
+        result = userService.get_notifications_by_pagination(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
+

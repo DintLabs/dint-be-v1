@@ -218,6 +218,8 @@ urlpatterns = [
     # notifications
     path('user/get-all-notifications/', GetAllNotifications.as_view(), name="get_unread_notification_list_by_user"),
     path('user/read-notification/<int:pk>/', ReadNotification.as_view(), name="read_notification"),
+    path('user/pagination/get-notifications/', GetNotifications.as_view(), name="pagination/get-notifications"),
+
 
 ]
 

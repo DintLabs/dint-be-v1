@@ -942,7 +942,7 @@ class UserService(UserBaseService):
      # list of unread notifications 
     def get_all_notification_list_by_user(self, request, format=None):
         """
-        Return all the Unseen Messages.
+        Return all notifications
         """
         id1 = list(UserSubscription.objects.filter(user = request.user.id).values_list('id'))
         id2 = list(UserFollowers.objects.filter(user=request.user.id).values_list('id'))
@@ -966,6 +966,28 @@ class UserService(UserBaseService):
         context = {"user_id":request.user.id}
         serializer = GetNotificationSerializer(notification_obj, many=True, context = context)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": MESSAGE})
+
+
+    def get_notifications_by_pagination(self, request, format=None):
+        """
+        Retrieve Notifications according to pages
+        """
+        id1 = list(UserSubscription.objects.filter(user = request.user.id).values_list('id'))
+        id2 = list(UserFollowers.objects.filter(user=request.user.id).values_list('id'))
+        id3 = list(Messages.objects.filter(reciever=request.user.id)) 
+        notification_obj = Notifications.objects.filter(subscribe__in = id1) | Notifications.objects.filter(followrequest__in = id2) | Notifications.objects.filter(message__in = id3) 
+        notification_obj = notification_obj.order_by('-created_at')
+        
+        custom_pagination = CustomPagination ()
+        search_keys = ['content__icontains', 'id__contains']
+        search_type = 'or'
+        context = {"logged_in_user":request.user.id}
+        roles_response = custom_pagination.custom_pagination(request, Notifications, search_keys, search_type, GetNotificationSerializer, notification_obj , context)
+        return {"data": roles_response['response_object'],
+                "recordsTotal": roles_response['total_records'],
+                "recordsFiltered": roles_response['total_records'],
+                "code": status.HTTP_200_OK, "message": OK}
+
     
     
 
