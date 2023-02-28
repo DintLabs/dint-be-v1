@@ -216,7 +216,7 @@ urlpatterns = [
     path('user/get_payouts_by_token/', UserPayoutsByToken.as_view(), name="get_payouts_by_token"),
 
     # notifications
-    path('user/get-unread-notifications/', GetUnreadNotifications.as_view(), name="get_unread_notification_list_by_user"),
+    path('user/get-all-notifications/', GetAllNotifications.as_view(), name="get_unread_notification_list_by_user"),
     path('user/read-notification/<int:pk>/', ReadNotification.as_view(), name="read_notification"),
 
 ]
