@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'simple_history',
     'rest_framework_swagger',
     'corsheaders',
+    'django_cron',
 ]
 
 ASGI_APPLICATION = "dint.asgi.application"
@@ -210,7 +211,8 @@ JWT_AUTH = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 
 USE_I18N = True
@@ -273,3 +275,7 @@ SEND_DINT_TOKEN_URL = config('SEND_DINT_TOKEN_URL')
 WITHDRAW_DINT_TOKEN_URL = config('WITHDRAW_DINT_TOKEN_URL')
 ID_ANALYZER_KEY = config('ID_ANALYZER_KEY')
 SENDINBLUE_API = config('SENDINBLUE_API')
+
+CRON_CLASSES = [
+    "api.cron.MyCronJob",
+]

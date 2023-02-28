@@ -35,26 +35,22 @@ class UserStoriesModelSerializer(serializers.ModelSerializer):
         except:
             return 0
 
-class GetUserStoriesModelSerializer(serializers.ModelSerializer):
-    user_stories = serializers.SerializerMethodField()
-   
-    class Meta(object):
-        model = User
-        fields = (
-            'id', 'profile_image', 'display_name', 'custom_username',  'user_stories')
-
-    def get_user_stories(self, obj):
-        logged_in_user = self.context.get('logged_in_user')
-        follower = UserFollowers.objects.filter(user=logged_in_user, request_status=True).values_list('follower')
-        following = UserFollowers.objects.filter(follower=logged_in_user, request_status=True).values_list('user')
-        users = following.union(follower)
-
-        expire_time = timezone.now() - datetime.timedelta(hours=24)
-        userstories = UserStories.objects.filter(user__in=users, created_at__gt = expire_time)
-        serializer = UserStoriesModelSerializer(instance = userstories, many=True).data
-        return serializer
-
 class UserArchiveStorySerializer(serializers.ModelSerializer):
     class Meta(object):
         model = UserStories
         fields = "__all__"
+
+class GetUserStoriesModelSerializer(serializers.ModelSerializer):
+    user_stories = serializers.SerializerMethodField()
+
+    class Meta(object):
+        model =  User
+        fields = ('id', 'profile_image', 'display_name', 'custom_username', 'user_stories')
+
+    def get_user_stories(self, obj):
+        user_obj = User.objects.get(email = obj)
+        expire_time = timezone.now() - datetime.timedelta(hours=24)
+        userstories = UserStories.objects.filter(user = obj.id, created_at__gt = expire_time)
+        serializer = UserStoriesModelSerializer(instance = userstories, many=True).data
+        return serializer
+ 
