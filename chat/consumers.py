@@ -62,7 +62,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def send_notification(self, event):
         message = event['message']
         user = self.scope['user']
-
+         
+        if(str(user) == "AnonymousUser"):
+            user.name = "Anonymous"
+        else:
+            pass
         # Send message to WebSocket on new message
         text = 'Got new message from '+ user.name
         await self.send(json.dumps({
@@ -71,18 +75,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "message": message
         }))
         
-        
 
     async def chat_message(self, event):
         message = event['message']
 
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({
-            'message': message
-        }))
-
-    async def chat_message(self, event):
-        message = event['message']
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'message': message
