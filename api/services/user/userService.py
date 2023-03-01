@@ -605,16 +605,13 @@ class UserService(UserBaseService):
             
             if serializer.data['enable_email_notification'] == True:
                 #get all unread messages
-                #schedule email notifications
-                def schedule_api(self, request, id, format=None):
-                        ChatService.send_notification(id)
+                
                 preference = UserPreferences.objects.filter(user = request.user.id, enable_email_notification = True).values().count()
                 d = {}
                 if preference == 1:
                     d = ChatService.getdictionary(self,request)
 
-                # @msgScheduler.scheduler.scheduled_job()
-                # msgScheduler.start(self,request, serializer.data['new_private_msg_summary_time'], d)
+                msgScheduler.start(self,request, serializer.data['new_private_msg_summary_time'], d)
 
                 return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "User Preferences saved Successfully"})
             return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
@@ -987,6 +984,10 @@ class UserService(UserBaseService):
                 "recordsTotal": roles_response['total_records'],
                 "recordsFiltered": roles_response['total_records'],
                 "code": status.HTTP_200_OK, "message": OK}
+
+    #schedule email notifications
+    def schedule_api(self, request, id, format=None):
+            ChatService.send_notification(id)
 
     
     

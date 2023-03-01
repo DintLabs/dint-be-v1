@@ -43,6 +43,7 @@ class ChatService (ChatBaseService):
         serializer = GetMessageSerializer(messages_obj, many=True, context = context)
         #change notification to seen
         msginstance = list(Messages.objects.filter(sender = pk, reciever = request.user.id).values_list('id'))
+        id=[]
         for i in msginstance:
             id.append(i[0])
         Notifications.objects.filter(message__in = id).update(is_active=False)
@@ -87,14 +88,14 @@ class ChatService (ChatBaseService):
         for i in msginstance:
             id.append(i[0])
         Notifications.objects.filter(message__in = id).update(is_active=False)
-        #get all unread messages
-        preference = UserPreferences.objects.filter(user = request.user.id, enable_email_notification = True).values().count()
-        time = UserPreferences.objects.filter(user=request.user.id, enable_email_notification = True).values_list('new_private_msg_summary_time')
-        d = {}
-        if preference == 1:
-            d = self.getdictionary(request)
+        # #get all unread messages
+        # preference = UserPreferences.objects.filter(user = request.user.id, enable_email_notification = True).values().count()
+        # time = UserPreferences.objects.filter(user=request.user.id, enable_email_notification = True).values_list('new_private_msg_summary_time')
+        # d = {}
+        # if preference == 1:
+        #     d = self.getdictionary(request)
     
-        msgScheduler.start(self,request, time[0][0], d)
+        # msgScheduler.start(self,request, time[0][0], d)
 
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
@@ -268,20 +269,15 @@ class ChatService (ChatBaseService):
 
     def getdictionary(self, request):
         '''
-        get the unread char details
+        get the unread chat details
         '''
         #get unread chat notification, msg ids
         d={}
         msgs = list(Messages.objects.filter(reciever=request.user.id, is_seen=False).values_list('id', flat=True))
-        print(msgs)
         msgid = list(Notifications.objects.filter(message__in=msgs).values_list('message'))
-        print(msgid)
         #get notification time 
         nottime = list(Notifications.objects.filter(message__in=msgs).values_list('created_at'))
-        print(nottime)
         for i in range(len(msgid)):
-            print(i)
             d[msgid[i][0]] = nottime[i][0]
         return d
-
-   
+    

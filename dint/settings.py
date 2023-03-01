@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-
+import django
+from django.utils.encoding import smart_str
+django.utils.encoding.smart_text = smart_str
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 import os
@@ -36,6 +38,7 @@ INSTALLED_APPS = [
     'daphne',
     'chat',
     'channels',
+    'api',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'api',
+    # 'api.apps.ApiConfig',
     'simple_history',
     'rest_framework_swagger',
     'corsheaders',
