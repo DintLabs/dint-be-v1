@@ -9,7 +9,6 @@ from api.utils.messages.commonMessages import *
 from api.utils.messages.eventMessages import *
 from rest_framework.parsers import MultiPartParser, FormParser
 from .storiesBaseService import StoriesBaseService
-import datetime
 from django.utils import timezone
 from django.forms.models import model_to_dict
 import datetime
@@ -37,14 +36,17 @@ class StoriesService(StoriesBaseService):
         parser_classes = (MultiPartParser, FormParser)
         user_obj = User.objects.get(id = request.user.id)
       
-        #user_story = UserStories.objects.create(user = user_obj, story = request.FILES['story'])
         serializer = CreateUserStoriesSerrializer(data = request.data)
-
+       
         if serializer.is_valid():
             serializer.save()
             res = serializer.data
             storyURL = request.build_absolute_uri(res["story"])
+            tz = pytz.timezone('Asia/Kolkata')
+            expire_time = datetime.datetime.now(tz) + datetime.timedelta(hours=24)
             res["story"] = storyURL
+            res["expiration_time"] = expire_time
+            user_obj = UserStories.objects.filter(id = res["id"]).update(expiration_time = expire_time)
             return ({"data": res, "code": status.HTTP_200_OK, "message": "Story posted successfully."})
         else:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Something went wrong."}) 
@@ -80,7 +82,6 @@ class StoriesService(StoriesBaseService):
                 serializer = UserStoryLikesSerializer(data = data)
                 if serializer.is_valid():
                     serializer.save()
-                    print(serializer.data)
                     return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "Story liked successfully"})
             else:
                 return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Story not found"})

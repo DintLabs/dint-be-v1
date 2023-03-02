@@ -76,6 +76,7 @@ urlpatterns = [
     path('user/referral_code/', UserReferralCode.as_view(), name="user_referral_code"),
     path('user/track_ip_address/', TrackUserIpAddress.as_view(), name = "track_user_ip_address"),
     path('user/get_referral_id/', GetUserReferralId.as_view(), name="get_user_referral_id"),
+    path('user/referrals/', GetUserReferral.as_view(), name="get_user_referrals"),
 
     # suggestions to user
     path('user/get_suggestions/', UserSuggestions.as_view(), name = "get_suggestions"),
@@ -216,10 +217,7 @@ urlpatterns = [
     path('user/get_payouts_by_token/', UserPayoutsByToken.as_view(), name="get_payouts_by_token"),
 
     # notifications
-    path('user/get-all-notifications/', GetAllNotifications.as_view(), name="get_unread_notification_list_by_user"),
+    path('user/get-unread-notifications/', GetUnreadNotifications.as_view(), name="get_unread_notification_list_by_user"),
     path('user/read-notification/<int:pk>/', ReadNotification.as_view(), name="read_notification"),
-    path('user/pagination/get-notifications/', GetNotifications.as_view(), name="pagination/get-notifications"),
-
-
 ]
 

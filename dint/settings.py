@@ -35,7 +35,6 @@ ALLOWED_HOSTS = ['127.0.0.1', config('WALLET_URL_DINT'), config('BE_URL_DINT')]
 
 # Application definition
 INSTALLED_APPS = [
-    'daphne',
     'chat',
     'channels',
     'api',
@@ -50,14 +49,17 @@ INSTALLED_APPS = [
     'simple_history',
     'rest_framework_swagger',
     'corsheaders',
-    'django_apscheduler',
+    'django_cron',
 ]
 
 ASGI_APPLICATION = "dint.asgi.application"
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
 }
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -96,25 +98,14 @@ WSGI_APPLICATION = 'dint.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': config('DB_NAME'),
-#         'USER': config('DB_USER'),
-#         'PASSWORD': config('DB_PASSWORD'),
-#         'HOST': config('DB_HOST'),
-#         'PORT': config('DB_PORT', cast=int)
-#     }
-# }
-
 DATABASES = {
-    'default':{
-        'ENGINE':'django.db.backends.postgresql_psycopg2',
-        'NAME':'dint',
-        'USER':'postgres',
-        'PASSWORD':'admin',
-        'HOST':'localhost',
-        'PORT':'5432'
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT', cast=int)
     }
 }
 
@@ -225,7 +216,8 @@ JWT_AUTH = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 
 USE_I18N = True
@@ -288,3 +280,7 @@ SEND_DINT_TOKEN_URL = config('SEND_DINT_TOKEN_URL')
 WITHDRAW_DINT_TOKEN_URL = config('WITHDRAW_DINT_TOKEN_URL')
 ID_ANALYZER_KEY = config('ID_ANALYZER_KEY')
 SENDINBLUE_API = config('SENDINBLUE_API')
+
+CRON_CLASSES = [
+    "api.cron.MyCronJob",
+]

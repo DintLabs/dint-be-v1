@@ -6,7 +6,6 @@ from api.models.postsModel import Posts
 from api.models.userFollowersModel import UserFollowers
 from api.serializers.posts import *
 from api.serializers.user.userSerializer import GetNotificationSerializer
-from api.services.user import msgScheduler
 from api.utils import CustomPagination
 from rest_framework import status
 from api.utils.messages.commonMessages import *
@@ -82,20 +81,12 @@ class ChatService (ChatBaseService):
         #changes is_seen of messages
         Messages.objects.filter(sender = pk, reciever = request.user.id).update(is_seen = True)
         serializer = GetMessageSerializer(messages_obj, many=True, context = context)
-        id=[]
+
         #change notification to seen
         msginstance = list(Messages.objects.filter(sender = pk, reciever = request.user.id).values_list('id'))
         for i in msginstance:
             id.append(i[0])
         Notifications.objects.filter(message__in = id).update(is_active=False)
-        # #get all unread messages
-        # preference = UserPreferences.objects.filter(user = request.user.id, enable_email_notification = True).values().count()
-        # time = UserPreferences.objects.filter(user=request.user.id, enable_email_notification = True).values_list('new_private_msg_summary_time')
-        # d = {}
-        # if preference == 1:
-        #     d = self.getdictionary(request)
-    
-        # msgScheduler.start(self,request, time[0][0], d)
 
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
@@ -134,7 +125,7 @@ class ChatService (ChatBaseService):
 
 
 
-    def send_notification(id):
+    def send_notification(self,id):
         msg = Messages.objects.get(id = id)
         first_name = msg.reciever.email
         sender_name = msg.sender.email
@@ -209,18 +200,14 @@ class ChatService (ChatBaseService):
   
     def delete_messsage(self, request, pk, format=None):
         """
-        Delete messages and their notifications.   
+        Delete Posts.   
         """
         try:
             post_obj = Messages.objects.get(id = pk)
         except Messages.DoesNotExist:
             return ({"code": status.HTTP_400_BAD_REQUEST, "message": RECORD_NOT_FOUND})
-        notobj = Notifications.objects.get(message = post_obj)
-        notobj.delete()
-        #print('deleted notification')
+
         post_obj.delete()
-        #print('deleted message')
-        
         return ({"code": status.HTTP_200_OK, "message": POST_DELETED})
 
 

@@ -3,11 +3,16 @@ from api.models.pageModel import Page
 from api.models.userFollowersModel import UserFollowers
 from rest_framework import serializers
 from api.models.UserStoriesModel import *
-from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet, UserPreferences, ConfineUsers,UserCustomLists, UserCustomGroupMembers, UserCloseFriends, UserStories)
 from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet, UserPreferences, ConfineUsers, UserCustomLists, UserCustomGroupMembers, UserCloseFriends, UserStories, UserIdentity)
+from api.models.userFollowersModel import *
+# from api.serializers.connections import *
 from api.models.userBookmarksModel import UserBookmarks
 from django.core.exceptions import ValidationError
 from api.models.messageNotificationModel import Notifications
+from django.http import JsonResponse
+from django.forms.models import model_to_dict
+import datetime
+from django.utils import timezone
 
 class UserLoginDetailSerializer(serializers.ModelSerializer):
     """
@@ -60,7 +65,6 @@ class GetUserPostsSerializer(serializers.ModelSerializer):
         model = Posts
         fields = '__all__'
 
-
 class UpdateUserProfileSerializer(serializers.ModelSerializer):
     """
     Update User Profile Serializer
@@ -90,13 +94,55 @@ class UserStoriesModelSerializer(serializers.ModelSerializer):
     def get_name(self, obj):
         return obj.user.name
 
+class UserFollowersSerializer(serializers.ModelSerializer):
+    """
+    This is for Get
+    """
+    # user = UserLoginDetailSerializer()
+    follower = UserLoginDetailSerializer()
+
+    class Meta(object):
+        model = UserFollowers
+        fields = '__all__'
+
+class UserFollowingSerializer(serializers.ModelSerializer):
+    user = UserLoginDetailSerializer()
+    # follower = UserLoginDetailSerializer()
+
+    class Meta(object):
+        model = UserFollowers
+        fields = '__all__'
+
+# class GetUserStoriesModelSerializer(serializers.ModelSerializer):
+#     user_stories = serializers.SerializerMethodField()
+   
+#     class Meta(object):
+#         model = User
+#         fields = (
+#             'id', 'profile_image', 'display_name', 'custom_username',  'user_stories')
+
+#     def get_user_stories(self, obj):
+#         print("story_obj", obj)
+        # # logged_in_user = self.context.get('logged_in_user')
+        # follower = UserFollowers.objects.filter(user=logged_in_user, request_status=True).values_list('follower')
+        # following = UserFollowers.objects.filter(follower=logged_in_user, request_status=True).values_list('user')
+        # users = following.union(follower)
+
+        # expire_time = timezone.now() - datetime.timedelta(hours=24)
+        # userstories = UserStories.objects.filter(user__in=users, created_at__gt = expire_time)
+        # serializer = UserStoriesModelSerializer(instance = userstories, many=True).data
+        # return serializer
+
 class GetUserProfileSerializer(serializers.ModelSerializer):
     """
     Update User Profile Serializer
     """
     user_posts = GetUserPostsSerializer(many=True)
     is_followed = serializers.SerializerMethodField()
-    user_stories = UserStoriesModelSerializer(many=True)
+    user_stories = serializers.SerializerMethodField()
+    # user_stories = GetUserStoriesModelSerializer(many=True)
+    user_follower = UserFollowersSerializer(many = True)
+    user_following = UserFollowingSerializer(many= True)
 
     def get_is_followed(self, obj):
         profile_user_id = self.context.get('profile_user_id')
@@ -109,11 +155,18 @@ class GetUserProfileSerializer(serializers.ModelSerializer):
                 return 'Request Sent'
         except:
             return False
+    
+    def get_user_stories(self, obj):
+        profile_user_id = self.context.get('profile_user_id')
+        expire_time = timezone.now() - datetime.timedelta(hours=24)
+        userstories = UserStories.objects.filter(user = profile_user_id, created_at__gt = expire_time)
+        serializer = UserStoriesModelSerializer(instance = userstories, many=True).data
+        return serializer
 
     class Meta:
         model = User
         fields = (
-        'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image','city', 'twitter', 'instagram', 'discord', 'banner_image', 'user_posts', 'location', 'is_followed','is_private','is_online', 'last_login','is_active', 'user_stories')
+        'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image','city', 'twitter', 'instagram', 'discord', 'banner_image', 'user_posts', 'location', 'is_followed','is_private','is_online', 'last_login','is_active', 'user_stories', 'user_follower', 'user_following')
 
 class UpdateUserWalletSerializer(serializers.ModelSerializer):
     """
@@ -309,12 +362,14 @@ class ProfileByUsernameSerializer(serializers.ModelSerializer):
     This is for Retrieving profile by user name
     """
     is_followed = serializers.SerializerMethodField()
-    user_posts = serializers.SerializerMethodField()
+    total_posts = serializers.SerializerMethodField()
+    total_followers = serializers.SerializerMethodField()
+    total_following = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = fields = (
-        'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image','city', 'twitter', 'instagram', 'discord', 'banner_image', 'user_posts', 'location', 'is_followed','is_private','is_online', 'connections', 'last_login', 'is_active')
+        'id', 'custom_username', 'display_name', 'bio', 'location', 'website_url', 'amazon_wishlist', 'profile_image','city', 'twitter', 'instagram', 'discord', 'banner_image', 'total_posts', 'location', 'is_followed','is_private','is_online', 'connections', 'last_login', 'is_active', 'total_followers', 'total_following')
 
     def get_is_followed(self, obj):
         profile_user_id = self.context.get('profile_user_id')
@@ -328,9 +383,21 @@ class ProfileByUsernameSerializer(serializers.ModelSerializer):
         except:
             return False
     
-    def get_user_posts(self, obj):
-        user_posts = ""
-        return user_posts
+    def get_total_posts(self, obj):
+        logged_in_user = self.context.get('profile_user_id')
+        total_posts = Posts.objects.filter(user = logged_in_user).all().count()
+        return total_posts
+    
+    def get_total_followers(self, obj):
+        logged_in_user = self.context.get('profile_user_id')
+        total_followers = UserFollowers.objects.filter(user = logged_in_user, request_status = True).all().count()
+        return total_followers
+   
+    def get_total_following(self, obj):
+        logged_in_user = self.context.get('profile_user_id')
+        total_following = UserFollowers.objects.filter(follower = logged_in_user, request_status = True).all().count()
+        return total_following
+  
 
 class UserCloseFriendsSerializer(serializers.ModelSerializer):
     """

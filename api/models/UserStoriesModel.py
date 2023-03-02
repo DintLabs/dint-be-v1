@@ -10,7 +10,7 @@ class UserStories(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_highlighted = models.BooleanField(default=False)
     is_archived = models.BooleanField(default=False)
-
+    expiration_time = models.DateTimeField(blank=True, null=True)
     class Meta:
         db_table = 'user_stories'
         indexes = [
