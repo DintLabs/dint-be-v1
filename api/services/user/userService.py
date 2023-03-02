@@ -930,6 +930,14 @@ class UserService(UserBaseService):
         else:
             return {"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "User not found"}
     
+    def get_user_referrals_by_token(self, request, format=None):
+        user = request.user.id
+        user_obj = User.objects.filter(user_referred_by = user)
+        if user_obj:
+            serializer = UserLoginDetailSerializer(user_obj, many=True)
+            return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
+        else:
+            return ({"data": [], "code": status.HTTP_200_OK, "message": "OK"})
      # list of unread notifications 
     def get_unread_notification_list_by_user(self, request, format=None):
         """

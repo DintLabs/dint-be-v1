@@ -502,7 +502,15 @@ class GetUserReferralId(APIView):
     def get(self, request, format=None):
         result = userService.get_referral_id_by_token(request, format=None)
         return Response(result, status = status.HTTP_200_OK)
-    
+
+class GetUserReferral(APIView):
+    """
+    API to get user referral
+    """
+    def get(self, request, format=None):
+        result = userService.get_user_referrals_by_token(request, format=None)
+        return Response(result, status = status.HTTP_200_OK)
+
 class GetUnreadNotifications(APIView):
     '''
     API to get unread notifications for user
