@@ -11,9 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-import django
-from django.utils.encoding import smart_str
-django.utils.encoding.smart_text = smart_str
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 import os
@@ -37,7 +35,6 @@ ALLOWED_HOSTS = ['127.0.0.1', config('WALLET_URL_DINT'), config('BE_URL_DINT')]
 INSTALLED_APPS = [
     'chat',
     'channels',
-    'api',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    # 'api.apps.ApiConfig',
+    'api',
     'simple_history',
     'rest_framework_swagger',
     'corsheaders',
@@ -108,7 +105,6 @@ DATABASES = {
         'PORT': config('DB_PORT', cast=int)
     }
 }
-
 
 AUTH_USER_MODEL = "api.User"
 

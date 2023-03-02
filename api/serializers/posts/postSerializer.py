@@ -2,34 +2,14 @@ from rest_framework import serializers
 from api.models import *
 from api.serializers.user import UserLoginDetailSerializer
 
-class PostsMediaSerializer(serializers.ModelSerializer):
-    class Meta(object):
-        model = PostsMedia
-        fields = '__all__'
 
-
-class PostsSerializer(serializers.ModelSerializer):
+class CreateUpdatePostsSerializer(serializers.ModelSerializer):
     """
     This is for update ,Create
     """
-    post_media = PostsMediaSerializer(many=True, required=False)
-
-    class Meta:
+    class Meta(object):
         model = Posts
         fields = '__all__'
-        extra_fields = ['post_media']
-    
-
-    def create(self, validated_data):
-        
-        post_media_data = validated_data.pop('post_media')
-        
-        post = super().create(validated_data)
-
-        for media_data in post_media_data:
-            PostsMedia.objects.create(post=post, post_media = media_data)
-
-        return post
 
 
 class CreateUpdatePostLikeSerializer(serializers.ModelSerializer):
@@ -73,7 +53,6 @@ class GetPostsSerializer(serializers.ModelSerializer):
     """
     This is for Retrieving full data
     """
-    
     user = UserLoginDetailSerializer()
     like_post = GetPostLikeSerializer(many=True)
     post_comment = GetPostsCommentSerializer(many=True)
@@ -81,7 +60,6 @@ class GetPostsSerializer(serializers.ModelSerializer):
     is_bookmarked = serializers.SerializerMethodField()
     total_likes = serializers.SerializerMethodField()
     total_comments = serializers.SerializerMethodField()
-    post_media = PostsMediaSerializer(many=True)
 
     def get_is_bookmarked(self, obj):
         logged_in_user = self.context.get('logged_in_user')

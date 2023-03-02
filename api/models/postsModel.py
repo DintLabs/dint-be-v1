@@ -12,7 +12,7 @@ class Posts(models.Model):
     page = models.ForeignKey(Page, related_name='post_page', on_delete=models.CASCADE, null=True, blank=True)
     type = models.CharField(max_length=50, null=True, blank=True)
     content = models.TextField(null=True, blank=True)
-    #media = models.URLField(max_length = 500, null=True, blank=True)
+    media = models.URLField(max_length = 500, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
     deleted_at = models.DateTimeField(blank=True, null=True)
@@ -49,7 +49,3 @@ class PostsPayment(models.Model):
         indexes = [
             models.Index(fields=['id'])
         ]
-
-class PostsMedia(models.Model):
-    post = models.ForeignKey(Posts, related_name='post_media', on_delete=models.CASCADE)
-    post_media = models.URLField(max_length = 500, null=True, blank=True)

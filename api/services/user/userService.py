@@ -614,17 +614,6 @@ class UserService(UserBaseService):
                 user_preferences_obj, data=request.data)
             if serializer.is_valid():
                 serializer.save(user=request.user)
-            
-            if serializer.data['enable_email_notification'] == True:
-                #get all unread messages
-                
-                preference = UserPreferences.objects.filter(user = request.user.id, enable_email_notification = True).values().count()
-                d = {}
-                if preference == 1:
-                    d = ChatService.getdictionary(self,request)
-
-                msgScheduler.start(self,request, serializer.data['new_private_msg_summary_time'], d)
-
                 return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "User Preferences saved Successfully"})
             return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
         return ({"data": [{error: 'User not found'}], "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
@@ -978,34 +967,3 @@ class UserService(UserBaseService):
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": MESSAGE})
         
 
-    def get_notifications_by_pagination(self, request, format=None):
-        """
-        Retrieve Notifications according to pages
-        """
-        id1 = list(UserSubscription.objects.filter(user = request.user.id).values_list('id'))
-        id2 = list(UserFollowers.objects.filter(user=request.user.id).values_list('id'))
-        id3 = list(Messages.objects.filter(reciever=request.user.id)) 
-        notification_obj = Notifications.objects.filter(subscribe__in = id1) | Notifications.objects.filter(followrequest__in = id2) | Notifications.objects.filter(message__in = id3) 
-        notification_obj = notification_obj.order_by('-created_at')
-        
-        custom_pagination = CustomPagination ()
-        search_keys = ['content__icontains', 'id__contains']
-        search_type = 'or'
-        context = {"logged_in_user":request.user.id}
-        roles_response = custom_pagination.custom_pagination(request, Notifications, search_keys, search_type, GetNotificationSerializer, notification_obj , context)
-        return {"data": roles_response['response_object'],
-                "recordsTotal": roles_response['total_records'],
-                "recordsFiltered": roles_response['total_records'],
-                "code": status.HTTP_200_OK, "message": OK}
-
-    #schedule email notifications
-    def schedule_api(self, request, id, format=None):
-            ChatService.send_notification(id)
-
-    
-    
-
-    
-   
-
-    
