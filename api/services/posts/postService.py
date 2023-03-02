@@ -14,8 +14,9 @@ from dotenv import load_dotenv
 from eth_account import Account
 from django.http import JsonResponse
 from hexbytes import HexBytes
-import json
 from django.core.exceptions import ObjectDoesNotExist
+from api.services.uploadMedia.uploadMediaService import *
+
 
 class PostsService (PostsBaseService):
     """
@@ -79,13 +80,23 @@ class PostsService (PostsBaseService):
         """
         Create New Posts. 
         """
-        serializer = CreateUpdatePostsSerializer(data=request.data)
-        if serializer.is_valid ():
-            serializer.save ()
+        
+        #serializer = UploadMediaService.create_upload_media(self,request)
+        upload_media = UploadMediaService.create_upload_media(self, request)
+        
+        media_urls = []
+        for i in upload_media['data']:
+            media_urls.append(i['media_file_url'])
+
+        serializer = PostsSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(post_media = media_urls)
+        
             res_data = GetPostsSerializer(Posts.objects.get(id = serializer.data['id'])).data
             return ({"data": res_data, "code": status.HTTP_201_CREATED, "message": POST_CREATED})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
-
+ 
     def delete_post(self, request, pk, format=None):
         """
         Delete Posts. 
@@ -134,7 +145,7 @@ class PostsService (PostsBaseService):
             post_obj = Posts.objects.get(id = pk)
         except Posts.DoesNotExist:
             return ({"code": status.HTTP_400_BAD_REQUEST, "message": RECORD_NOT_FOUND})
-        serializer = CreateUpdatePostsSerializer(post_obj, data=data)
+        serializer = PostsSerializer(post_obj, data=data)
         if serializer.is_valid ():
             serializer.save ()
             return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_UPDATED})
