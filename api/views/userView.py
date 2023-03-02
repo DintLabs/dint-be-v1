@@ -116,7 +116,7 @@ class SignupView(APIView):
         """
         Create User/ Signup User
         """
-        result = userService.sign_up(request, format=None)
+        result = userService.sign_up(request)
         return Response(result, status=status.HTTP_200_OK)
 
 class VarifyOtpView(APIView):

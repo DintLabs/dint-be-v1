@@ -33,7 +33,6 @@ ALLOWED_HOSTS = ['127.0.0.1', config('WALLET_URL_DINT'), config('BE_URL_DINT')]
 
 # Application definition
 INSTALLED_APPS = [
-    'daphne',
     'chat',
     'channels',
     'django.contrib.admin',
@@ -47,13 +46,17 @@ INSTALLED_APPS = [
     'simple_history',
     'rest_framework_swagger',
     'corsheaders',
+    'django_cron',
 ]
 
 ASGI_APPLICATION = "dint.asgi.application"
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
 }
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -210,7 +213,8 @@ JWT_AUTH = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 
 USE_I18N = True
@@ -273,3 +277,7 @@ SEND_DINT_TOKEN_URL = config('SEND_DINT_TOKEN_URL')
 WITHDRAW_DINT_TOKEN_URL = config('WITHDRAW_DINT_TOKEN_URL')
 ID_ANALYZER_KEY = config('ID_ANALYZER_KEY')
 SENDINBLUE_API = config('SENDINBLUE_API')
+
+CRON_CLASSES = [
+    "api.cron.MyCronJob",
+]

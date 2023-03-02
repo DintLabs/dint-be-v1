@@ -154,6 +154,19 @@ class ChatService (ChatBaseService):
                 print("Exception when calling SMTPApi->send_transac_email: %s\n" % e)
         return True
 
+    def create_message(self, request, format=None):
+        """
+        Create New Posts. 
+        """
+        serializer = CreateUpdateMessageSerializer(data=request.data)
+        if serializer.is_valid ():
+            serializer.save()
+            self.send_notification(serializer.data['id'])
+            res_obj = Messages.objects.get(id = serializer.data['id'])
+            result_data = GetMessageSerializer(res_obj).data
+            return ({"data": result_data, "code": status.HTTP_201_CREATED, "message": POST_CREATED})
+        return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
+
     # create notification 
     def create_notification(self, request, format=None):
         """
