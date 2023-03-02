@@ -14,6 +14,9 @@ from api.serializers.chat import *
 from .chatBaseService import ChatBaseService
 from django.db.models import Q
 from dint import settings
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
+from dint import settings
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
@@ -32,23 +35,25 @@ class ChatService (ChatBaseService):
         """
         Return all the Posts.
         """
-        print(request.user.id)
+      
         messages_obj = Messages.objects.filter(sender = request.user.id, reciever = pk) |  Messages.objects.filter(sender = pk, reciever = request.user.id)
+       
         messages_obj = messages_obj.order_by('-created_at')
         context = {"user_id":request.user.id}
         #changes is_seen of messages
         Messages.objects.filter(sender = pk, reciever = request.user.id).update(is_seen = True)
         print(Messages.objects.filter(sender = pk, reciever = request.user.id))
         serializer = GetMessageSerializer(messages_obj, many=True, context = context)
-        #change notification to seen
-        msginstance = list(Messages.objects.filter(sender = pk, reciever = request.user.id).values_list('id'))
-        for i in msginstance:
-            id.append(i[0])
-        Notifications.objects.filter(message__in = id).update(is_active=False)
- 
+        try:
+            msginstance = list(Messages.objects.filter(sender = pk, reciever = request.user.id).values_list('id'))
+            print("msginstance", msginstance)
+            for i in msginstance:
+                id.append(i[0])
+            Notifications.objects.filter(message__in = id).update(is_active=False)
+        except:
+            pass
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
-    # list of notifications where messages are unread
     def get_notification_chunks_by_user(self, request, pk, format=None):
         """
         Return all the Posts.
@@ -181,12 +186,13 @@ class ChatService (ChatBaseService):
         """
         Create New Messages. 
         """
+        print(request.data)
         serializer = CreateUpdateMessageSerializer(data=request.data)
         if serializer.is_valid ():
             serializer.save()
             res_obj = Messages.objects.get(id = serializer.data['id'])
             result_data = GetMessageSerializer(res_obj).data
-            return ({"data": result_data, "code": status.HTTP_201_CREATED, "message": POST_CREATED})
+            return ({"data": result_data, "code": status.HTTP_201_CREATED, "message": "Message created successfully"})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
     
     @receiver(post_save, sender=Messages)
@@ -253,3 +259,27 @@ class ChatService (ChatBaseService):
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
    
+
+    # list of notifications where messages are unread
+    def get_unseen_chat_list_by_user(self, request, format=None):
+        """
+        Return all the Unseen Messages.
+        """
+        messages_obj = Messages.objects.filter(reciever=request.user.id,is_seen=False)
+        messages_obj = messages_obj.order_by('-created_at')
+        context = {"user_id":request.user.id}
+        serializer = GetMessageSerializer(messages_obj, many=True, context = context)
+        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
+
+   
+
+    # list of notifications where messages are unread
+    def get_unseen_chat_list_by_user(self, request, format=None):
+        """
+        Return all the Unseen Messages.
+        """
+        messages_obj = Messages.objects.filter(reciever=request.user.id,is_seen=False)
+        messages_obj = messages_obj.order_by('-created_at')
+        context = {"user_id":request.user.id}
+        serializer = GetMessageSerializer(messages_obj, many=True, context = context)
+        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
