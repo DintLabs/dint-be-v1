@@ -13,3 +13,6 @@ def start(self, request, prefhours, d):
         scheduler.add_job(userService.UserService.schedule_api, trigger='interval', hours=prefhours, start_date=start_date, args=[self, request, i] )
         scheduler.start()
 
+    #     #REFRESH
+    # for job in scheduler.get_jobs():
+    #     job.modify(next_run_time=datetime.now())
