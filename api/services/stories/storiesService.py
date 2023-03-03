@@ -33,23 +33,23 @@ class StoriesService(StoriesBaseService):
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "Stories List Fecthed."})
 
     def create_stories(self, request, format=None):
-        parser_classes = (MultiPartParser, FormParser)
-        user_obj = User.objects.get(id = request.user.id)
-      
-        serializer = CreateUserStoriesSerrializer(data = request.data)
-       
-        if serializer.is_valid():
-            serializer.save()
+        """
+        Create New Posts. 
+        """
+        # parser_classes = (MultiPartParser, FormParser,)
+        data = request.data
+        print(type(data))
+        serializer = CreateUserStoriesSerrializer(data=request.data)
+        if serializer.is_valid ():
+            serializer.save ()
             res = serializer.data
-            storyURL = request.build_absolute_uri(res["story"])
             tz = pytz.timezone('Asia/Kolkata')
+           
             expire_time = datetime.datetime.now(tz) + datetime.timedelta(hours=24)
-            res["story"] = storyURL
             res["expiration_time"] = expire_time
             user_obj = UserStories.objects.filter(id = res["id"]).update(expiration_time = expire_time)
             return ({"data": res, "code": status.HTTP_200_OK, "message": "Story posted successfully."})
-        else:
-            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Something went wrong."}) 
+        return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
 
     def delete_stories(self, request, pk, format=None):
         try:
