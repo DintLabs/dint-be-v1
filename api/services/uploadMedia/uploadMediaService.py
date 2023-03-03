@@ -9,6 +9,8 @@ import mimetypes
 import os
 from .uploadMediaBaseService import UploadMediaBaseService
 from api.utils.saveImage import saveImage
+from api.models.userModel import *
+from django.utils.timezone import datetime
 
 class UploadMediaService(UploadMediaBaseService):
     """
@@ -19,13 +21,39 @@ class UploadMediaService(UploadMediaBaseService):
         pass
 
     def create_upload_media(self, request, format=None):
+        
+        user = request.user
+        subscription = request.data['subscription']
+       
+        user_id = request.user.id
         media_list = []
         if 'folder' in request.data:
-            folder = request.data['folder']
-            if folder not in ['banners','main-photo','photos','videos']:
+            sub_folder = request.data['folder']
+            if sub_folder not in ['banners','main-photo','photos','videos']:
                 return({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Folder not Found in S3 Bucket!"})        
         else:
-            folder = ''
+            sub_folder = ''
+
+        today = datetime.now().date()
+        if (subscription == "true"):
+            print("subscriptions")
+            main_folder = "Subscriptions"
+            folder = main_folder+'/'+str(user_id)+'/'+sub_folder+'/'+str(today)
+        if (subscription == "false"):
+            main_folder = "Standard"
+            post_type = request.data['media_type']
+            if (post_type == "story"):
+                media_type = "Stories"
+            elif (post_type== "post"):
+                media_type = "Posts"
+            elif (post_type == "locked"):
+                media_type = "Locked"
+            elif (post_type == "verifications"):
+                media_type = "Verification"
+          
+            folder = main_folder+'/'+str(user_id)+'/'+media_type+'/'+sub_folder+'/'+str(today)
+
+        
         for im in dict((request.data).lists())['media']: 
             image_url, image_name = saveImage(im, folder)
             media = UploadMedia()
@@ -33,7 +61,10 @@ class UploadMediaService(UploadMediaBaseService):
             media.save()
             media.media_file_name = image_name
             media.file_type = mimetypes.guess_type(im.name)[0]
+            user_obj = User.objects.get(id = request.user.id)
+            media.user = user_obj
             media.save()
+            print(media.user)
             try:
                 if ((media.file_type).split("/"))[0] == "video":
                     # self.create_thumbnail("media/upload-media/{}".format(media.media_file_name), media, media.media_file_name)
