@@ -79,6 +79,9 @@ class PostsService (PostsBaseService):
         """
         Create New Posts. 
         """
+        # parser_classes = (MultiPartParser, FormParser,)
+        data = request.data
+        print(type(data))
         serializer = CreateUpdatePostsSerializer(data=request.data)
         if serializer.is_valid ():
             serializer.save ()
