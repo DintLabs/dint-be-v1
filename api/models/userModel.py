@@ -9,7 +9,6 @@ from django.contrib.auth.models import (
 )
 
 from django.conf import settings
-from .UploadMediaModel import UploadMedia
 from django.contrib.postgres.fields import JSONField
 
 # from django.contrib.auth.models import User as UserModel

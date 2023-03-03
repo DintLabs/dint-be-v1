@@ -1,10 +1,11 @@
 from django.db import models
 from django.utils import timezone
 from simple_history.models import HistoricalRecords
-
+from .userModel import User
 
 class UploadMedia(models.Model):
     id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User,on_delete=models.CASCADE, null=True, blank=True)
     media_file_url = models.CharField(max_length=255, blank=True, null=True)
     media_file_name = models.CharField(max_length=250, blank=True, null=True)
     thumbnail = models.ImageField(upload_to='upload-media/', blank=True, null=True)
