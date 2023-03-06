@@ -23,20 +23,15 @@ class MyCronJob(CronJobBase):
 
     def do(self):
         print("success")
-        # print(requests.user.id)
         try:
             tz = pytz.timezone('Asia/Kolkata')
             current_time = datetime.datetime.now(tz)
             all_stories = UserStories.objects.filter(expiration_time__lt = current_time).update(is_archived = True)
-            
-            # wallet_obj = User.objects.filter(wal)
+          
             user_wallet = list(User.objects.values_list("wallet_address", flat=True).exclude(wallet_address__isnull=True))
             for i in user_wallet:
-               
                 user_wallet = i.tobytes()
-                # if (i !=None):
                 try:
-                   
                     key = Fernet(settings.ENCRYPTION_KEY)
                     user_decwallet = key.decrypt(user_wallet).decode()
                     user_address = user_decwallet
