@@ -228,7 +228,7 @@ class UserService(UserBaseService):
                 chain_id = settings.CHAIN_ID
                 register = contract.functions.register(new_user, referral_address).buildTransaction({  
                     'from': user_address,
-                    'chainId': 80001,   
+                    'chainId': CHAIN_ID,   
                     'gasPrice': web3.toWei('30', 'gwei'),  
                     'nonce': nonce,  
                 })  
@@ -340,7 +340,7 @@ class UserService(UserBaseService):
 
         sendReward = contract.functions.reward(receiver_add, tip_dint).buildTransaction({
             'from': user_address,
-            'chainId': 80001,  
+            'chainId': CHAIN_ID,  
             'gasPrice': web3.toWei('30', 'gwei'),  
             'nonce': new_nonce,     
         })
