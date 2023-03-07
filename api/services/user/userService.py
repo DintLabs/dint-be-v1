@@ -490,6 +490,7 @@ class UserService(UserBaseService):
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
 
     def get_wallet_by_token(self, request, format=None):
+        print(request.user.id)
         user_obj = User.objects.filter(id = request.user.id)
         user = User.objects.get(id = request.user.id)
         wallet = user.wallet_address
@@ -497,10 +498,10 @@ class UserService(UserBaseService):
         key = Fernet(settings.ENCRYPTION_KEY)
         user_decwallet = key.decrypt(wallet_address).decode()
         user_address = user_decwallet
-        balance = user.user_walllet_address
         r = redis.Redis(host=REDIS_HOST,port=REDIS_PORT)
-        
-        return ({"data": {'wallet_balance': balance, 'wallet_address': user_address}, "code": status.HTTP_200_OK, "message": "User Wallet fetched Successfully"})
+        balance_value = r.get(user.id)
+        balance = balance_value.decode('UTF-8')  
+        return ({"data": {'wallet_balance': int(balance), 'wallet_address': user_address}, "code": status.HTTP_200_OK, "message": "User Wallet fetched Successfully"})
 
     def update_wallet_by_token(self, request, format=None):
         user_obj = User.objects.get(id=request.user.id)

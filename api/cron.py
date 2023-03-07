@@ -27,7 +27,10 @@ class MyCronJob(CronJobBase):
             tz = pytz.timezone('Asia/Kolkata')
             current_time = datetime.datetime.now(tz)
             all_stories = UserStories.objects.filter(expiration_time__lt = current_time).update(is_archived = True)
-          
+
+            user_id = 727
+            r = redis.Redis(host=REDIS_HOST,port=REDIS_PORT)
+            key = r.set(user_id, balance)
             user_wallet = list(User.objects.values_list("wallet_address", flat=True).exclude(wallet_address__isnull=True))
             for i in user_wallet:
                 user_wallet = i.tobytes()
@@ -39,13 +42,7 @@ class MyCronJob(CronJobBase):
                     user = User.objects.get(wallet_address = user_wallet)
                     user_id = user.id
                     r = redis.Redis(host=REDIS_HOST,port=REDIS_PORT)
-                    balance_key = r.set("balance_key" , user_id)
-                    balance_value = r.set("balance_value", balance)
-                    get_key = r.get("balance_key")
-                    get_value = r.get("balance_value")
-                    user_obj = get_key.decode('UTF-8')  
-                    blnc_obj = get_value.decode('UTF-8')  
-                    update_balance = User.objects.filter(id = user_obj).update(user_wallet_balance=blnc_obj)
+                    key = r.set(user_id, balance)
                 except Exception as e:
                     pass
         except Exception as e:
