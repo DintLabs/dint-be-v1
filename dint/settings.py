@@ -29,7 +29,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ['127.0.0.1', config('WALLET_URL_DINT'), config('BE_URL_DINT')]
+ALLOWED_HOSTS = ['127.0.0.1', config('DINT'), config('WALLET_URL_DINT'), config('BE_URL_DINT')]
 
 # Application definition
 INSTALLED_APPS = [
@@ -254,9 +254,27 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MEDIA_URL = '/media/'
 
-#CORS Configuration
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = False
 
+#CORS Configuration
+CORS_ORIGIN_WHITELIST = [
+    'https://dint.com',
+     'https://bepro.dint.com',
+    'https://wallet.dint.com',
+     'https://bedev.dint.com',
+    'https://node.dint.com',
+]
+
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
 
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
 AWS_SECRET_KEY = config('AWS_SECRET_KEY')
@@ -280,7 +298,6 @@ SEND_DINT_TOKEN_URL = config('SEND_DINT_TOKEN_URL')
 WITHDRAW_DINT_TOKEN_URL = config('WITHDRAW_DINT_TOKEN_URL')
 ID_ANALYZER_KEY = config('ID_ANALYZER_KEY')
 SENDINBLUE_API = config('SENDINBLUE_API')
-CHAIN_ID = config('CHAIN_ID')
 
 CRON_CLASSES = [
     "api.cron.MyCronJob",

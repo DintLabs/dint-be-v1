@@ -19,10 +19,7 @@ class Messages(models.Model):
     content = models.TextField(null=True,blank=True)
     is_seen = models.BooleanField(default=False)
     is_edited = models.BooleanField(default=False)
-    # media = models.URLField(max_length=1000)
-    type = models.CharField(max_length=50, null=True, blank=True)
-    # content = models.TextField(null=True, blank=True)
-    media = models.URLField(max_length = 1000, null=True, blank=True)
+
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
     deleted_at = models.DateTimeField(blank=True, null=True)

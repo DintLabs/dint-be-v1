@@ -35,7 +35,9 @@ class ChatService (ChatBaseService):
         """
         Return all the Posts.
         """
+      
         messages_obj = Messages.objects.filter(sender = request.user.id, reciever = pk) |  Messages.objects.filter(sender = pk, reciever = request.user.id)
+       
         messages_obj = messages_obj.order_by('-created_at')
         context = {"user_id":request.user.id}
         #changes is_seen of messages
@@ -61,6 +63,7 @@ class ChatService (ChatBaseService):
         context = {"user_id":request.user.id}
         serializer = GetNotificationSerializer(notifications_obj, many=True, context = context)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
+
 
     def get_chat_chunks_by_user(self, request, pk, format=None):
         """
@@ -91,15 +94,17 @@ class ChatService (ChatBaseService):
 
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
+
+
     def get_chat_chat_list_by_token(self, request, format=None):
         """
         Return all the Posts.
         """
         # received user message
-        r_message = list(Messages.objects.filter(reciever = request.user.id).values_list('sender'))
-        print(r_message)
+        r_message = list(Messages.objects.filter(reciever = request.user.id).values_list('sender', flat=True))
+
         s_message = list(Messages.objects.filter(sender = request.user.id).values_list('reciever', flat=True))
-        print(s_message)
+
         r_message.extend(s_message)
         print('------------------->>')
         print(r_message)
@@ -121,6 +126,8 @@ class ChatService (ChatBaseService):
         user_obj = user_obj.filter(id__in = follower_list)
         serializer = UserLoginDetailSerializer(user_obj,many=True)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": OK})
+
+
 
     def send_notification(self,id):
         msg = Messages.objects.get(id = id)
@@ -180,11 +187,12 @@ class ChatService (ChatBaseService):
         Create New Messages. 
         """
         print(request.data)
-        serializer = CreateUpdateMessageSerializer(data=request.data, many=True)
+        serializer = CreateUpdateMessageSerializer(data=request.data)
         if serializer.is_valid ():
             serializer.save()
-            data = serializer.data
-            return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Message created successfully"})
+            res_obj = Messages.objects.get(id = serializer.data['id'])
+            result_data = GetMessageSerializer(res_obj).data
+            return ({"data": result_data, "code": status.HTTP_201_CREATED, "message": "Message created successfully"})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
     
     @receiver(post_save, sender=Messages)
@@ -206,6 +214,7 @@ class ChatService (ChatBaseService):
 
         post_obj.delete()
         return ({"code": status.HTTP_200_OK, "message": POST_DELETED})
+
 
     def update_message(self, request, pk, format=None):
         """
@@ -235,7 +244,8 @@ class ChatService (ChatBaseService):
 
         context = {"user_id":request.user.id}
         serializer = GetMessageSerializer(message_obj, context = context)
-        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "Messages Fetched Successfully"})
+        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
+
 
     # list of notifications where messages are unread
     def get_unseen_chat_list_by_user(self, request, format=None):

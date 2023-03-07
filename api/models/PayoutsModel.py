@@ -15,7 +15,6 @@ class Payouts(models.Model):
     paid = models.BooleanField(default=False)
 
     class Meta:
-        verbose_name = 'Payout'
         db_table = 'UserPayouts'
         indexes = [
             models.Index(fields=['id'])
