@@ -263,7 +263,7 @@ CORS_ORIGIN_WHITELIST = [
     'https://wallet.dint.com',
      'https://bedev.dint.com',
     'https://node.dint.com',
-   'http://127.0.0.1',
+   'http://localhost:3000',
 ]
 
 
