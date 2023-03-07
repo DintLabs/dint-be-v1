@@ -259,6 +259,7 @@ CORS_ORIGIN_ALLOW_ALL = False
 #CORS Configuration
 CORS_ORIGIN_WHITELIST = [
     'https://dint.com',
+    'https://fedev.dint.com',
      'https://bepro.dint.com',
     'https://wallet.dint.com',
      'https://bedev.dint.com',
