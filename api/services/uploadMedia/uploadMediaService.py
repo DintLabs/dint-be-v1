@@ -50,7 +50,8 @@ class UploadMediaService(UploadMediaBaseService):
                 media_type = "Locked"
             elif (post_type == "verifications"):
                 media_type = "Verification"
-          
+            elif (media_type == "chat"):
+                media_type = "Chat"
             folder = main_folder+'/'+str(user_id)+'/'+media_type+'/'+sub_folder+'/'+str(today)
 
         
