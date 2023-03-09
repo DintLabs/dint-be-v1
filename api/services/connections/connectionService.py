@@ -198,6 +198,21 @@ class ConnectionService(ConnectionBaseService):
         except:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": RECORD_NOT_FOUND})
 
+    def get_connections_count(self, request, pk, format=None):
+        print(pk)
+        user_obj = User.objects.get(id = pk)
+        followers_count = sub_obj = UserFollowers.objects.filter(user = user_obj, request_status = True).count()
+
+        following_count = UserFollowers.objects.filter(follower = user_obj, request_status = True).count()
+
+        data = {
+            "total-followers":followers_count,
+            "total-following":following_count
+        }
+
+        return ({"total-followers": followers_count, "total-following" : following_count, "code": status.HTTP_200_OK, "message": "User Stories List Fecthed."})
+
+
 @receiver(post_save, sender=UserFollowers)
 def subscribe_saved(sender,instance,created,**kwargs):
     if created:
@@ -205,3 +220,5 @@ def subscribe_saved(sender,instance,created,**kwargs):
         NotificationInstance = Notifications(followrequest=instance, type_of_notification='New Follow Request')
         NotificationInstance.save()
         #print(NotificationInstance.id)
+
+   
