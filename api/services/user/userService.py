@@ -264,8 +264,8 @@ class UserService(UserBaseService):
             Hash = data['hash']
             node_url = settings.NODE_URL
             web3 = Web3(Web3.HTTPProvider(node_url))
-            dintReciept = web3.eth.wait_for_transaction_receipt(Hash)  
-            if (dintReciept.status == 1):
+            dintReceipt = web3.eth.wait_for_transaction_receipt(Hash)  
+            if (dintReceipt.status == 1):
                 return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
             else:
                 return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
@@ -278,7 +278,9 @@ class UserService(UserBaseService):
         payload = json.dumps({
         "sender_id" : request.data['sender_id'],
         "reciever_id" : request.data['reciever_id'],
-        "amount" : request.data['amount']
+        "amount" : request.data['amount'],
+        "priceInUSD" : request.data['priceInUSD']
+
         })
         headers = {
         'Content-Type': 'application/json',
@@ -290,8 +292,8 @@ class UserService(UserBaseService):
             Hash = data['Hash']
             node_url = settings.NODE_URL
             web3 = Web3(Web3.HTTPProvider(node_url))
-            dintReciept = web3.eth.wait_for_transaction_receipt(Hash)  
-            if (dintReciept.status == 1):
+            dintReceipt = web3.eth.wait_for_transaction_receipt(Hash)  
+            if (dintReceipt.status == 1):
                 return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
             else:
                 return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
