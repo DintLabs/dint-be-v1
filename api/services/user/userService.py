@@ -279,7 +279,6 @@ class UserService(UserBaseService):
         "sender_id" : request.data['sender_id'],
         "reciever_id" : request.data['reciever_id'],
         "amount" : request.data['amount'],
-
         })
         headers = {
         'Content-Type': 'application/json',
@@ -295,14 +294,9 @@ class UserService(UserBaseService):
             if (dintReceipt.status == 1):
                 return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
             else:
-                error_msg = None
-                if "error" in data:
-                   error_msg = data["error"]
-                elif "errors" in data:
-                  error_msg = data["errors"]
-            return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": f"Transaction Failed: {error_msg}"})
-        except requests.exceptions.RequestException as e:
-            return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": f"Oops! Something went wrong: {e}"})
+                return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
+        except:
+             return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
         
     def send_reward_by_token(self, request, format=None):
         receiver = User.objects.get(id = request.user.id)
