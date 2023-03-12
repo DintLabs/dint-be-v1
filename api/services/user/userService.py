@@ -270,7 +270,7 @@ class UserService(UserBaseService):
             else:
                 return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
         except:
-            return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Something went wrong."})
+            return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Withdrawal went wrong."})
 
     def send_dint_token(self, request, format=None):
         url = settings.SEND_DINT_TOKEN_URL
