@@ -182,3 +182,11 @@ class UserCustomGroupMembersModelViewSet(ModelViewSet):
                 "message" : "Member added successfully"
               }
         return Response(res)
+
+class GetConnectionsCount(APIView):
+    """
+    Get connection counts
+    """
+    def get(self, request, pk, format=None):
+        result = connectionService.get_connections_count(request, pk, format=None)
+        return Response(result, status=status.HTTP_200_OK)
