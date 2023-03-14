@@ -158,7 +158,7 @@ urlpatterns = [
     path('chat/get-chat-list-by-token/', GetChatListByTokenView.as_view(), name="create-posts"),
     path('chat/search_user/', SearchUserView.as_view(), name="create-posts"),
     path('chat/create-notification/', ListCreateUpdateDeleteNotificationView.as_view(), name="create-notification"),
-    path('chat/get-notification-by-user-in-chunks/<int:pk>/', ListNotificationsChunksView.as_view(), name="create-notification"),
+    path('chat/get-notification-by-user-in-chunks/', ListNotificationsChunksView.as_view(), name="create-notification"),
     path('chat/get-unseen-message/', GetUnseenChatByUser.as_view(), name="unseen-chat"),
     #Page
     path('page/list/', ListCreateUpdateDeletePageView.as_view(), name="get-all-page"),

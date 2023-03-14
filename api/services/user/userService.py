@@ -76,27 +76,31 @@ class UserService(UserBaseService):
         username = request.data['email']
         fire_base_auth_key = request.data['fire_base_auth_key']
         username = username.lower()
-
+        
         user = self.user_authenticate(username, fire_base_auth_key)
-
+      
         if user is not None:
-            login(request, user)
-            serializer = UserLoginDetailSerializer(user)
-            payload = jwt_payload_handler(user)
-            token = jwt.encode(payload, settings.SECRET_KEY)
-            user_details = serializer.data
-            user_details['token'] = token
-            # User.objects.filter(pk=user.pk).update(auth_token=token)
-            user_session = self.create_update_user_session(
-                user, token, request)
-            user.is_online = True
-            user.save()
-            user_obj = User.objects.get(email = username)
-            referral = UserReferralWallet.objects.filter(user_referral = user_obj)
-            if referral:
-                return ({"data": user_details, "code": status.HTTP_200_OK, "message": "LOGIN_SUCCESSFULLY"})
+            user_active = User.objects.filter(email = user, is_active = True)
+            if user_active:
+                login(request, user)
+                serializer = UserLoginDetailSerializer(user)
+                payload = jwt_payload_handler(user)
+                token = jwt.encode(payload, settings.SECRET_KEY)
+                user_details = serializer.data
+                user_details['token'] = token
+                # User.objects.filter(pk=user.pk).update(auth_token=token)
+                user_session = self.create_update_user_session(
+                    user, token, request)
+                user.is_online = True
+                user.save()
+                user_obj = User.objects.get(email = username)
+                referral = UserReferralWallet.objects.filter(user_referral = user_obj)
+                if referral:
+                    return ({"data": user_details, "code": status.HTTP_200_OK, "message": "LOGIN_SUCCESSFULLY"})
+                else:
+                    return ({"data": user_details, "code": status.HTTP_200_OK, "message": "User don't have referral code"})
             else:
-                return ({"data": user_details, "code": status.HTTP_200_OK, "message": "User don't have referral code"})
+                return ({"data": None, "code": status.HTTP_200_OK, "message": "This account is deactivated by admin"})
         return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "INVALID_CREDENTIALS"})
 
     def user_authenticate(self, user_name, fire_base_auth_key):
@@ -276,7 +280,7 @@ class UserService(UserBaseService):
             else:
                 return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
         except:
-            return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Withdrawal went wrong."})
+            return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Withdrawal went wrong."})
 
     def send_dint_token(self, request, format=None):
         url = settings.SEND_DINT_TOKEN_URL
