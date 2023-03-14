@@ -41,19 +41,21 @@ class UploadMediaService(UploadMediaBaseService):
             folder = main_folder+'/'+str(user_id)+'/'+sub_folder+'/'+str(today)
         if (subscription == "false"):
             main_folder = "Standard"
-            post_type = request.data['media_type']
-            if (post_type == "story"):
-                media_type = "Stories"
-            elif (post_type== "post"):
-                media_type = "Posts"
-            elif (post_type == "locked"):
-                media_type = "Locked"
-            elif (post_type == "verifications"):
-                media_type = "Verification"
-          
-            folder = main_folder+'/'+str(user_id)+'/'+media_type+'/'+sub_folder+'/'+str(today)
+            if (sub_folder == 'main-photo') | (sub_folder == 'banners'):
+                folder = main_folder+'/'+str(user_id)+'/'+sub_folder+'/'+str(today)
+            else:
+                post_type = request.data['media_type']
+                if (post_type == "story"):
+                    media_type = "Stories"
+                elif (post_type== "post"):
+                    media_type = "Posts"
+                elif (post_type == "locked"):
+                    media_type = "Locked"
+                elif (post_type == "verifications"):
+                    media_type = "Verification"
 
-        
+                folder = main_folder+'/'+str(user_id)+'/'+media_type+'/'+sub_folder+'/'+str(today)
+       
         for im in dict((request.data).lists())['media']: 
             image_url, image_name = saveImage(im, folder)
             media = UploadMedia()
