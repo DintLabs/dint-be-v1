@@ -16,9 +16,9 @@ from .UserSubscriptionModel import *
 
 class Notifications(models.Model):
     #id = models.AutoField(primary_key=True)
-    message = models.ForeignKey(Messages, on_delete=models.CASCADE, null=True, blank=True, related_name='notification_message' )
+    message = models.ForeignKey(Messages, on_delete=models.DO_NOTHING, null=True, blank=True, related_name='notification_message' )
     type_of_notification=models.CharField(max_length=264,null=True,blank=True)
-    subscribe = models.ForeignKey(UserSubscription, on_delete=models.CASCADE, related_name='notification_subscribe', null=True, blank=True)
+    subscribe = models.ForeignKey(UserSubscription, on_delete=models.DO_NOTHING, related_name='notification_subscribe', null=True, blank=True)
     followrequest = models.ForeignKey(UserFollowers, on_delete=models.CASCADE, related_name='notification_followrequest', null=True, blank=True)
 
     created_at = models.DateTimeField(default=timezone.now)
@@ -37,4 +37,3 @@ class Notifications(models.Model):
         # indexes = [
         #     models.Index(fields=['id'])
         # ]
-        app_label = 'api'

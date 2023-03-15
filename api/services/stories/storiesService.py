@@ -38,21 +38,19 @@ class StoriesService(StoriesBaseService):
         """
         # parser_classes = (MultiPartParser, FormParser,)
         data = request.data
-        serializer = CreateUserStoriesSerrializer(data=request.data, many=True)
+        print(type(data))
+        serializer = CreateUserStoriesSerrializer(data=request.data)
         if serializer.is_valid ():
             serializer.save ()
-            data = serializer.data
-            for i in range(len(data)):
-                res = serializer.data
-                tz = pytz.timezone('Asia/Kolkata')
-                expire_time = datetime.datetime.now(tz) + datetime.timedelta(hours=24)
-                id = data[i]['id']
-                data[i]['expiration_time'] = expire_time
-                user_obj = UserStories.objects.filter(id = id).update(expiration_time = expire_time)
-            return ({"data" : data, "code": status.HTTP_200_OK, "message": "Story Created Successfully"})
-        else:
-            return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
-        
+            res = serializer.data
+            tz = pytz.timezone('Asia/Kolkata')
+           
+            expire_time = datetime.datetime.now(tz) + datetime.timedelta(hours=24)
+            res["expiration_time"] = expire_time
+            user_obj = UserStories.objects.filter(id = res["id"]).update(expiration_time = expire_time)
+            return ({"data": res, "code": status.HTTP_200_OK, "message": "Story posted successfully."})
+        return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
+
     def delete_stories(self, request, pk, format=None):
         try:
             user_story = UserStories.objects.get(user = request.user, id = pk)

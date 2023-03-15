@@ -53,11 +53,11 @@ class ListCreateUpdateDeleteNotificationView(APIView):
 
 class ListNotificationsChunksView(APIView):
 
-    def post(self, request, format=None):
+    def post(self, request,pk, format=None):
         """
         Retun all the Posts.
         """
-        result = chatService.get_notification_chunks_by_user(request, format=None)
+        result = chatService.get_notification_chunks_by_user(request,pk, format=None)
         return Response(result, status=status.HTTP_200_OK)
 
 
