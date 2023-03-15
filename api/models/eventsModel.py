@@ -9,7 +9,7 @@ from .userModel import User
 
 class Events(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, related_name='user_events', on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, related_name='user_events', on_delete=models.DO_NOTHING, null=True, blank=True)
     eventFequency = models.CharField(max_length=50, null=True, blank=True)
     balanceFrequency = models.CharField(max_length=50, null=True, blank=True)
     eventDate = models.DateField(default=timezone.now)

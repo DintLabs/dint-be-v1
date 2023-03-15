@@ -15,7 +15,7 @@ from .userSubscriptionTierModel import *
 
 class SubscriptionHistory(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, related_name='user_subscription_history', on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, related_name='user_subscription_history', on_delete=models.DO_NOTHING, null=True, blank=True)
     details = models.TextField(null=True, blank=True)
 
     created_at = models.DateTimeField(default=timezone.now)

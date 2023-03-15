@@ -37,40 +37,33 @@ class ChatService (ChatBaseService):
         """
       
         messages_obj = Messages.objects.filter(sender = request.user.id, reciever = pk) |  Messages.objects.filter(sender = pk, reciever = request.user.id)
-
-        print(messages_obj)
+       
         messages_obj = messages_obj.order_by('-created_at')
         context = {"user_id":request.user.id}
         #changes is_seen of messages
         Messages.objects.filter(sender = pk, reciever = request.user.id).update(is_seen = True)
+        print(Messages.objects.filter(sender = pk, reciever = request.user.id))
         serializer = GetMessageSerializer(messages_obj, many=True, context = context)
-        print(serializer)
-        try:
-            data = serializer.data
-            print("data", data)
-        except Exception as e:
-            print(e)
         try:
             msginstance = list(Messages.objects.filter(sender = pk, reciever = request.user.id).values_list('id'))
             print("msginstance", msginstance)
             for i in msginstance:
                 id.append(i[0])
             Notifications.objects.filter(message__in = id).update(is_active=False)
-        except Exception as e:
+        except:
             pass
+        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
-        return ({"data": data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
-
-    def get_notification_chunks_by_user(self, request, format=None):
+    def get_notification_chunks_by_user(self, request, pk, format=None):
         """
-        Return unseen.
+        Return all the Posts.
         """
-        notifications_obj = Notifications.objects.filter(message__reciever=request.user.id)
-        print(notifications_obj)
+        notifications_obj = Notifications.objects.filter(message__reciever=request.user.id,message__is_seen=False)
         notifications_obj = notifications_obj.order_by('-created_at')
         context = {"user_id":request.user.id}
         serializer = GetNotificationSerializer(notifications_obj, many=True, context = context)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
+
 
     def get_chat_chunks_by_user(self, request, pk, format=None):
         """
@@ -101,13 +94,15 @@ class ChatService (ChatBaseService):
 
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
+
+
     def get_chat_chat_list_by_token(self, request, format=None):
         """
         Return all the Posts.
         """
         # received user message
         r_message = list(Messages.objects.filter(reciever = request.user.id).values_list('sender', flat=True))
-        print(r_message)
+
         s_message = list(Messages.objects.filter(sender = request.user.id).values_list('reciever', flat=True))
 
         r_message.extend(s_message)
@@ -131,6 +126,8 @@ class ChatService (ChatBaseService):
         user_obj = user_obj.filter(id__in = follower_list)
         serializer = UserLoginDetailSerializer(user_obj,many=True)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": OK})
+
+
 
     def send_notification(self,id):
         msg = Messages.objects.get(id = id)
@@ -158,12 +155,11 @@ class ChatService (ChatBaseService):
             except ApiException as e:
                 print("Exception when calling SMTPApi->send_transac_email: %s\n" % e)
         return True
-    
+
     def create_message(self, request, format=None):
         """
         Create New Posts. 
         """
-        print("create msg with notification")
         serializer = CreateUpdateMessageSerializer(data=request.data)
         if serializer.is_valid ():
             serializer.save()
@@ -172,6 +168,7 @@ class ChatService (ChatBaseService):
             result_data = GetMessageSerializer(res_obj).data
             return ({"data": result_data, "code": status.HTTP_201_CREATED, "message": POST_CREATED})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
+
     # create notification 
     def create_notification(self, request, format=None):
         """
@@ -218,6 +215,7 @@ class ChatService (ChatBaseService):
         post_obj.delete()
         return ({"code": status.HTTP_200_OK, "message": POST_DELETED})
 
+
     def update_message(self, request, pk, format=None):
         """
         Updates Post
@@ -248,6 +246,7 @@ class ChatService (ChatBaseService):
         serializer = GetMessageSerializer(message_obj, context = context)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
+
     # list of notifications where messages are unread
     def get_unseen_chat_list_by_user(self, request, format=None):
         """
@@ -259,3 +258,28 @@ class ChatService (ChatBaseService):
         serializer = GetMessageSerializer(messages_obj, many=True, context = context)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
+   
+
+    # list of notifications where messages are unread
+    def get_unseen_chat_list_by_user(self, request, format=None):
+        """
+        Return all the Unseen Messages.
+        """
+        messages_obj = Messages.objects.filter(reciever=request.user.id,is_seen=False)
+        messages_obj = messages_obj.order_by('-created_at')
+        context = {"user_id":request.user.id}
+        serializer = GetMessageSerializer(messages_obj, many=True, context = context)
+        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
+
+   
+
+    # list of notifications where messages are unread
+    def get_unseen_chat_list_by_user(self, request, format=None):
+        """
+        Return all the Unseen Messages.
+        """
+        messages_obj = Messages.objects.filter(reciever=request.user.id,is_seen=False)
+        messages_obj = messages_obj.order_by('-created_at')
+        context = {"user_id":request.user.id}
+        serializer = GetMessageSerializer(messages_obj, many=True, context = context)
+        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
