@@ -79,12 +79,14 @@ class PostsService (PostsBaseService):
         """
         Create New Posts. 
         """
+        # parser_classes = (MultiPartParser, FormParser,)
         data = request.data
-        serializer = CreateUpdatePostsSerializer(data=request.data, many=True)
+        print(type(data))
+        serializer = CreateUpdatePostsSerializer(data=request.data)
         if serializer.is_valid ():
             serializer.save ()
-            data = serializer.data
-            return ({"data": data, "code": status.HTTP_201_CREATED, "message": POST_CREATED})
+            res_data = GetPostsSerializer(Posts.objects.get(id = serializer.data['id'])).data
+            return ({"data": res_data, "code": status.HTTP_201_CREATED, "message": POST_CREATED})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": BAD_REQUEST})
 
     def delete_post(self, request, pk, format=None):

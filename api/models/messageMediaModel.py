@@ -9,7 +9,7 @@ class MessageMedia(models.Model):
     id = models.AutoField(primary_key=True)
     message = models.ForeignKey(Messages, related_name='reciever_user', on_delete=models.DO_NOTHING, null=True, blank=True)
     media = models.URLField(max_length=1000)
-    
+  
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
     deleted_at = models.DateTimeField(blank=True, null=True)

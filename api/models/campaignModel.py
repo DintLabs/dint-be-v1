@@ -14,7 +14,7 @@ from .UploadMediaModel import *
 
 class PromotionCampaign(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, related_name='campaign_user', on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, related_name='campaign_user', on_delete=models.DO_NOTHING, null=True, blank=True)
     page = models.ForeignKey(Page, related_name='campaign_page', on_delete=models.DO_NOTHING, null=True, blank=True)
     campaign_type = models.IntegerField(default = 1, help_text="1. New User, 2. Expired Subscriber User 3. Both")
     offer_limit = models.IntegerField(default = 5)
