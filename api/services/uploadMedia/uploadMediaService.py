@@ -23,8 +23,8 @@ class UploadMediaService(UploadMediaBaseService):
     def create_upload_media(self, request, format=None):
         
         user = request.user
-        subscription = request.data['subscription']
-       
+        subscription = request.data.get('subscription')
+        chat_media = request.data.get('chat_media')
         user_id = request.user.id
         media_list = []
         if 'folder' in request.data:
@@ -33,10 +33,9 @@ class UploadMediaService(UploadMediaBaseService):
                 return({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Folder not Found in S3 Bucket!"})        
         else:
             sub_folder = ''
-
+       
         today = datetime.now().date()
         if (subscription == "true"):
-            print("subscriptions")
             main_folder = "Subscriptions"
             folder = main_folder+'/'+str(user_id)+'/'+sub_folder+'/'+str(today)
         if (subscription == "false"):
@@ -55,7 +54,14 @@ class UploadMediaService(UploadMediaBaseService):
                     media_type = "Verification"
 
                 folder = main_folder+'/'+str(user_id)+'/'+media_type+'/'+sub_folder+'/'+str(today)
-       
+
+        if (chat_media == "true"):
+            main_folder = "my-chat-app-media"
+            chat_room = request.data['chat_room']
+            media_type = request.data['media_type']
+
+            folder = main_folder+'/'+str(today)+'/'+"chatroom"+chat_room+'/'+str(user_id)+'/'+media_type
+
         for im in dict((request.data).lists())['media']: 
             image_url, image_name = saveImage(im, folder)
             media = UploadMedia()
@@ -66,10 +72,8 @@ class UploadMediaService(UploadMediaBaseService):
             user_obj = User.objects.get(id = request.user.id)
             media.user = user_obj
             media.save()
-            print(media.user)
             try:
                 if ((media.file_type).split("/"))[0] == "video":
-                    # self.create_thumbnail("media/upload-media/{}".format(media.media_file_name), media, media.media_file_name)
                     self.create_thumbnail(media.media_file_url, media, media.media_file_name)
             except: 
                 pass

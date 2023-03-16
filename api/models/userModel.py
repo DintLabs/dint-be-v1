@@ -101,7 +101,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_email_verified = models.BooleanField(default=False)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     is_referred = models.BooleanField(default=False)
-    user_referred_by = models.ForeignKey(to='User', on_delete=models.DO_NOTHING, blank=True, null=True)
+    user_referred_by = models.ForeignKey(to='User', on_delete=models.CASCADE, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         super(User, self).save(*args, **kwargs)
