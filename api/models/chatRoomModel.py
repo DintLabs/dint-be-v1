@@ -8,8 +8,8 @@ from .userModel import User
 
 class ChatRoom(models.Model):
     id = models.AutoField(primary_key=True)
-    reciever = models.ForeignKey(User, related_name='chat_room_reciever', on_delete=models.CASCADE, null=True, blank=True)
-    sender = models.ForeignKey(User, related_name='chat_room_sender', on_delete=models.CASCADE, null=True, blank=True)
+    reciever = models.ForeignKey(User, related_name='chat_room_reciever', on_delete=models.DO_NOTHING, null=True, blank=True)
+    sender = models.ForeignKey(User, related_name='chat_room_sender', on_delete=models.DO_NOTHING, null=True, blank=True)
     
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)

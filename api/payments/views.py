@@ -5,8 +5,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet, ModelViewSet
 from rest_framework.permissions import IsAuthenticated
-from api.models.userModel import User
-# from .userModel import User
+
 from api.payments.models import CreditCard
 from api.payments.serializers import CreditCardModelSerializer, CreditCardSerializer
 from api.payments.utils import add_card

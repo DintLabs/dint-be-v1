@@ -10,6 +10,8 @@ load_dotenv()
 import json
 
 def getWallet(user_address):
+    print(user_address)
+    data = "success"
     node_url = settings.NODE_URL
     web3 = Web3(Web3.HTTPProvider(node_url))
     web3.middleware_onion.inject(geth_poa_middleware, layer=0)
@@ -26,3 +28,4 @@ def getWallet(user_address):
     balance = web3.fromWei(balance, 'ether')
 
     return balance
+    # # my_balance = r.get('wallet_balance')

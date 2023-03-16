@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils import timezone
 from django.db import transaction
+from .roleModel import *
 from simple_history.models import HistoricalRecords
 from django.contrib.auth.models import (
     AbstractBaseUser, PermissionsMixin, BaseUserManager
@@ -101,7 +102,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_email_verified = models.BooleanField(default=False)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     is_referred = models.BooleanField(default=False)
-    user_referred_by = models.ForeignKey(to='User', on_delete=models.CASCADE, blank=True, null=True)
+    user_referred_by = models.ForeignKey(to='User', on_delete=models.DO_NOTHING, blank=True, null=True)
+    user_wallet_balance = models.IntegerField(default=0)
 
     def save(self, *args, **kwargs):
         super(User, self).save(*args, **kwargs)

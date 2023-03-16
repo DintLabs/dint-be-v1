@@ -71,34 +71,33 @@ class UserService(UserBaseService):
         pass
 
     def login(self, request, format=None):
+
         validated_data = self.validate_auth_data(request)
         username = request.data['email']
         fire_base_auth_key = request.data['fire_base_auth_key']
         username = username.lower()
+
         user = self.user_authenticate(username, fire_base_auth_key)
-        user_active = User.objects.filter(email = user, is_active = True)
+    
         if user is not None:
-            if user_active:
-                login(request, user)
-                serializer = UserLoginDetailSerializer(user)
-                payload = jwt_payload_handler(user)
-                token = jwt.encode(payload, settings.SECRET_KEY)
-                user_details = serializer.data
-                user_details['token'] = token
-                # User.objects.filter(pk=user.pk).update(auth_token=token)
-                user_session = self.create_update_user_session(user, token, request)
-                user.is_online = True
-                user.save()
-                user_obj = User.objects.get(email = username)
-                referral = UserReferralWallet.objects.filter(user_referral = user_obj)
-                if referral:
-                    return ({"data": user_details, "code": status.HTTP_200_OK, "message": "LOGIN_SUCCESSFULLY"})
-                else:
-                    return ({"data": user_details, "code": status.HTTP_200_OK, "message": "User don't have referral code"})
+            login(request, user)
+            serializer = UserLoginDetailSerializer(user)
+            payload = jwt_payload_handler(user)
+            token = jwt.encode(payload, settings.SECRET_KEY)
+            user_details = serializer.data
+            user_details['token'] = token
+            # User.objects.filter(pk=user.pk).update(auth_token=token)
+            user_session = self.create_update_user_session(
+                user, token, request)
+            user.is_online = True
+            user.save()
+            user_obj = User.objects.get(email = username)
+            referral = UserReferralWallet.objects.filter(user_referral = user_obj)
+            if referral:
+                return ({"data": user_details, "code": status.HTTP_200_OK, "message": "LOGIN_SUCCESSFULLY"})
             else:
-                return ({"data": None, "code": status.HTTP_200_OK, "message": "This account is deactivated by admin"})
-        else:
-            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Invalid Credentials"})
+                return ({"data": user_details, "code": status.HTTP_200_OK, "message": "User don't have referral code"})
+        return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "INVALID_CREDENTIALS"})
 
     def user_authenticate(self, user_name, fire_base_auth_key):
         try:
@@ -193,13 +192,9 @@ class UserService(UserBaseService):
                 else:
                     code_used = False
 
-                # user.is_referred = True
-                # user.user_referred_by = user_referred_by
-                # user.save()
-                user_obj = User.objects.get(id=serializer.data.get('id'))
-                user_obj.user_referred_by = user_referred_by
-                user_obj.save()
-
+                user.is_referred = True
+                user.user_referred_by = user_referred_by
+                user.save()
             payload = jwt_payload_handler(user)
             token = jwt.encode(payload, settings.SECRET_KEY)
             user_details = serializer.data
@@ -209,26 +204,14 @@ class UserService(UserBaseService):
             wallet_private_key = "0x" + priv
             acct = Account.from_key(wallet_private_key)
             wallet_address = acct.address
-            print("wallet_address",wallet_address)
-            # address = wallet_address
+            address = wallet_address
             key = Fernet(settings.ENCRYPTION_KEY)
-            encrypted_wallet_address = key.encrypt(wallet_address.encode())
-            print(encrypted_wallet_address)
+            encrypted_wallet_address = key.encrypt(address.encode())
             encrypted_wallet_privatekey = key.encrypt(wallet_private_key.encode())
             user.wallet_address = encrypted_wallet_address
             user.wallet_private_key = encrypted_wallet_privatekey
             user.save()
-            print(user.wallet_address)
             user_details['wallet_address'] = encrypted_wallet_address
-            # user_details['wallet_address'] = wallet_address
-            if (referral_address == '0x0000000000000000000000000000000000000000'):
-                user.is_referred = False
-            else:
-                user.is_referred = True
-                user.user_referred_by = user_referred_by
-                user.save()
-                user_details['is_referred'] = True
-                user_details['user_referred_by'] = user_referred_by
             node_url = settings.NODE_URL
             try:
                 web3 = Web3(Web3.HTTPProvider(node_url))
@@ -244,13 +227,15 @@ class UserService(UserBaseService):
                 nonce = web3.eth.getTransactionCount(user_address) 
                 register = contract.functions.register(new_user, referral_address).buildTransaction({  
                     'from': user_address,
-                    'chainId': 80001,   
+                    'chainId': 137,   
                     'gasPrice': web3.toWei('200', 'gwei'),  
                     'nonce': nonce,  
                 })  
                 signed_txn = web3.eth.account.signTransaction(register, private_key)  
+                print(signed_txn)  # add this line to check if the transaction is being signed successfully
                 result = web3.eth.sendRawTransaction(signed_txn.rawTransaction)   
                 tx_receipt = web3.eth.waitForTransactionReceipt(result)  
+                print(tx_receipt)
                 try:
                     user = User.objects.get(id = serializer.data.get('id'))
                     pk = user.id
@@ -260,7 +245,7 @@ class UserService(UserBaseService):
                     return ({"data": user_details, "code": status.HTTP_201_CREATED, "message": "User Created Successfully"})
             except Exception as e:
                 print(e)
-                return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": str(e)})
+                return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Signup went wrong. Please try again"})
         return ({"data": serializer.errors, "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Singup went wrong. Please try again"})
 
     def withdraw_dint_token(self, request, format=None):
@@ -514,14 +499,31 @@ class UserService(UserBaseService):
         user_decwallet = key.decrypt(wallet_address).decode()
         user_address = user_decwallet
 
-        # data = getWallet(user_address)
-        # user_address = user.wallet_address
+        data = getWallet(user_address)
+        print(data)
+        return ({"data": {'wallet_balance': data, 'wallet_address': user_address}, "code": status.HTTP_200_OK, "message": "User Wallet fetched Successfully"})
+        # node_url = settings.NODE_URL
+        # web3 = Web3(Web3.HTTPProvider(node_url))
+        # web3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        # address = settings.DINT_TOKEN_DISTRIBUTOR_ADDRESS
+        # checksum_address = Web3.toChecksumAddress(address)
+       
 
-        r = redis.Redis(host=REDIS_HOST,port=REDIS_PORT)
-        balance_value = r.get(user.id)
-        print(balance_value)
-        balance = balance_value.decode('UTF-8') 
-        return ({"data": {'wallet_balance': int(balance), 'wallet_address': user_address}, "code": status.HTTP_200_OK, "message": "User Wallet fetched Successfully"})
+        # abi = json.loads('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_sender","type":"address"},{"indexed":false,"internalType":"address","name":"_recipient","type":"address"}],"name":"tipSent","type":"event"},{"inputs":[{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_blocked","type":"bool"}],"name":"blockUnblockReferrer","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"blockedReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"changeManagedState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"_isReferrer","type":"bool"}],"name":"changeReferrerState","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"dintToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isManaged","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isReferrer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isRegistered","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referrer","type":"address"},{"internalType":"bool","name":"_isManaged","type":"bool"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"reward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_recipient","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"sendDint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeCollector","type":"address"}],"name":"setFeeCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"startedReferringAt","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"tipRecieverToReferrer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"unRegister","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"address","name":"_to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]') 
+        # contract = web3.eth.contract(address = checksum_address , abi = abi)
+        # dintAddress = settings.DINT_TOKEN_ADDRESS
+        # checksum_dintAddress = Web3.toChecksumAddress(dintAddress)
+        # dintABI = json.loads('[{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_amount","type":"uint256"}],"name":"approve","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"creationBlock","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_newController","type":"address"}],"name":"changeController","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_blockNumber","type":"uint256"}],"name":"balanceOfAt","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"version","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_cloneTokenName","type":"string"},{"name":"_cloneDecimalUnits","type":"uint8"},{"name":"_cloneTokenSymbol","type":"string"},{"name":"_snapshotBlock","type":"uint256"},{"name":"_transfersEnabled","type":"bool"}],"name":"createCloneToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"parentToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_owner","type":"address"},{"name":"_amount","type":"uint256"}],"name":"generateTokens","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_blockNumber","type":"uint256"}],"name":"totalSupplyAt","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"transfersEnabled","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"parentSnapShotBlock","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_amount","type":"uint256"},{"name":"_extraData","type":"bytes"}],"name":"approveAndCall","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_owner","type":"address"},{"name":"_amount","type":"uint256"}],"name":"destroyTokens","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_token","type":"address"}],"name":"claimTokens","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"tokenFactory","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_transfersEnabled","type":"bool"}],"name":"enableTransfers","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"controller","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_tokenFactory","type":"address"},{"name":"_parentToken","type":"address"},{"name":"_parentSnapShotBlock","type":"uint256"},{"name":"_tokenName","type":"string"},{"name":"_decimalUnits","type":"uint8"},{"name":"_tokenSymbol","type":"string"},{"name":"_transfersEnabled","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_token","type":"address"},{"indexed":true,"name":"_controller","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"ClaimedTokens","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_from","type":"address"},{"indexed":true,"name":"_to","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_cloneToken","type":"address"},{"indexed":false,"name":"_snapshotBlock","type":"uint256"}],"name":"NewCloneToken","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_owner","type":"address"},{"indexed":true,"name":"_spender","type":"address"},{"indexed":false,"name":"_amount","type":"uint256"}],"name":"Approval","type":"event"}]')
+        # dintCont = web3.eth.contract(address = checksum_dintAddress , abi = dintABI)
+        # balance = dintCont.functions.balanceOf(user_address).call()
+        # balance = web3.fromWei(balance, 'ether')
+        # # my_balance = r.get('wallet_balance')
+
+        # update_balance = User.objects.filter(id = request.user.id).update(user_wallet_balance = 80)
+        # print(update_balance)
+
+        # user_obj = User.objects.get(id = request.user.id)
+        
 
     def update_wallet_by_token(self, request, format=None):
         user_obj = User.objects.get(id=request.user.id)
@@ -767,6 +769,7 @@ class UserService(UserBaseService):
         
         try:
             referred_by = User.objects.get(referral_id=referral_code)
+            print(referred_by)
             if referred_by:
                 already_exists = UserReferralWallet.objects.filter(referred_by=referred_by, user_referral = user_obj)
                 if not already_exists:
@@ -799,14 +802,19 @@ class UserService(UserBaseService):
         today = datetime.now().date()
         media_type = "Verification"
         sub_folder = "Photos"
+        
        
         folder = main_folder+'/'+str(user_id)+'/'+media_type+'/'+sub_folder+'/'+str(today)
         document_url=''
         try:
             image_url, image_name = saveImage(request.data['document'], folder)
             document_url = image_url
+            # for im in dict((request.data).lists())['face_image']:
             image_url, image_name = saveImage("imageToSave.jpeg", folder)
+            #     # print(image_url)
+            #     face_image_url = image_url
         except Exception as e:
+            print('exception',  e)
             pass
         id_analyzer_key = settings.ID_ANALYZER_KEY
         coreapi = idanalyzer.CoreAPI(id_analyzer_key, "US") 

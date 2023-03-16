@@ -11,8 +11,8 @@ from .UploadMediaModel import *
 
 class UserFollowers(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, related_name='user_follower', on_delete=models.CASCADE, null=True, blank=True)
-    follower = models.ForeignKey(User, related_name='user_following', on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, related_name='user_follower', on_delete=models.DO_NOTHING, null=True, blank=True)
+    follower = models.ForeignKey(User, related_name='user_following', on_delete=models.DO_NOTHING, null=True, blank=True)
     request_status = models.BooleanField(default=None, null=True, blank=True)
 
     created_at = models.DateTimeField(default=timezone.now)
