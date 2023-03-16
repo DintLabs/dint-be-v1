@@ -11,7 +11,6 @@ class CustomPagination:
         length = request.data['length']
         start = request.data['start']
         columns_order = request.data['order'][0]['column']
-        print(columns_order)
         order = request.data['columns'][columns_order]['data']
         direction = request.data['order'][0]['dir']
         search_value = request.data['search']['value']

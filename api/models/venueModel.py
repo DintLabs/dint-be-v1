@@ -8,7 +8,7 @@ from .userModel import User
 
 class Venue(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, related_name='user_venues', on_delete=models.DO_NOTHING, null=True, blank=True)
+    user = models.ForeignKey(User, related_name='user_venues', on_delete=models.CASCADE, null=True, blank=True)
     venueAddress = models.CharField(max_length=500, null=True, blank=True)
     venueGmap = models.CharField(max_length=500, null=True, blank=True)
     venueName = models.CharField(max_length=500, null=True, blank=True)

@@ -13,7 +13,7 @@ from .userSubscriptionTierModel import *
 
 class UserSubscription(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, related_name='user_subscription', on_delete=models.DO_NOTHING, null=True, blank=True)
+    user = models.ForeignKey(User, related_name='user_subscription', on_delete=models.CASCADE, null=True, blank=True)
     page = models.ForeignKey(Page, related_name='page_subscription', on_delete=models.DO_NOTHING, null=True, blank=True)
     subscription_tier = models.ForeignKey(UserSubscriptionTier, related_name='user_subscription_tier', on_delete=models.DO_NOTHING, null=True, blank=True)
     promotion_campaign = models.ForeignKey(PromotionCampaign, related_name='subscription_promotion_campaign', on_delete=models.DO_NOTHING, null=True, blank=True)
