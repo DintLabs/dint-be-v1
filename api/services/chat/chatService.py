@@ -35,15 +35,13 @@ class ChatService (ChatBaseService):
         """
         Return all the Posts.
         """
-      
         messages_obj = Messages.objects.filter(sender = request.user.id, reciever = pk) |  Messages.objects.filter(sender = pk, reciever = request.user.id)
-       
         messages_obj = messages_obj.order_by('-created_at')
         context = {"user_id":request.user.id}
         #changes is_seen of messages
         Messages.objects.filter(sender = pk, reciever = request.user.id).update(is_seen = True)
-        print(Messages.objects.filter(sender = pk, reciever = request.user.id))
         serializer = GetMessageSerializer(messages_obj, many=True, context = context)
+       
         try:
             msginstance = list(Messages.objects.filter(sender = pk, reciever = request.user.id).values_list('id'))
             print("msginstance", msginstance)
@@ -54,7 +52,7 @@ class ChatService (ChatBaseService):
             pass
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
-    def get_notification_chunks_by_user(self, request, pk, format=None):
+    def get_notification_chunks_by_user(self, request, format=None):
         """
         Return all the Posts.
         """
@@ -63,7 +61,6 @@ class ChatService (ChatBaseService):
         context = {"user_id":request.user.id}
         serializer = GetNotificationSerializer(notifications_obj, many=True, context = context)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
-
 
     def get_chat_chunks_by_user(self, request, pk, format=None):
         """
@@ -94,20 +91,14 @@ class ChatService (ChatBaseService):
 
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
 
-
-
     def get_chat_chat_list_by_token(self, request, format=None):
         """
         Return all the Posts.
         """
         # received user message
         r_message = list(Messages.objects.filter(reciever = request.user.id).values_list('sender', flat=True))
-
         s_message = list(Messages.objects.filter(sender = request.user.id).values_list('reciever', flat=True))
-
         r_message.extend(s_message)
-        print('------------------->>')
-        print(r_message)
         user_obj = User.objects.filter(id__in = r_message)
         context = {"user1_id":request.user.id}
         serializer = ChatListSerializer(user_obj, many=True, context = context)
@@ -126,8 +117,6 @@ class ChatService (ChatBaseService):
         user_obj = user_obj.filter(id__in = follower_list)
         serializer = UserLoginDetailSerializer(user_obj,many=True)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": OK})
-
-
 
     def send_notification(self,id):
         msg = Messages.objects.get(id = id)
@@ -215,7 +204,6 @@ class ChatService (ChatBaseService):
         post_obj.delete()
         return ({"code": status.HTTP_200_OK, "message": POST_DELETED})
 
-
     def update_message(self, request, pk, format=None):
         """
         Updates Post
@@ -245,33 +233,6 @@ class ChatService (ChatBaseService):
         context = {"user_id":request.user.id}
         serializer = GetMessageSerializer(message_obj, context = context)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
-
-
-    # list of notifications where messages are unread
-    def get_unseen_chat_list_by_user(self, request, format=None):
-        """
-        Return all the Unseen Messages.
-        """
-        messages_obj = Messages.objects.filter(reciever=request.user.id,is_seen=False)
-        messages_obj = messages_obj.order_by('-created_at')
-        context = {"user_id":request.user.id}
-        serializer = GetMessageSerializer(messages_obj, many=True, context = context)
-        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
-
-   
-
-    # list of notifications where messages are unread
-    def get_unseen_chat_list_by_user(self, request, format=None):
-        """
-        Return all the Unseen Messages.
-        """
-        messages_obj = Messages.objects.filter(reciever=request.user.id,is_seen=False)
-        messages_obj = messages_obj.order_by('-created_at')
-        context = {"user_id":request.user.id}
-        serializer = GetMessageSerializer(messages_obj, many=True, context = context)
-        return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": POST_FETCHED})
-
-   
 
     # list of notifications where messages are unread
     def get_unseen_chat_list_by_user(self, request, format=None):

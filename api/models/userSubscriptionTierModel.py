@@ -9,7 +9,7 @@ from .postsModel import *
 
 class UserSubscriptionTier(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, related_name='user_tier', on_delete=models.DO_NOTHING, null=True, blank=True)
+    user = models.ForeignKey(User, related_name='user_tier', on_delete=models.CASCADE, null=True, blank=True)
     page = models.ForeignKey(Page, related_name='subscription_tier_page', on_delete=models.DO_NOTHING, null=True, blank=True)
     tier_name = models.CharField(max_length=100, null=True, blank=True)
     price = models.FloatField(null=True, blank=True)

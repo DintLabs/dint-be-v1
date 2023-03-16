@@ -14,7 +14,7 @@ from .UploadMediaModel import *
 
 class FreeTrial(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, related_name='trial_user', on_delete=models.DO_NOTHING, null=True, blank=True)
+    user = models.ForeignKey(User, related_name='trial_user', on_delete=models.CASCADE, null=True, blank=True)
     page = models.ForeignKey(Page, related_name='trial_page', on_delete=models.DO_NOTHING, null=True, blank=True)
     offer_limit = models.IntegerField(default = 1, null=True, blank=True)
     offer_expiration = models.IntegerField(default = 1, null=True, blank=True)

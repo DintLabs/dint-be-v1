@@ -6,7 +6,7 @@ from .userModel import User
 
 
 class UserSession(models.Model):
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     device_id = models.CharField(max_length=100, null = True, blank= True)
     token = models.CharField(max_length=255, null = True, blank= True)
     device_type = models.CharField(max_length=20,  null = True, blank= True)
