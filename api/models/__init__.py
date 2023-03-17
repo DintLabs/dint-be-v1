@@ -26,3 +26,5 @@ from .WiseQuotesModel import *
 from .BankAccountsModel import *
 from .PayoutsModel import *
 from .UserStoriesModel import *
+from .CommentLikeModel import PostCommentLike
+
