@@ -5,6 +5,7 @@ from rest_framework.routers import DefaultRouter
 from django.urls import re_path
 
 from chat import consumers
+from .views.post_comment_like_view import PostCommentLikeView
 
 # websocket_urlpatterns = [
 #     re_path(r'ws/auth/login', consumers.ChatConsumer.as_asgi()),
@@ -101,6 +102,7 @@ urlpatterns = [
     path('posts/fetch-post-counts/<int:user_name>/', GetPostCountsByUserIDView.as_view(), name="create-posts"),
     path('posts/like/', LikePostView.as_view(), name="create-posts"),
     path('posts/comment/', CommentPostView.as_view(), name="comment-posts"),
+    path('posts/comment-like/', PostCommentLikeView.as_view(), name="comment-likes"),
     path('posts/unlike/', UnLikePostView.as_view(), name="unlike-posts"),
     path('posts/send_payment/', PostPayment.as_view(), name="send_payment"),
     path('posts/unlock_post/', PostPayment.as_view(), name="post_unlock"),
