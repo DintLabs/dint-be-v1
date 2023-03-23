@@ -65,7 +65,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     desription = models.TextField(null=True, blank=True)
     fire_base_auth_key = models.CharField(max_length=250, null=True, blank=True)
     referral_id = models.CharField(max_length=30, null=True, blank=True)
-    wallet_address = models.BinaryField(null = True, blank=True)
+    wallet_address = models.BinaryField(editable=True, null = True, blank=True)
     wallet_private_key = models.BinaryField(null=True, blank=True)
     custom_username = models.CharField(max_length=50, blank=True, null=True)
     display_name = models.CharField(max_length=40, blank=True, null=True)
