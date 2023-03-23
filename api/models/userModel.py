@@ -105,6 +105,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     user_referred_by = models.ForeignKey(to='User', on_delete=models.DO_NOTHING, blank=True, null=True)
     user_wallet_balance = models.IntegerField(default=0)
 
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+
     def save(self, *args, **kwargs):
         super(User, self).save(*args, **kwargs)
 

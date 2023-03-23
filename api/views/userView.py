@@ -374,6 +374,12 @@ class SearchAnyUserView(APIView):
         return Response(result, status=status.HTTP_200_OK)
 
 
+class NearbyUsersView(APIView):
+    def get(self, request):
+        result = userService.get_nearby_users(request)
+        return Response(result)
+
+
 class CloseFriendsView(APIView):
     """
     APIs for Fetching the user bookmarks by Token

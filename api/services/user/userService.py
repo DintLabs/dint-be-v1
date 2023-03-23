@@ -1,4 +1,7 @@
 from __future__ import print_function
+
+from geopy import distance, units
+
 from api.utils.messages.postMessages import MESSAGE, POST_FETCHED
 from cryptography.fernet import Fernet
 from dint import settings
@@ -17,7 +20,7 @@ import re
 import requests
 from api.serializers.user.userSerializer import GetUserPageProfileSerializer, GetUserProfileSerializer, UpdateUserProfileSerializer, UpdateUserWalletSerializer, GetUserPreferencesSerializer, UpdateUserPreferencesUpdateSerializer, GetUserBookmarksSerializer, CreateUserBookmarksSerializer, ProfileByUsernameSerializer
 from api.utils.messages.commonMessages import BAD_REQUEST, RECORD_NOT_FOUND
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.response import Response
 from rest_framework_jwt.settings import api_settings
 from django.template.loader import render_to_string
@@ -691,14 +694,54 @@ class UserService(UserBaseService):
         if search_text is None:
             return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Please provide Search Text"})
         try:
-            user = User.objects.filter(able_to_be_found = True).filter(Q(custom_username__icontains=search_text) | Q(display_name__icontains=search_text))
+            user = User.objects.filter(able_to_be_found = True).filter(Q(custom_username__iexact=search_text) | Q(display_name__iexact=search_text))
             followers = UserFollowers.objects.filter(follower = request.user.id, request_status = True)
-            followers_obj = User.objects.filter(id__in = followers).filter(Q(custom_username__icontains=search_text) | Q(display_name__icontains=search_text))
+            followers_obj = User.objects.filter(id__in = followers).filter(Q(custom_username__iexact=search_text) | Q(display_name__iexact=search_text))
             result = list(chain(user, followers_obj))
             serializer = UserLoginDetailSerializer(result, many=True)
             return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"})
         except:
             return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Something went wrong"})
+
+    def get_nearby_users(self, request):
+        user = request.user
+        latitude = user.latitude
+        longitude = user.longitude
+        user_location = (latitude, longitude)
+
+        if not all(user_location):
+            raise serializers.ValidationError({'error': 'User location is required'})
+
+        distance_range = 10  # miles
+        rough_distance = units.degrees(arcminutes=units.nautical(miles=distance_range)) * 2
+
+        nearby_users = User.objects.filter(
+            ~Q(id=user.id),
+            latitude__range=(
+                latitude - rough_distance,
+                latitude + rough_distance
+            ),
+            longitude__range=(
+                longitude - rough_distance,
+                longitude + rough_distance
+            )
+        )
+
+        nearby_users_list = []
+
+        for nearby_user in nearby_users:
+            if nearby_user.latitude and nearby_user.longitude:
+                exact_distance = distance.distance(
+                    (latitude, longitude),
+                    (nearby_user.latitude, nearby_user.longitude)
+                ).miles
+
+                if exact_distance <= distance_range:
+                    nearby_users_list.append(nearby_user)
+
+        nearby_users = nearby_users.filter(id__in=[user.id for user in nearby_users])
+        serializer = UserLoginDetailSerializer(nearby_users, many=True)
+        return {"data": serializer.data, "code": status.HTTP_200_OK, "message": "OK"}
 
     def get_closefriends(self, request, format=None):
         user_obj = User.objects.get(id=request.user.id)

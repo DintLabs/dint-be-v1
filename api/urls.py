@@ -188,6 +188,7 @@ urlpatterns = [
     path('stripe/', include('api.payments.urls')),
     path('connection/count/<int:pk>/', GetConnectionsCount.as_view(), name="connection-counts"),
     path('search-user/', SearchAnyUserView.as_view(), name="search-user"),
+    path('nearby-users/', NearbyUsersView.as_view(), name='nearby-users'),
     path('user/get-close-friends/', CloseFriendsView.as_view(), name="close-friend"),
     path('user/create-close-friends/', CloseFriendsView.as_view(), name="create-close-friend"),
     path('user/delete-close-friends/<int:pk>/', CloseFriendsView.as_view(), name="delete-close-friend"),
