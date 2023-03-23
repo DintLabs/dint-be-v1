@@ -8,9 +8,9 @@ from .models import *
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'wallet_address1')
+    list_display = ('email', 'user_wallet_address')
 
-    def wallet_address1(self, user):
+    def user_wallet_address(self, user):
         if not user.wallet_address:
             return
         receiver_wallet = user.wallet_address
