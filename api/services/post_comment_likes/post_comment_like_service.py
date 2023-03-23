@@ -11,7 +11,7 @@ class PostCommentLikeService:
         if not comment_id:
             raise ValidationError({'error': 'Comment ID is required'})
 
-        like, created = PostCommentLike.objects.get_or_create(user_id=1, comment_id=comment_id)
+        like, created = PostCommentLike.objects.get_or_create(user=request.user, comment_id=comment_id)
 
         if not created:
             like.delete()
