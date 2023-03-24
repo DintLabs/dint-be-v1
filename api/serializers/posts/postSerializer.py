@@ -45,6 +45,11 @@ class GetPostsCommentSerializer(serializers.ModelSerializer):
     """
 
     user = UserLoginDetailSerializer()
+    liked_by = serializers.SerializerMethodField()
+
+    def get_liked_by(self, comment: PostComments):
+        return PostCommentLike.objects.filter(comment=comment).values_list('user_id', flat=True)
+
     class Meta(object):
         model = PostComments
         fields = '__all__'
