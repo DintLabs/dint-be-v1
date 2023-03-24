@@ -17,4 +17,11 @@ class Migration(migrations.Migration):
             name='type',
             field=models.CharField(max_length=50, null=True),
         ),
+
+        migrations.AddField(
+    model_name='messages_history',
+    name='type',
+    field=models.CharField(default='', max_length=20),
+    preserve_default=False,
+),
     ]
