@@ -12,4 +12,9 @@ class Migration(migrations.Migration):
             name='media',
             field=models.CharField(max_length=255, null=True),
         ),
+        migrations.AddField(
+            model_name='historicalmessages',
+            name='type',
+            field=models.CharField(max_length=50, null=True),
+        ),
     ]
