@@ -269,8 +269,7 @@ class UserService(UserBaseService):
                 return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
             else:
                 return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
-        except Exception as e:
-            print('Error in withdraw_dint_token:', e)
+        except:
             return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Withdrawal went wrong."})
 
     def send_dint_token(self, request, format=None):
@@ -292,8 +291,8 @@ class UserService(UserBaseService):
             Status = data['Status']
             node_url = settings.NODE_URL
             web3 = Web3(Web3.HTTPProvider(node_url))
-
-            if (Status == 201):
+            dintReceipt = web3.eth.wait_for_transaction_receipt(Hash, timeout=120)
+            if (Status == 1):
                 return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
                 
             else:
