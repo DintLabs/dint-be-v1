@@ -262,10 +262,11 @@ class UserService(UserBaseService):
             response = requests.post(url, headers = headers, data = payload)
             data = response.json()
             Hash = data['Hash']
+            status = data['status']
             node_url = settings.NODE_URL
             web3 = Web3(Web3.HTTPProvider(node_url))
             dintReceipt = web3.eth.wait_for_transaction_receipt(Hash)  
-            if (dintReceipt.status == 1):
+            if (status == 201):
                 return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
             else:
                 return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
