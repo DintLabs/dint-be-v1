@@ -290,7 +290,7 @@ class UserService(UserBaseService):
             Hash = data['Hash']
             node_url = settings.NODE_URL
             web3 = Web3(Web3.HTTPProvider(node_url))
-            dintReceipt = web3.eth.wait_for_transaction_receipt(Hash)  
+            dintReceipt = web3.eth.wait_for_transaction_receipt(Hash, timeout=120)
             if (dintReceipt.status == 1):
                 return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
                 
