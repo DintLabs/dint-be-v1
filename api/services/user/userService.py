@@ -61,7 +61,7 @@ from itertools import chain
 from api.utils.token import account_activation_token
 import redis
 from dint.settings import *
-
+from web3.exceptions import TransactionNotFound
 class UserService(UserBaseService):
     """
     Allow any user (authenticated or not) to access this url 
@@ -297,8 +297,8 @@ class UserService(UserBaseService):
                 
             else:
                 return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
-        except:
-             return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops Sending! Something went wrong."})
+        except TransactionNotFound:
+               return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction not found. Please try again later."})
         
     def send_reward_by_token(self, request, format=None):
         receiver = User.objects.get(id = request.user.id)
