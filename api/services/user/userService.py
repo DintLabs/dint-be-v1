@@ -261,7 +261,7 @@ class UserService(UserBaseService):
         try:
             response = requests.post(url, headers = headers, data = payload)
             data = response.json()
-            Hash = data['hash']
+            Hash = data['Hash']
             node_url = settings.NODE_URL
             web3 = Web3(Web3.HTTPProvider(node_url))
             dintReceipt = web3.eth.wait_for_transaction_receipt(Hash)  
