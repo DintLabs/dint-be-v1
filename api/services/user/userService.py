@@ -269,7 +269,8 @@ class UserService(UserBaseService):
                 return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
             else:
                 return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
-        except:
+        except Exception as e:
+            print('Error in withdraw_dint_token:', e)
             return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops! Withdrawal went wrong."})
 
     def send_dint_token(self, request, format=None):
