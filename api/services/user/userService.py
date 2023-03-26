@@ -279,7 +279,6 @@ class UserService(UserBaseService):
         "sender_id" : request.data['sender_id'],
         "reciever_id" : request.data['reciever_id'],
         "amount" : request.data['amount'],
-        "priceInUSD" : request.data['priceInUSD'],
         })
         headers = {
         'Content-Type': 'application/json',
