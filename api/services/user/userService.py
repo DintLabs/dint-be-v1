@@ -296,8 +296,10 @@ class UserService(UserBaseService):
                 
             else:
                 return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
-        except:
-             return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops Sending! Something went wrong."})
+        except Exception as e:
+          print(f"Error occurred: {str(e)}")
+          return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": f"Oops Sending! Something went wrong. {str(e)}"})
+
         
         
     def send_reward_by_token(self, request, format=None):
