@@ -64,6 +64,7 @@ from api.utils.token import account_activation_token
 import redis
 from dint.settings import *
 from web3.exceptions import TransactionNotFound
+from django.http import HttpResponse
 class UserService(UserBaseService):
     """
     Allow any user (authenticated or not) to access this url 
@@ -303,14 +304,14 @@ class UserService(UserBaseService):
                       web3 = Web3(Web3.HTTPProvider(node_url))
                       dintReceipt = web3.eth.wait_for_transaction_receipt(Hash, timeout=120)
                       if dintReceipt:
-                         return HTTPResponse(json.dumps({"data": data, "message": "Token sent successfully"}), status=201, content_type="application/json")     
+                       return HttpResponse(json.dumps({"data": data, "message": "Token sent successfully"}), status=201, content_type="application/json")     
                else:
                   return SMTPResponseException(json.dumps({"data": [], "message": "Transaction Failed"}), status=400, content_type="application/json")
             else:
              return {"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"}   
         except Exception as e:
           print(f"Error occurred: {str(e)}")
-          return {"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops Sending! Something went wrong. {str(e)}"}
+          return HttpResponse(json.dumps({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": f"Oops Sending! Something went wrong. {str(e)}"}), status=status.HTTP_400_BAD_REQUEST, content_type="application/json")
 
         
         
