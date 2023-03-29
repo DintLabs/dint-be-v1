@@ -281,7 +281,7 @@ class UserService(UserBaseService):
 
     def send_dint_token(self, request, format=None):
         url = settings.SEND_DINT_TOKEN_URL
-        data = request.data
+        requested_data = request.data
         payload = json.dumps({
         "sender_id" : request.data['sender_id'],
         "reciever_id" : request.data['reciever_id'],
@@ -304,14 +304,14 @@ class UserService(UserBaseService):
                       web3 = Web3(Web3.HTTPProvider(node_url))
                       dintReceipt = web3.eth.wait_for_transaction_receipt(Hash, timeout=120)
                       if dintReceipt:
-                       return HttpResponse(json.dumps({"data": data, "message": "Token sent successfully"}), status=201, content_type="application/json")     
+                           return HttpResponse(json.dumps({"data": data, "message": "Token sent successfully"}), status=201, content_type="application/json")     
                else:
-                  return SMTPResponseException(json.dumps({"data": [], "message": "Transaction Failed"}), status=400, content_type="application/json")
+                  return HttpResponse(json.dumps({"data": [], "message": "Transaction Failed"}), status=status.HTTP_400_BAD_REQUEST, content_type="application/json")
             else:
-             return {"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"}   
+             return HttpResponse(json.dumps({"data": [], "message": "Transaction Failed"}), status=status.HTTP_400_BAD_REQUEST, content_type="application/json")  
         except Exception as e:
           print(f"Error occurred: {str(e)}")
-          return {"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": f"Oops Sending! Something went wrong. {str(e)}"}
+          return HttpResponse(json.dumps({"data": [], "message": f"Oops Sending! Something went wrong. {str(e)}"}), status=status.HTTP_400_BAD_REQUEST, content_type="application/json")
 
         
         
