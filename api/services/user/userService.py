@@ -292,21 +292,17 @@ class UserService(UserBaseService):
         'apikey':settings.NODE_API_KEY
         }
         try:
-            response = requests.post(url, headers=headers, data=payload)
-            response.raise_for_status()
+            response = requests.post(url, headers = headers, data = payload)
             data = response.json()
-            tx_hash = data['txHash']
-            status = data['status']
-            success= data['true'],
+            Hash = data['Hash']
             node_url = settings.NODE_URL
             web3 = Web3(Web3.HTTPProvider(node_url))
-            dintReceipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
-            if (dintReceipt):
+            dintReceipt = web3.eth.wait_for_transaction_receipt(Hash, timeout=300)
+            if (dintReceipt == 1):
                 return {
                     "data": data, 
                     "code": status.HTTP_201_CREATED, 
-                    "message": "Token sent successfully",
-                    "success": success,
+                    "message": "Token sent successfully"
                     }
             else:
                 return {
