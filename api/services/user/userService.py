@@ -292,14 +292,14 @@ class UserService(UserBaseService):
         'apikey':settings.NODE_API_KEY
         }
         try:
-            response = requests.post(url, headers = headers, data = payload)
+            response = requests.post(url, headers=headers, data=payload)
             data = response.json()
             tx_hash = data['txHash']
-            status = response.status_code
+            status = data['status']
             node_url = settings.NODE_URL
             web3 = Web3(Web3.HTTPProvider(node_url))
             web3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
-            if status == 201:
+            if response.status_code == 201:
                 return {
                     "data": data, 
                     "code": status.HTTP_201_CREATED, 
@@ -310,9 +310,8 @@ class UserService(UserBaseService):
                     "data": data, 
                     "code": status.HTTP_400_BAD_REQUEST, 
                     "message": "Transaction Failed"}
-        except Exception as e:
-             print(e)
-             return {
+        except: 
+            return {
                     "data": [],
                      "code": status.HTTP_400_BAD_REQUEST,
                      "message": "Oops Sending! Something went wrong."
