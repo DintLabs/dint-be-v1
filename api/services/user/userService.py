@@ -294,11 +294,11 @@ class UserService(UserBaseService):
         try:
             response = requests.post(url, headers = headers, data = payload)
             if response.status_code == 201:
-               data = response.json()
+               data = response.json()['data']
                print("Response status code:", response.status_code)
                print("Response data:", data)
                if 'success' in data and data['success']:
-                  if 'Hash' in data:
+                  if 'txHash' in data:
                       Hash = data['txHash']
                       node_url = settings.NODE_URL
                       web3 = Web3(Web3.HTTPProvider(node_url))
