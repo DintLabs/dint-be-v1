@@ -301,7 +301,7 @@ class UserService(UserBaseService):
                if dintReceipt:
                   return {"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"}      
                else:
-                  return {"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"}
+                  return {"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"}
             else:
              return {"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"}   
         except Exception as e:
