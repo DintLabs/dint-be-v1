@@ -282,9 +282,10 @@ class UserService(UserBaseService):
 
     def send_dint_token(self, request, format=None):
         url = settings.SEND_DINT_TOKEN_URL
+        payload = request.data
         payload = json.dumps({
         "sender_id" : request.data['sender_id'],
-        "receiver_id": request.data['receiver_id'], 
+        "reciever_id" : request.data['reciever_id'],
         "amount" : request.data['amount'],
         })
         headers = {
@@ -293,25 +294,18 @@ class UserService(UserBaseService):
         }
         try:
             response = requests.post(url, headers = headers, data = payload)
-            if response.status_code == 201:
-               data = response.json()['data']
-               print("Response status code:", response.status_code)
-               print("Response data:", data)
-               if 'success' in data and data['success']:
-                  if 'txHash' in data:
-                      Hash = data['txHash']
-                      node_url = settings.NODE_URL
-                      web3 = Web3(Web3.HTTPProvider(node_url))
-                      dintReceipt = web3.eth.wait_for_transaction_receipt(Hash, timeout=120)
-                      if (dintReceipt):
-                           return JsonResponse({"data": data, "message": "Token sent successfully"}, status=201)     
-               else:
-                  return JsonResponse({"data": [], "message": "Transaction Failed"}, status=400)
+            data = response.json()
+            Hash = data['Hash']
+            node_url = settings.NODE_URL
+            web3 = Web3(Web3.HTTPProvider(node_url))
+            dintReceipt = web3.eth.wait_for_transaction_receipt(Hash, timeout=120)
+            if (dintReceipt):
+                return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
+                
             else:
-             return JsonResponse({"data": [], "message": "Transaction Failed"}, status=400)  
-        except Exception as e:
-         print(f"Error occurred: {str(e)}")
-         return JsonResponse({"data": [], "message": "Oops Sending! Something went wrong."}, status=400)
+                return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
+        except:
+             return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops Sending! Something went wrong."})
 
         
         
