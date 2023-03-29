@@ -298,7 +298,7 @@ class UserService(UserBaseService):
             node_url = settings.NODE_URL
             web3 = Web3(Web3.HTTPProvider(node_url))
             dintReceipt = web3.eth.wait_for_transaction_receipt(Hash, timeout=300)
-            if (dintReceipt == 1):
+            if (dintReceipt):
                 return {
                     "data": data, 
                     "code": status.HTTP_201_CREATED, 
