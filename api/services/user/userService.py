@@ -298,7 +298,7 @@ class UserService(UserBaseService):
             node_url = settings.NODE_URL
             web3 = Web3(Web3.HTTPProvider(node_url))
             receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
-            if receipt == 1:
+            if status == 201:
                 return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
                 
             else:
