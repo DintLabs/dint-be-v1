@@ -300,7 +300,7 @@ class UserService(UserBaseService):
                print("Response data:", data)
                if 'success' in data and data['success']:
                   if 'Hash' in data:
-                      Hash = data['Hash']
+                      Hash = payload['Hash']
                       node_url = settings.NODE_URL
                       web3 = Web3(Web3.HTTPProvider(node_url))
                       dintReceipt = web3.eth.wait_for_transaction_receipt(Hash, timeout=120)
@@ -312,7 +312,7 @@ class UserService(UserBaseService):
              return JsonResponse({"data": [], "message": "Transaction Failed"}, status=400)  
         except Exception as e:
           print(f"Error occurred: {str(e)}")
-        return JsonResponse({"data": [], "message": f"Oops Sending! Something went wrong. {str(e)}"}, status=400)
+          return JsonResponse({"data": [], "message": f"Oops Sending! Something went wrong. {str(e)}"}, status=400)
 
         
         
