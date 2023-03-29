@@ -312,8 +312,9 @@ class UserService(UserBaseService):
              return JsonResponse({"data": [], "message": "Transaction Failed"}, status=400)  
         except Exception as e:
           print(f"Error occurred: {str(e)}")
-          return JsonResponse({"data": [], "message": f"Oops Sending! Something went wrong. {e}"}, status=400)
-
+          import traceback
+          traceback.print_exc()
+          return JsonResponse({"data": [], "message": f"Oops Sending! Something went wrong. {str(e)}"}, status=400)
         
         
     def send_reward_by_token(self, request, format=None):
