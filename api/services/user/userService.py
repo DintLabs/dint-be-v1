@@ -282,24 +282,25 @@ class UserService(UserBaseService):
 
     def send_dint_token(self, request, format=None):
         url = settings.SEND_DINT_TOKEN_URL
-        payload = {
+        payload = json.dumps ({
         "sender_id" : request.data['sender_id'],
         "reciever_id" : request.data['reciever_id'],
         "amount" : request.data['amount'],
-        }
+        })
         headers = {
         'Content-Type': 'application/json',
         'apikey':settings.NODE_API_KEY
         }
         try:
             response = requests.post(url, headers=headers, data=payload)
+            response.raise_for_status()
             data = response.json()
             tx_hash = data['txHash']
             status = data['status']
             node_url = settings.NODE_URL
             web3 = Web3(Web3.HTTPProvider(node_url))
-            web3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
-            if response.status_code == 201:
+            dintReceipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
+            if (dintReceipt):
                 return {
                     "data": data, 
                     "code": status.HTTP_201_CREATED, 
