@@ -311,7 +311,7 @@ class UserService(UserBaseService):
              return {"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"}   
         except Exception as e:
           print(f"Error occurred: {str(e)}")
-          return HttpResponse(json.dumps({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": f"Oops Sending! Something went wrong. {str(e)}"}), status=status.HTTP_400_BAD_REQUEST, content_type="application/json")
+          return {"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": f"Oops Sending! Something went wrong. {str(e)}"}
 
         
         
