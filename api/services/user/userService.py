@@ -281,7 +281,7 @@ class UserService(UserBaseService):
 
     def send_dint_token(self, request, format=None):
         url = settings.SEND_DINT_TOKEN_URL
-        requested_data = request.data
+        data = request.data
         payload = json.dumps({
         "sender_id" : request.data['sender_id'],
         "reciever_id" : request.data['reciever_id'],
