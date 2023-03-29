@@ -1,4 +1,6 @@
 from __future__ import print_function
+from http.client import HTTPResponse
+from smtplib import SMTPResponseException
 from api.utils.messages.postMessages import MESSAGE, POST_FETCHED
 from cryptography.fernet import Fernet
 from dint import settings
@@ -301,9 +303,9 @@ class UserService(UserBaseService):
                       web3 = Web3(Web3.HTTPProvider(node_url))
                       dintReceipt = web3.eth.wait_for_transaction_receipt(Hash, timeout=120)
                       if dintReceipt:
-                         return {"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"}      
+                         return HTTPResponse(json.dumps({"data": data, "message": "Token sent successfully"}), status=201, content_type="application/json")     
                else:
-                  return {"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"}
+                  return SMTPResponseException(json.dumps({"data": [], "message": "Transaction Failed"}), status=400, content_type="application/json")
             else:
              return {"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"}   
         except Exception as e:
