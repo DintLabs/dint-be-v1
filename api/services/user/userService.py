@@ -285,7 +285,7 @@ class UserService(UserBaseService):
         requested_data = request.data
         payload = json.dumps({
         "sender_id" : request.data['sender_id'],
-        "reciever_id" : request.data['reciever_id'],
+        "receiver_id": request.data['receiver_id'], 
         "amount" : request.data['amount'],
         })
         headers = {
