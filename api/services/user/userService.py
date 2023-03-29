@@ -295,17 +295,28 @@ class UserService(UserBaseService):
             response = requests.post(url, headers = headers, data = payload)
             data = response.json()
             tx_hash = data['txHash']
-            status = data['status']
+            status = response.status_code
             node_url = settings.NODE_URL
             web3 = Web3(Web3.HTTPProvider(node_url))
-            receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
+            web3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
             if status == 201:
-                return ({"data": data, "code": status.HTTP_201_CREATED, "message": "Token sent successfully"})
-                
+                return {
+                    "data": data, 
+                    "code": status.HTTP_201_CREATED, 
+                    "message": "Token sent successfully"
+                    }
             else:
-                return ({"data": data, "code": status.HTTP_400_BAD_REQUEST, "message": "Transaction Failed"})
-        except:
-             return ({"data": [], "code": status.HTTP_400_BAD_REQUEST, "message": "Oops Sending! Something went wrong."})
+                return {
+                    "data": data, 
+                    "code": status.HTTP_400_BAD_REQUEST, 
+                    "message": "Transaction Failed"}
+        except Exception as e:
+             print(e)
+             return {
+                    "data": [],
+                     "code": status.HTTP_400_BAD_REQUEST,
+                     "message": "Oops Sending! Something went wrong."
+                     }
 
         
         
