@@ -293,7 +293,7 @@ class UserService(UserBaseService):
         }
         try:
             response = requests.post(url, headers = headers, data = payload)
-            if response.status_code == 201:
+            if response == 201:
                data = response.json()
                print("Response status code:", response.status_code)
                print("Response data:", data)
