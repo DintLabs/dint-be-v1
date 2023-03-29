@@ -293,13 +293,13 @@ class UserService(UserBaseService):
         }
         try:
             response = requests.post(url, headers = headers, data = payload)
-            if (payload):
+            if (response):
                data = response.json()
                print("Response status code:", response.status_code)
                print("Response data:", data)
                if 'success' in data and data['success']:
                   if 'Hash' in data:
-                      Hash = data['Hash']
+                      Hash = data['txHash']
                       node_url = settings.NODE_URL
                       web3 = Web3(Web3.HTTPProvider(node_url))
                       dintReceipt = web3.eth.wait_for_transaction_receipt(Hash, timeout=120)
