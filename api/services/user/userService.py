@@ -8,7 +8,7 @@ from api.serializers.user import (UserLoginDetailSerializer, UserCreateUpdateSer
                                   UserCloseFriendsSerializer, UserStatusUpdateSerializer, UserIdentitySerializer, GetNotificationSerializer)
 
 from api.models.userFollowersModel import UserFollowers
-from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks, Posts, UserCloseFriends, UserIdentity, UserSubscription, Messages
+from api.models import User, UserSession, UserReferralWallet, UserPreferences, UserBookmarks, Posts, UserCloseFriends, UserIdentity, UserSubscription, Messages, UserTickets, Events
 from api.models.messageNotificationModel import Notifications
 from api.utils.messages.userMessages import *
 from .userBaseService import UserBaseService
@@ -17,7 +17,7 @@ from curses.ascii import US
 from multiprocessing import managers
 import re
 import requests
-from api.serializers.user.userSerializer import GetUserPageProfileSerializer, GetUserProfileSerializer, UpdateUserProfileSerializer, UpdateUserWalletSerializer, GetUserPreferencesSerializer, UpdateUserPreferencesUpdateSerializer, GetUserBookmarksSerializer, CreateUserBookmarksSerializer, ProfileByUsernameSerializer
+from api.serializers.user.userSerializer import GetUserPageProfileSerializer, GetUserProfileSerializer, UpdateUserProfileSerializer, UpdateUserWalletSerializer, GetUserPreferencesSerializer, UpdateUserPreferencesUpdateSerializer, GetUserBookmarksSerializer, CreateUserBookmarksSerializer, ProfileByUsernameSerializer, CreateTicketSerializer
 from api.utils.messages.commonMessages import BAD_REQUEST, RECORD_NOT_FOUND
 from rest_framework import status
 from rest_framework.response import Response
@@ -1010,4 +1010,28 @@ class UserService(UserBaseService):
         serializer = GetNotificationSerializer(notification_obj, many=True, context = context)
         return ({"data": serializer.data, "code": status.HTTP_200_OK, "message": MESSAGE})
         
+    def create_ticket(self, request, format=None):
+        print('---------------------------------')
+        try:
+            event_obj = Events.objects.get(id = request.data['eventId'])
+        except:
+            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Event not found!"})
+
+        try:
+            user_obj = User.objects.get(id = request.data['eventId'])
+        except:
+            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "User not found!"})
+
+        ticket_obj = UserTickets()
+        
+
+        try:
+            ticket_obj.authId = request.data['authId']
+            ticket_obj.userId = user_obj
+            ticket_obj.eventId = event_obj
+            ticket_obj.save()
+            return ({"data": {"id":ticket_obj.id, "authId":ticket_obj.authId, "userId":ticket_obj.userId.id, "eventId":ticket_obj.eventId.id  }, "code": status.HTTP_200_OK, "message": "Ticket Created Successfully."})
+        except:
+            return ({"data": None, "code": status.HTTP_400_BAD_REQUEST, "message": "Something went wrong"})
+            
 
