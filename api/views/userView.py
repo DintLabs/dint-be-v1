@@ -526,3 +526,14 @@ class ReadNotification(APIView):
     def get(self, request,pk, format=None):
         result = userService.read_notification(request, pk, format=None)
         return Response(result, status=status.HTTP_200_OK)
+
+
+class CreateTicketView(APIView):
+    '''
+    API to read notification
+    '''
+
+    permission_classes = (AllowAny,)
+    def post(self, request, format=None):
+        result = userService.create_ticket(request, format=None)
+        return Response(result, status=status.HTTP_200_OK)
