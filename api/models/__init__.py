@@ -27,5 +27,4 @@ from .BankAccountsModel import *
 from .PayoutsModel import *
 from .UserStoriesModel import *
 from .CommentLikeModel import PostCommentLike
-from .UserTicketModel import *
 

@@ -3,7 +3,7 @@ from api.models.pageModel import Page
 from api.models.userFollowersModel import UserFollowers
 from rest_framework import serializers
 from api.models.UserStoriesModel import *
-from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet, UserPreferences, ConfineUsers, UserCustomLists, UserCustomGroupMembers, UserCloseFriends, UserStories, UserIdentity, UserTicketModel)
+from api.models import (User, Posts, PostComments, PostLikes, UserReferralWallet, UserPreferences, ConfineUsers, UserCustomLists, UserCustomGroupMembers, UserCloseFriends, UserStories, UserIdentity)
 from api.models.userFollowersModel import *
 # from api.serializers.connections import *
 from api.models.userBookmarksModel import UserBookmarks
@@ -432,12 +432,4 @@ class GetNotificationSerializer(serializers.ModelSerializer):
     # type_of_notification = serializers.SerializerMethodField()
     class Meta(object):
         model = Notifications
-        fields = '__all__'
-
-class CreateTicketSerializer(serializers.ModelSerializer):
-    """
-    This is for Get
-    """
-    class Meta(object):
-        model = UserTicketModel
         fields = '__all__'
