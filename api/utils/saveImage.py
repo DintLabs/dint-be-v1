@@ -21,5 +21,5 @@ def saveImage(image, folder):
                 "ContentType": image.content_type
             }
         )
-    s3_location = "https://{}.s3.us-east-1.amazonaws.com/".format(bucket_name)
+    s3_location = "https://{}.s3.us-east-2.amazonaws.com/".format(bucket_name)
     return "{}{}".format(s3_location, image_name), image_name
